@@ -3,6 +3,7 @@ import { LinkCategory } from "@/components/LinkCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
+import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -53,10 +54,11 @@ interface SortableCategoryProps {
   onReorderLinks: (newLinks: Array<{id: string; title: string; url: string; description?: string}>) => void;
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
+  onDeleteCategory: () => void;
   editMode: boolean;
 }
 
-const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, editMode }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, onDeleteCategory, editMode }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
@@ -92,6 +94,7 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
         onReorderLinks={onReorderLinks}
         onEditLink={onEditLink}
         onDeleteLink={onDeleteLink}
+        onDeleteCategory={onDeleteCategory}
         editMode={editMode}
       />
     </div>
@@ -262,6 +265,7 @@ const Index = () => {
   const [addLinkDialogOpen, setAddLinkDialogOpen] = useState(false);
   const [editLinkDialogOpen, setEditLinkDialogOpen] = useState(false);
   const [deleteLinkDialogOpen, setDeleteLinkDialogOpen] = useState(false);
+  const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
@@ -272,6 +276,26 @@ const Index = () => {
 
   const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
   const selectedLink = selectedCategory?.links.find((link) => link.id === selectedLinkId);
+
+  const handleDeleteCategory = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setDeleteCategoryDialogOpen(true);
+  };
+
+  const handleDeleteCategoryConfirm = () => {
+    if (selectedCategoryId) {
+      const category = categories.find((cat) => cat.id === selectedCategoryId);
+      
+      setCategories((prevCategories) =>
+        prevCategories.filter((cat) => cat.id !== selectedCategoryId)
+      );
+      toast({
+        title: "Kategorie smazána",
+        description: `Kategorie "${category?.title}" byla úspěšně smazána.`,
+      });
+    }
+  };
+
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -489,6 +513,7 @@ const Index = () => {
                     onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
                     onEditLink={(linkId) => handleEditLink(category.id, linkId)}
                     onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                    onDeleteCategory={() => handleDeleteCategory(category.id)}
                     editMode={editMode}
                   />
                 ))}
@@ -508,6 +533,7 @@ const Index = () => {
                 onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
                 onEditLink={(linkId) => handleEditLink(category.id, linkId)}
                 onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                onDeleteCategory={() => handleDeleteCategory(category.id)}
                 editMode={editMode}
               />
             ))}
@@ -535,6 +561,14 @@ const Index = () => {
         onOpenChange={setDeleteLinkDialogOpen}
         onConfirm={handleDeleteLinkConfirm}
         linkTitle={selectedLink?.title || ""}
+      />
+
+      <DeleteCategoryDialog
+        open={deleteCategoryDialogOpen}
+        onOpenChange={setDeleteCategoryDialogOpen}
+        onConfirm={handleDeleteCategoryConfirm}
+        categoryTitle={selectedCategory?.title || ""}
+        linkCount={selectedCategory?.links.length || 0}
       />
 
       <ColorPickerDialog

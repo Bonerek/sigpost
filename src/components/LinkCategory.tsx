@@ -1,4 +1,4 @@
-import { ExternalLink, MoreVertical, Plus, Palette, GripVertical } from "lucide-react";
+import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { ColorValue } from "@/components/ColorPickerDialog";
 import {
@@ -25,7 +25,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 interface Link {
   id: string;
@@ -43,6 +43,7 @@ interface LinkCategoryProps {
   onReorderLinks: (links: Link[]) => void;
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
+  onDeleteCategory: () => void;
   editMode: boolean;
 }
 
@@ -161,6 +162,7 @@ export const LinkCategory = ({
   onReorderLinks,
   onEditLink,
   onDeleteLink,
+  onDeleteCategory,
   editMode
 }: LinkCategoryProps) => {
   const sensors = useSensors(
@@ -204,6 +206,13 @@ export const LinkCategory = ({
               <DropdownMenuItem onClick={onChangeColor} className="cursor-pointer">
                 <Palette className="mr-2 h-4 w-4" />
                 Změnit barvu
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={onDeleteCategory} 
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Smazat kategorii
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
