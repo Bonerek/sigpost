@@ -1,4 +1,4 @@
-import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Maximize2, Minimize2 } from "lucide-react";
+import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Maximize2, Minimize2, LayoutGrid } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ColorValue } from "@/components/ColorPickerDialog";
@@ -46,6 +46,7 @@ interface LinkCategoryProps {
   onDeleteLink: (linkId: string) => void;
   onDeleteCategory: () => void;
   onToggleFullWidth: () => void;
+  onSetGridPosition: () => void;
   editMode: boolean;
 }
 
@@ -170,6 +171,7 @@ export const LinkCategory = ({
   onDeleteLink,
   onDeleteCategory,
   onToggleFullWidth,
+  onSetGridPosition,
   editMode
 }: LinkCategoryProps) => {
   const sensors = useSensors(
@@ -217,6 +219,10 @@ export const LinkCategory = ({
               <DropdownMenuItem onClick={onToggleFullWidth} className="cursor-pointer">
                 <Maximize2 className="mr-2 h-4 w-4" />
                 Celá šířka
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onSetGridPosition} className="cursor-pointer">
+                <LayoutGrid className="mr-2 h-4 w-4" />
+                Pozice v mřížce
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onDeleteCategory} 
