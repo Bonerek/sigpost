@@ -1,5 +1,4 @@
 import { useState } from "react";
-import esaLogo from "@/assets/esa-logo.png";
 import { LinkCategory } from "@/components/LinkCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
@@ -441,7 +440,6 @@ const Index = () => {
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <img src={esaLogo} alt="ESA Logo" className="h-10" />
               {customText && (
                 <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
               )}
