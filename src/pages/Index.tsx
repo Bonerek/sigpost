@@ -405,7 +405,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 py-8">
+        <div className="px-4 py-8">
           <div className="flex items-center gap-3 justify-between">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -457,7 +457,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12">
+      <main className="px-4 py-12">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -515,7 +515,7 @@ const Index = () => {
       />
 
       <footer className="bg-card border-t border-border mt-16">
-        <div className="container mx-auto px-4 py-6 text-center text-muted-foreground">
+        <div className="px-4 py-6 text-center text-muted-foreground">
           <p>Vytvořeno s pomocí Lovable</p>
         </div>
       </footer>
