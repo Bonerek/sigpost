@@ -1,5 +1,6 @@
 import { ExternalLink, MoreVertical, Plus, Palette } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import type { ColorValue } from "@/components/ColorPickerDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,18 +18,24 @@ interface Link {
 interface LinkCategoryProps {
   title: string;
   links: Link[];
-  color: "blue" | "green" | "orange" | "purple" | "red" | "cyan";
+  color: ColorValue;
   onAddLink: () => void;
   onChangeColor: () => void;
 }
 
-const colorClasses = {
+const colorClasses: Record<ColorValue, string> = {
   blue: "bg-category-blue text-category-blue-foreground",
   green: "bg-category-green text-category-green-foreground",
   orange: "bg-category-orange text-category-orange-foreground",
   purple: "bg-category-purple text-category-purple-foreground",
   red: "bg-category-red text-category-red-foreground",
   cyan: "bg-category-cyan text-category-cyan-foreground",
+  pink: "bg-category-pink text-category-pink-foreground",
+  indigo: "bg-category-indigo text-category-indigo-foreground",
+  teal: "bg-category-teal text-category-teal-foreground",
+  amber: "bg-category-amber text-category-amber-foreground",
+  lime: "bg-category-lime text-category-lime-foreground",
+  emerald: "bg-category-emerald text-category-emerald-foreground",
 };
 
 export const LinkCategory = ({ title, links, color, onAddLink, onChangeColor }: LinkCategoryProps) => {

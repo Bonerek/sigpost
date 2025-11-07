@@ -55,6 +55,24 @@ All colors MUST be HSL.
     
     --category-cyan: 190 85% 55%;
     --category-cyan-foreground: 0 0% 100%;
+    
+    --category-pink: 330 85% 65%;
+    --category-pink-foreground: 0 0% 100%;
+    
+    --category-indigo: 240 75% 65%;
+    --category-indigo-foreground: 0 0% 100%;
+    
+    --category-teal: 170 80% 50%;
+    --category-teal-foreground: 0 0% 100%;
+    
+    --category-amber: 45 95% 55%;
+    --category-amber-foreground: 0 0% 100%;
+    
+    --category-lime: 85 75% 50%;
+    --category-lime-foreground: 0 0% 100%;
+    
+    --category-emerald: 160 75% 45%;
+    --category-emerald-foreground: 0 0% 100%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -119,6 +137,24 @@ All colors MUST be HSL.
     
     --category-cyan: 190 85% 50%;
     --category-cyan-foreground: 0 0% 100%;
+    
+    --category-pink: 330 85% 60%;
+    --category-pink-foreground: 0 0% 100%;
+    
+    --category-indigo: 240 75% 60%;
+    --category-indigo-foreground: 0 0% 100%;
+    
+    --category-teal: 170 80% 45%;
+    --category-teal-foreground: 0 0% 100%;
+    
+    --category-amber: 45 95% 50%;
+    --category-amber-foreground: 0 0% 100%;
+    
+    --category-lime: 85 75% 45%;
+    --category-lime-foreground: 0 0% 100%;
+    
+    --category-emerald: 160 75% 40%;
+    --category-emerald-foreground: 0 0% 100%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

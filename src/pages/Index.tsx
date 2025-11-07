@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LinkCategory } from "@/components/LinkCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
-import { ColorPickerDialog } from "@/components/ColorPickerDialog";
+import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { Compass, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -25,7 +25,7 @@ import { CSS } from "@dnd-kit/utilities";
 interface CategoryData {
   id: string;
   title: string;
-  color: "blue" | "green" | "orange" | "purple" | "red" | "cyan";
+  color: ColorValue;
   links: {
     title: string;
     url: string;
@@ -270,7 +270,7 @@ const Index = () => {
     }
   };
 
-  const handleColorChange = (color: "blue" | "green" | "orange" | "purple" | "red" | "cyan") => {
+  const handleColorChange = (color: ColorValue) => {
     if (selectedCategoryId) {
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
