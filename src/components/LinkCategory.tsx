@@ -94,7 +94,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
 
   return (
     <div ref={setNodeRef} style={style} className="relative group/link">
-      <div className="flex items-start gap-2 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+      <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
         {editMode && (
           <div
             {...attributes}
@@ -253,7 +253,7 @@ export const LinkCategory = ({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
+                  className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
                 >
                   <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
                   <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
