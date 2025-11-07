@@ -525,23 +525,8 @@ const Index = () => {
             >
               <div className={`grid ${getGridCols()} gap-6`}>
                 {categories.map((category) => (
-                  category.fullWidth ? (
-                    <div key={category.id} className="col-span-full">
-                      <SortableCategory 
-                        category={category}
-                        onAddLink={() => handleAddLink(category.id)}
-                        onChangeColor={() => handleChangeColor(category.id)}
-                        onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                        onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                        onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                        onDeleteCategory={() => handleDeleteCategory(category.id)}
-                        onToggleFullWidth={() => handleToggleFullWidth(category.id)}
-                        editMode={editMode}
-                      />
-                    </div>
-                  ) : (
+                  <div key={category.id} className={category.fullWidth ? "col-span-full" : ""}>
                     <SortableCategory 
-                      key={category.id} 
                       category={category}
                       onAddLink={() => handleAddLink(category.id)}
                       onChangeColor={() => handleChangeColor(category.id)}
@@ -552,7 +537,7 @@ const Index = () => {
                       onToggleFullWidth={() => handleToggleFullWidth(category.id)}
                       editMode={editMode}
                     />
-                  )
+                  </div>
                 ))}
               </div>
             </SortableContext>
@@ -560,25 +545,8 @@ const Index = () => {
         ) : (
           <div className={`grid ${getGridCols()} gap-6`}>
             {categories.map((category) => (
-              category.fullWidth ? (
-                <div key={category.id} className="col-span-full">
-                  <LinkCategory
-                    title={category.title}
-                    color={category.color}
-                    links={category.links}
-                    onAddLink={() => handleAddLink(category.id)}
-                    onChangeColor={() => handleChangeColor(category.id)}
-                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                    onDeleteCategory={() => handleDeleteCategory(category.id)}
-                    onToggleFullWidth={() => handleToggleFullWidth(category.id)}
-                    editMode={editMode}
-                  />
-                </div>
-              ) : (
+              <div key={category.id} className={category.fullWidth ? "col-span-full" : ""}>
                 <LinkCategory
-                  key={category.id}
                   title={category.title}
                   color={category.color}
                   links={category.links}
@@ -591,7 +559,7 @@ const Index = () => {
                   onToggleFullWidth={() => handleToggleFullWidth(category.id)}
                   editMode={editMode}
                 />
-              )
+              </div>
             ))}
           </div>
         )}
