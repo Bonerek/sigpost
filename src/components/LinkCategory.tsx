@@ -36,6 +36,12 @@ const colorClasses: Record<ColorValue, string> = {
   amber: "bg-category-amber text-category-amber-foreground",
   lime: "bg-category-lime text-category-lime-foreground",
   emerald: "bg-category-emerald text-category-emerald-foreground",
+  brown: "bg-category-brown text-category-brown-foreground",
+  gray: "bg-category-gray text-category-gray-foreground",
+  slate: "bg-category-slate text-category-slate-foreground",
+  zinc: "bg-category-zinc text-category-zinc-foreground",
+  stone: "bg-category-stone text-category-stone-foreground",
+  black: "bg-category-black text-category-black-foreground",
 };
 
 export const LinkCategory = ({ title, links, color, onAddLink, onChangeColor }: LinkCategoryProps) => {

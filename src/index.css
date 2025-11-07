@@ -73,6 +73,24 @@ All colors MUST be HSL.
     
     --category-emerald: 160 75% 45%;
     --category-emerald-foreground: 0 0% 100%;
+    
+    --category-brown: 25 50% 45%;
+    --category-brown-foreground: 0 0% 100%;
+    
+    --category-gray: 220 10% 50%;
+    --category-gray-foreground: 0 0% 100%;
+    
+    --category-slate: 215 20% 45%;
+    --category-slate-foreground: 0 0% 100%;
+    
+    --category-zinc: 240 5% 45%;
+    --category-zinc-foreground: 0 0% 100%;
+    
+    --category-stone: 25 5% 50%;
+    --category-stone-foreground: 0 0% 100%;
+    
+    --category-black: 0 0% 15%;
+    --category-black-foreground: 0 0% 100%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -155,6 +173,24 @@ All colors MUST be HSL.
     
     --category-emerald: 160 75% 40%;
     --category-emerald-foreground: 0 0% 100%;
+    
+    --category-brown: 25 50% 40%;
+    --category-brown-foreground: 0 0% 100%;
+    
+    --category-gray: 220 10% 45%;
+    --category-gray-foreground: 0 0% 100%;
+    
+    --category-slate: 215 20% 40%;
+    --category-slate-foreground: 0 0% 100%;
+    
+    --category-zinc: 240 5% 40%;
+    --category-zinc-foreground: 0 0% 100%;
+    
+    --category-stone: 25 5% 45%;
+    --category-stone-foreground: 0 0% 100%;
+    
+    --category-black: 0 0% 20%;
+    --category-black-foreground: 0 0% 100%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
