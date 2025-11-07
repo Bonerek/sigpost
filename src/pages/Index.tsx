@@ -26,12 +26,13 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  rectSortingStrategy,
+  verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -40,6 +41,7 @@ interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
+  columnIndex: number; // Track which column this category belongs to
   links: Array<{
     id: string;
     title: string;
@@ -102,12 +104,85 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
   );
 };
 
+interface DroppableColumnProps {
+  columnIndex: number;
+  categories: CategoryData[];
+  editMode: boolean;
+  onAddLink: (categoryId: string) => void;
+  onChangeColor: (categoryId: string) => void;
+  onReorderLinks: (categoryId: string, newLinks: Array<{id: string; title: string; url: string; description?: string}>) => void;
+  onEditLink: (categoryId: string, linkId: string) => void;
+  onDeleteLink: (categoryId: string, linkId: string) => void;
+  onDeleteCategory: (categoryId: string) => void;
+}
+
+const DroppableColumn = ({ 
+  columnIndex, 
+  categories, 
+  editMode,
+  onAddLink,
+  onChangeColor,
+  onReorderLinks,
+  onEditLink,
+  onDeleteLink,
+  onDeleteCategory 
+}: DroppableColumnProps) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `column-${columnIndex}`,
+  });
+
+  return (
+    <div 
+      ref={setNodeRef}
+      className={`flex flex-col gap-6 min-h-[200px] p-4 rounded-lg transition-colors ${
+        isOver && editMode ? 'bg-accent/20 border-2 border-dashed border-primary' : 'bg-transparent'
+      }`}
+    >
+      <SortableContext
+        items={categories.map((cat) => cat.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {categories.map((category) => (
+          editMode ? (
+            <SortableCategory 
+              key={category.id}
+              category={category}
+              onAddLink={() => onAddLink(category.id)}
+              onChangeColor={() => onChangeColor(category.id)}
+              onReorderLinks={(newLinks) => onReorderLinks(category.id, newLinks)}
+              onEditLink={(linkId) => onEditLink(category.id, linkId)}
+              onDeleteLink={(linkId) => onDeleteLink(category.id, linkId)}
+              onDeleteCategory={() => onDeleteCategory(category.id)}
+              editMode={editMode}
+            />
+          ) : (
+            <LinkCategory
+              key={category.id}
+              title={category.title}
+              color={category.color}
+              links={category.links}
+              onAddLink={() => onAddLink(category.id)}
+              onChangeColor={() => onChangeColor(category.id)}
+              onReorderLinks={(newLinks) => onReorderLinks(category.id, newLinks)}
+              onEditLink={(linkId) => onEditLink(category.id, linkId)}
+              onDeleteLink={(linkId) => onDeleteLink(category.id, linkId)}
+              onDeleteCategory={() => onDeleteCategory(category.id)}
+              editMode={editMode}
+            />
+          )
+        ))}
+      </SortableContext>
+    </div>
+  );
+};
+
 const Index = () => {
   const initialCategories: CategoryData[] = [
     {
       id: "tech",
       title: "Technologie",
       color: "blue" as const,
+      columnIndex: 0,
       links: [
         {
           id: "github",
@@ -133,6 +208,7 @@ const Index = () => {
       id: "news",
       title: "Zprávy",
       color: "orange" as const,
+      columnIndex: 1,
       links: [
         {
           id: "idnes",
@@ -158,6 +234,7 @@ const Index = () => {
       id: "social",
       title: "Sociální sítě",
       color: "purple" as const,
+      columnIndex: 2,
       links: [
         {
           id: "facebook",
@@ -189,6 +266,7 @@ const Index = () => {
       id: "tools",
       title: "Nástroje",
       color: "green" as const,
+      columnIndex: 0,
       links: [
         {
           id: "gdrive",
@@ -214,6 +292,7 @@ const Index = () => {
       id: "entertainment",
       title: "Zábava",
       color: "red" as const,
+      columnIndex: 1,
       links: [
         {
           id: "youtube",
@@ -239,6 +318,7 @@ const Index = () => {
       id: "eshops",
       title: "E-shopy",
       color: "cyan" as const,
+      columnIndex: 2,
       links: [
         {
           id: "alza",
@@ -310,12 +390,36 @@ const Index = () => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      setCategories((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+    if (!over) return;
 
-        return arrayMove(items, oldIndex, newIndex);
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // If dropped on a column droppable
+    if (overId.startsWith('column-')) {
+      const targetColumnIndex = parseInt(overId.replace('column-', ''));
+      setCategories((items) => 
+        items.map((item) => 
+          item.id === activeId ? { ...item, columnIndex: targetColumnIndex } : item
+        )
+      );
+      return;
+    }
+
+    // If dropped on another category (reordering within or between columns)
+    if (activeId !== overId) {
+      setCategories((items) => {
+        const oldIndex = items.findIndex((item) => item.id === activeId);
+        const newIndex = items.findIndex((item) => item.id === overId);
+        
+        const activeItem = items[oldIndex];
+        const overItem = items[newIndex];
+        
+        // Update the active item's column to match the over item's column
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        return reordered.map((item) => 
+          item.id === activeId ? { ...item, columnIndex: overItem.columnIndex } : item
+        );
       });
     }
   };
@@ -428,12 +532,8 @@ const Index = () => {
     }
   };
 
-  const distributeIntoColumns = (items: CategoryData[]) => {
-    const cols: CategoryData[][] = Array.from({ length: columns }, () => []);
-    items.forEach((item, index) => {
-      cols[index % columns].push(item);
-    });
-    return cols;
+  const getCategoriesByColumn = (columnIndex: number) => {
+    return categories.filter(cat => cat.columnIndex === columnIndex);
   };
 
   const getGridCols = () => {
@@ -515,46 +615,22 @@ const Index = () => {
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext
-            items={categories.map((cat) => cat.id)}
-            strategy={rectSortingStrategy}
-          >
-            <div className={`grid ${getGridCols()} gap-6`}>
-              {distributeIntoColumns(categories).map((column, colIndex) => (
-                <div key={colIndex} className="flex flex-col gap-6">
-                  {column.map((category) => (
-                    editMode ? (
-                      <SortableCategory 
-                        key={category.id}
-                        category={category}
-                        onAddLink={() => handleAddLink(category.id)}
-                        onChangeColor={() => handleChangeColor(category.id)}
-                        onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                        onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                        onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                        onDeleteCategory={() => handleDeleteCategory(category.id)}
-                        editMode={editMode}
-                      />
-                    ) : (
-                      <LinkCategory
-                        key={category.id}
-                        title={category.title}
-                        color={category.color}
-                        links={category.links}
-                        onAddLink={() => handleAddLink(category.id)}
-                        onChangeColor={() => handleChangeColor(category.id)}
-                        onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                        onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                        onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                        onDeleteCategory={() => handleDeleteCategory(category.id)}
-                        editMode={editMode}
-                      />
-                    )
-                  ))}
-                </div>
-              ))}
-            </div>
-          </SortableContext>
+          <div className={`grid ${getGridCols()} gap-6`}>
+            {Array.from({ length: columns }, (_, colIndex) => (
+              <DroppableColumn
+                key={colIndex}
+                columnIndex={colIndex}
+                categories={getCategoriesByColumn(colIndex)}
+                editMode={editMode}
+                onAddLink={handleAddLink}
+                onChangeColor={handleChangeColor}
+                onReorderLinks={handleReorderLinks}
+                onEditLink={handleEditLink}
+                onDeleteLink={handleDeleteLink}
+                onDeleteCategory={handleDeleteCategory}
+              />
+            ))}
+          </div>
         </DndContext>
       </main>
 
