@@ -559,7 +559,7 @@ const Index = () => {
               items={categories.map((cat) => cat.id)}
               strategy={rectSortingStrategy}
             >
-              <div className={`grid ${getGridCols()} gap-6`}>
+              <div className={`grid ${getGridCols()} gap-6 auto-rows-auto`} style={{ gridAutoFlow: 'row dense' }}>
                 {categories.map((category) => (
                   <div key={category.id} className={getGridClasses(category)}>
                     <SortableCategory 
@@ -580,7 +580,7 @@ const Index = () => {
             </SortableContext>
           </DndContext>
         ) : (
-          <div className={`grid ${getGridCols()} gap-6`}>
+          <div className={`grid ${getGridCols()} gap-6 auto-rows-auto`} style={{ gridAutoFlow: 'row dense' }}>
             {categories.map((category) => (
               <div key={category.id} className={getGridClasses(category)}>
                 <LinkCategory
