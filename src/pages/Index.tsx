@@ -466,7 +466,8 @@ const Index = () => {
       classes += "col-span-full ";
     }
     if (category.newRow) {
-      classes += "col-start-1 ";
+      // Force break to new row by adding a break-before effect
+      classes += "[grid-column:1/-1] ";
     } else if (category.columnStart) {
       classes += `col-start-${category.columnStart} `;
     }
@@ -558,10 +559,47 @@ const Index = () => {
               strategy={rectSortingStrategy}
             >
               <div className={`grid ${getGridCols()} gap-6`}>
-                {categories.map((category) => (
+                {categories.map((category, index) => {
+                  const prevCategory = index > 0 ? categories[index - 1] : null;
+                  const needsBreak = category.newRow && prevCategory && !prevCategory.fullWidth;
+                  
+                  return (
+                    <>
+                      {needsBreak && <div key={`break-${category.id}`} className="col-span-full h-0" />}
+                      <div key={category.id} className={getGridClasses(category)}>
+                        <SortableCategory 
+                          category={category}
+                          onAddLink={() => handleAddLink(category.id)}
+                          onChangeColor={() => handleChangeColor(category.id)}
+                          onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                          onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                          onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                          onDeleteCategory={() => handleDeleteCategory(category.id)}
+                          onToggleFullWidth={() => handleToggleFullWidth(category.id)}
+                          onSetGridPosition={() => handleSetGridPosition(category.id)}
+                          editMode={editMode}
+                        />
+                      </div>
+                    </>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className={`grid ${getGridCols()} gap-6`}>
+            {categories.map((category, index) => {
+              const prevCategory = index > 0 ? categories[index - 1] : null;
+              const needsBreak = category.newRow && prevCategory && !prevCategory.fullWidth;
+              
+              return (
+                <>
+                  {needsBreak && <div key={`break-${category.id}`} className="col-span-full h-0" />}
                   <div key={category.id} className={getGridClasses(category)}>
-                    <SortableCategory 
-                      category={category}
+                    <LinkCategory
+                      title={category.title}
+                      color={category.color}
+                      links={category.links}
                       onAddLink={() => handleAddLink(category.id)}
                       onChangeColor={() => handleChangeColor(category.id)}
                       onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
@@ -573,30 +611,9 @@ const Index = () => {
                       editMode={editMode}
                     />
                   </div>
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        ) : (
-          <div className={`grid ${getGridCols()} gap-6`}>
-            {categories.map((category) => (
-              <div key={category.id} className={getGridClasses(category)}>
-                <LinkCategory
-                  title={category.title}
-                  color={category.color}
-                  links={category.links}
-                  onAddLink={() => handleAddLink(category.id)}
-                  onChangeColor={() => handleChangeColor(category.id)}
-                  onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                  onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                  onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                  onDeleteCategory={() => handleDeleteCategory(category.id)}
-                  onToggleFullWidth={() => handleToggleFullWidth(category.id)}
-                  onSetGridPosition={() => handleSetGridPosition(category.id)}
-                  editMode={editMode}
-                />
-              </div>
-            ))}
+                </>
+              );
+            })}
           </div>
         )}
       </main>
