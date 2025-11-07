@@ -436,6 +436,12 @@ const Index = () => {
     return cols;
   };
 
+  const getGridCols = () => {
+    if (columns === 3) return "grid-cols-1 md:grid-cols-3";
+    if (columns === 4) return "grid-cols-1 md:grid-cols-4";
+    return "grid-cols-1 md:grid-cols-5";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
@@ -514,7 +520,7 @@ const Index = () => {
               items={categories.map((cat) => cat.id)}
               strategy={rectSortingStrategy}
             >
-              <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-6`}>
+              <div className={`grid ${getGridCols()} gap-6`}>
                 {categories.map((category) => (
                   <SortableCategory 
                     key={category.id}
@@ -532,7 +538,7 @@ const Index = () => {
             </SortableContext>
           </DndContext>
         ) : (
-          <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-6`}>
+          <div className={`grid ${getGridCols()} gap-6`}>
             {distributeIntoColumns(categories).map((column, colIndex) => (
               <div key={colIndex} className="flex flex-col gap-6">
                 {column.map((category) => (
