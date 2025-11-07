@@ -5,8 +5,9 @@ import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
+import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit, Type } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import {
@@ -268,10 +269,12 @@ const Index = () => {
   const [deleteLinkDialogOpen, setDeleteLinkDialogOpen] = useState(false);
   const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
+  const [customTextDialogOpen, setCustomTextDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
   const [editMode, setEditMode] = useState(false);
+  const [customText, setCustomText] = useState("");
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
@@ -440,6 +443,9 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <Compass className="w-8 h-8 text-primary" />
               <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
+              {customText && (
+                <span className="text-xl text-muted-foreground ml-4">{customText}</span>
+              )}
             </div>
 
             <div className="flex items-center gap-4">
@@ -484,6 +490,12 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
                     <Edit className="mr-2 h-4 w-4" />
                     {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Vlastní nastavení</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setCustomTextDialogOpen(true)}>
+                    <Type className="mr-2 h-4 w-4" />
+                    Upravit vlastní text
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -577,6 +589,13 @@ const Index = () => {
         onSelectColor={handleColorChange}
         categoryTitle={selectedCategory?.title || ""}
         currentColor={selectedCategory?.color || "blue"}
+      />
+
+      <CustomTextDialog
+        open={customTextDialogOpen}
+        onOpenChange={setCustomTextDialogOpen}
+        onSave={setCustomText}
+        currentText={customText}
       />
 
       <footer className="bg-card border-t border-border mt-16">
