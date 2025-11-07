@@ -440,10 +440,10 @@ const Index = () => {
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
+              <Compass className="w-8 h-8 text-primary" />
               {customText && (
                 <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
               )}
-              <Compass className="w-8 h-8 text-primary" />
               <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
             </div>
 
