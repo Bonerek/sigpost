@@ -5,9 +5,8 @@ import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
 import { CustomTextDialog } from "@/components/CustomTextDialog";
-import { GridPositionDialog } from "@/components/GridPositionDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit, Type, LayoutGrid } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit, Type } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import {
@@ -41,9 +40,6 @@ interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
-  fullWidth?: boolean;
-  newRow?: boolean;
-  columnStart?: 1 | 2 | 3 | 4 | 5;
   links: Array<{
     id: string;
     title: string;
@@ -60,12 +56,10 @@ interface SortableCategoryProps {
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
   onDeleteCategory: () => void;
-  onToggleFullWidth: () => void;
-  onSetGridPosition: () => void;
   editMode: boolean;
 }
 
-const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, onDeleteCategory, onToggleFullWidth, onSetGridPosition, editMode }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, onDeleteCategory, editMode }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
@@ -102,8 +96,6 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
         onEditLink={onEditLink}
         onDeleteLink={onDeleteLink}
         onDeleteCategory={onDeleteCategory}
-        onToggleFullWidth={onToggleFullWidth}
-        onSetGridPosition={onSetGridPosition}
         editMode={editMode}
       />
     </div>
@@ -277,7 +269,6 @@ const Index = () => {
   const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
   const [customTextDialogOpen, setCustomTextDialogOpen] = useState(false);
-  const [gridPositionDialogOpen, setGridPositionDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
@@ -437,52 +428,12 @@ const Index = () => {
     }
   };
 
-  const handleToggleFullWidth = (categoryId: string) => {
-    setCategories((prevCategories) =>
-      prevCategories.map((cat) =>
-        cat.id === categoryId ? { ...cat, fullWidth: !cat.fullWidth } : cat
-      )
-    );
-  };
-
-  const handleSetGridPosition = (categoryId: string) => {
-    setSelectedCategoryId(categoryId);
-    setGridPositionDialogOpen(true);
-  };
-
-  const handleGridPositionSave = (newRow: boolean, columnStart?: 1 | 2 | 3 | 4 | 5) => {
-    if (selectedCategoryId) {
-      setCategories((prevCategories) =>
-        prevCategories.map((cat) =>
-          cat.id === selectedCategoryId ? { ...cat, newRow, columnStart } : cat
-        )
-      );
-    }
-  };
-
-  const getGridClasses = (category: CategoryData) => {
-    let classes = "";
-    
-    // Full width is separate from new row
-    if (category.fullWidth) {
-      classes += "col-span-full ";
-    }
-    
-    // New row just forces column start at 1
-    if (category.newRow) {
-      classes += "col-start-1 ";
-    } else if (category.columnStart && !category.fullWidth) {
-      // Column positioning only if not full width
-      classes += `col-start-${category.columnStart} `;
-    }
-    
-    return classes.trim();
-  };
-
-  const getGridCols = () => {
-    if (columns === 3) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
-    if (columns === 4) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
-    return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
+  const distributeIntoColumns = (items: CategoryData[]) => {
+    const cols: CategoryData[][] = Array.from({ length: columns }, () => []);
+    items.forEach((item, index) => {
+      cols[index % columns].push(item);
+    });
+    return cols;
   };
 
   return (
@@ -563,44 +514,42 @@ const Index = () => {
               items={categories.map((cat) => cat.id)}
               strategy={rectSortingStrategy}
             >
-              <div className={`grid ${getGridCols()} gap-6 auto-rows-auto`} style={{ gridAutoFlow: 'row dense' }}>
+              <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-6`}>
                 {categories.map((category) => (
-                  <div key={category.id} className={getGridClasses(category)}>
-                    <SortableCategory 
-                      category={category}
-                      onAddLink={() => handleAddLink(category.id)}
-                      onChangeColor={() => handleChangeColor(category.id)}
-                      onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                      onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                      onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                      onDeleteCategory={() => handleDeleteCategory(category.id)}
-                      onToggleFullWidth={() => handleToggleFullWidth(category.id)}
-                      onSetGridPosition={() => handleSetGridPosition(category.id)}
-                      editMode={editMode}
-                    />
-                  </div>
+                  <SortableCategory 
+                    key={category.id}
+                    category={category}
+                    onAddLink={() => handleAddLink(category.id)}
+                    onChangeColor={() => handleChangeColor(category.id)}
+                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                    onDeleteCategory={() => handleDeleteCategory(category.id)}
+                    editMode={editMode}
+                  />
                 ))}
               </div>
             </SortableContext>
           </DndContext>
         ) : (
-          <div className={`grid ${getGridCols()} gap-6 auto-rows-auto`} style={{ gridAutoFlow: 'row dense' }}>
-            {categories.map((category) => (
-              <div key={category.id} className={getGridClasses(category)}>
-                <LinkCategory
-                  title={category.title}
-                  color={category.color}
-                  links={category.links}
-                  onAddLink={() => handleAddLink(category.id)}
-                  onChangeColor={() => handleChangeColor(category.id)}
-                  onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                  onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                  onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                  onDeleteCategory={() => handleDeleteCategory(category.id)}
-                  onToggleFullWidth={() => handleToggleFullWidth(category.id)}
-                  onSetGridPosition={() => handleSetGridPosition(category.id)}
-                  editMode={editMode}
-                />
+          <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-6`}>
+            {distributeIntoColumns(categories).map((column, colIndex) => (
+              <div key={colIndex} className="flex flex-col gap-6">
+                {column.map((category) => (
+                  <LinkCategory
+                    key={category.id}
+                    title={category.title}
+                    color={category.color}
+                    links={category.links}
+                    onAddLink={() => handleAddLink(category.id)}
+                    onChangeColor={() => handleChangeColor(category.id)}
+                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                    onDeleteCategory={() => handleDeleteCategory(category.id)}
+                    editMode={editMode}
+                  />
+                ))}
               </div>
             ))}
           </div>
@@ -650,14 +599,6 @@ const Index = () => {
         onOpenChange={setCustomTextDialogOpen}
         onSave={setCustomText}
         currentText={customText}
-      />
-
-      <GridPositionDialog
-        open={gridPositionDialogOpen}
-        onOpenChange={setGridPositionDialogOpen}
-        onSave={handleGridPositionSave}
-        currentNewRow={selectedCategory?.newRow || false}
-        currentColumnStart={selectedCategory?.columnStart}
       />
 
       <footer className="bg-card border-t border-border mt-16">
