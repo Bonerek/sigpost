@@ -435,15 +435,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
-        <div className="px-4 py-8">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Compass className="w-10 h-10 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">Signpost</h1>
+              <Compass className="w-8 h-8 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
             </div>
 
             <div className="flex items-center gap-4">
-              <img src={esaLogo} alt="ESA Logo" className="h-12" />
+              <img src={esaLogo} alt="ESA Logo" className="h-10" />
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -489,9 +489,6 @@ const Index = () => {
               </DropdownMenu>
             </div>
           </div>
-          <p className="text-left text-muted-foreground mt-3 text-lg">
-            Quick access to favorite websites • Drag to reorder
-          </p>
         </div>
       </header>
 
