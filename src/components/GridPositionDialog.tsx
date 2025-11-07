@@ -58,30 +58,32 @@ export const GridPositionDialog = ({
               onChange={(e) => setNewRow(e.target.checked)}
               className="h-4 w-4"
             />
-            <Label htmlFor="new-row">Začít na novém řádku</Label>
+            <Label htmlFor="new-row">Začít na novém řádku (sloupec 1)</Label>
           </div>
           
-          <div className="grid gap-2">
-            <Label>Pozice sloupce</Label>
-            <RadioGroup value={columnStart} onValueChange={setColumnStart}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="auto" id="auto" />
-                <Label htmlFor="auto">Automaticky</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="1" id="col1" />
-                <Label htmlFor="col1">Sloupec 1</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="2" id="col2" />
-                <Label htmlFor="col2">Sloupec 2</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="3" id="col3" />
-                <Label htmlFor="col3">Sloupec 3</Label>
-              </div>
-            </RadioGroup>
-          </div>
+          {!newRow && (
+            <div className="grid gap-2">
+              <Label>Pozice sloupce</Label>
+              <RadioGroup value={columnStart} onValueChange={setColumnStart}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="auto" id="auto" />
+                  <Label htmlFor="auto">Automaticky</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="1" id="col1" />
+                  <Label htmlFor="col1">Sloupec 1</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="2" id="col2" />
+                  <Label htmlFor="col2">Sloupec 2</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="3" id="col3" />
+                  <Label htmlFor="col3">Sloupec 3</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

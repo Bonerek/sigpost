@@ -462,16 +462,20 @@ const Index = () => {
 
   const getGridClasses = (category: CategoryData) => {
     let classes = "";
+    
+    // Full width is separate from new row
     if (category.fullWidth) {
       classes += "col-span-full ";
     }
+    
+    // New row just forces column start at 1
     if (category.newRow) {
-      // Clear both sides to force new row
-      classes += "clear-both col-span-full ";
-    }
-    if (category.columnStart && !category.fullWidth && !category.newRow) {
+      classes += "col-start-1 ";
+    } else if (category.columnStart && !category.fullWidth) {
+      // Column positioning only if not full width
       classes += `col-start-${category.columnStart} `;
     }
+    
     return classes.trim();
   };
 
