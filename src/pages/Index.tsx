@@ -4,8 +4,18 @@ import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
-import { Compass, GripVertical } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   DndContext,
   closestCenter,
@@ -251,7 +261,9 @@ const Index = () => {
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
+  const [columns, setColumns] = useState<3 | 4 | 5>(3);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
   const selectedLink = selectedCategory?.links.find((link) => link.id === selectedLinkId);
@@ -384,13 +396,60 @@ const Index = () => {
     }
   };
 
+  const getGridCols = () => {
+    if (columns === 3) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+    if (columns === 4) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+    return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 justify-center">
-            <Compass className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">Rozcestník odkazů</h1>
+          <div className="flex items-center gap-3 justify-between">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-card">
+                <DropdownMenuLabel>Motiv</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                  <Sun className="mr-2 h-4 w-4" />
+                  Světlý
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                  <Moon className="mr-2 h-4 w-4" />
+                  Tmavý
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                  <Laptop className="mr-2 h-4 w-4" />
+                  Systémový
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setColumns(3)}>
+                  <Grid3x3 className="mr-2 h-4 w-4" />
+                  3 sloupce
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setColumns(4)}>
+                  <Grid3x3 className="mr-2 h-4 w-4" />
+                  4 sloupce
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setColumns(5)}>
+                  <Grid3x3 className="mr-2 h-4 w-4" />
+                  5 sloupců
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="flex items-center gap-3">
+              <Compass className="w-10 h-10 text-primary" />
+              <h1 className="text-4xl font-bold text-foreground">Rozcestník odkazů</h1>
+            </div>
+
+            <div className="w-10" />
           </div>
           <p className="text-center text-muted-foreground mt-3 text-lg">
             Rychlý přístup k oblíbeným webům • Přetáhni pro změnu pořadí
@@ -408,7 +467,7 @@ const Index = () => {
             items={categories.map((cat) => cat.id)}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`grid ${getGridCols()} gap-6`}>
               {categories.map((category) => (
                 <SortableCategory 
                   key={category.id} 
