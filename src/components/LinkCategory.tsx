@@ -1,5 +1,6 @@
 import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ColorValue } from "@/components/ColorPickerDialog";
 import {
   DropdownMenu,
@@ -104,22 +105,26 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
           </div>
         )}
         
-        <a
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-start gap-3 flex-1 min-w-0 group/anchor"
-        >
-          <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors mt-0.5 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
-              {link.title}
-            </h3>
-            {link.description && (
-              <p className="text-sm text-muted-foreground mt-1">{link.description}</p>
-            )}
-          </div>
-        </a>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+            >
+              <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+              <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+                {link.title}
+              </h3>
+            </a>
+          </TooltipTrigger>
+          {link.description && (
+            <TooltipContent>
+              <p>{link.description}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
 
         {editMode && (
           <DropdownMenu>
@@ -242,23 +247,26 @@ export const LinkCategory = ({
           </DndContext>
         ) : (
           links.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
-            >
-              <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
-                  {link.title}
-                </h3>
-                {link.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{link.description}</p>
-                )}
-              </div>
-            </a>
+            <Tooltip key={link.id}>
+              <TooltipTrigger asChild>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
+                >
+                  <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+                  <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+                    {link.title}
+                  </h3>
+                </a>
+              </TooltipTrigger>
+              {link.description && (
+                <TooltipContent>
+                  <p>{link.description}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           ))
         )}
       </div>
