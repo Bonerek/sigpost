@@ -216,10 +216,6 @@ export const LinkCategory = ({
                 <Palette className="mr-2 h-4 w-4" />
                 Změnit barvu
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onToggleFullWidth} className="cursor-pointer">
-                <Maximize2 className="mr-2 h-4 w-4" />
-                Celá šířka
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={onSetGridPosition} className="cursor-pointer">
                 <LayoutGrid className="mr-2 h-4 w-4" />
                 Pozice v mřížce
