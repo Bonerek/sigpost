@@ -441,16 +441,15 @@ const Index = () => {
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
+              <img src={esaLogo} alt="ESA Logo" className="h-10" />
+              {customText && (
+                <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
+              )}
               <Compass className="w-8 h-8 text-primary" />
               <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
-              {customText && (
-                <span className="text-xl text-muted-foreground ml-4">{customText}</span>
-              )}
             </div>
 
             <div className="flex items-center gap-4">
-              <img src={esaLogo} alt="ESA Logo" className="h-10" />
-              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
