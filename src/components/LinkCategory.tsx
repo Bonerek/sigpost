@@ -1,4 +1,4 @@
-import { ExternalLink, MoreVertical, Plus, Palette } from "lucide-react";
+import { ExternalLink, MoreVertical, Plus, Palette, GripVertical } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { ColorValue } from "@/components/ColorPickerDialog";
 import {
@@ -8,8 +8,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Pencil, Trash2 } from "lucide-react";
 
 interface Link {
+  id: string;
   title: string;
   url: string;
   description?: string;
@@ -21,6 +40,9 @@ interface LinkCategoryProps {
   color: ColorValue;
   onAddLink: () => void;
   onChangeColor: () => void;
+  onReorderLinks: (links: Link[]) => void;
+  onEditLink: (linkId: string) => void;
+  onDeleteLink: (linkId: string) => void;
 }
 
 const colorClasses: Record<ColorValue, string> = {
@@ -44,7 +66,114 @@ const colorClasses: Record<ColorValue, string> = {
   black: "bg-category-black text-category-black-foreground",
 };
 
-export const LinkCategory = ({ title, links, color, onAddLink, onChangeColor }: LinkCategoryProps) => {
+interface SortableLinkProps {
+  link: Link;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const SortableLink = ({ link, onEdit, onDelete }: SortableLinkProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/link">
+      <div className="flex items-start gap-2 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 opacity-0 group-hover/link:opacity-100 transition-opacity"
+        >
+          <GripVertical className="w-4 h-4 text-muted-foreground" />
+        </div>
+        
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-start gap-3 flex-1 min-w-0 group/anchor"
+        >
+          <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+              {link.title}
+            </h3>
+            {link.description && (
+              <p className="text-sm text-muted-foreground mt-1">{link.description}</p>
+            )}
+          </div>
+        </a>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0"
+              onClick={(e) => e.preventDefault()}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
+            <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+              <Pencil className="mr-2 h-4 w-4" />
+              Upravit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={onDelete} 
+              className="cursor-pointer text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Smazat
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+};
+
+export const LinkCategory = ({ 
+  title, 
+  links, 
+  color, 
+  onAddLink, 
+  onChangeColor, 
+  onReorderLinks,
+  onEditLink,
+  onDeleteLink 
+}: LinkCategoryProps) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = links.findIndex((link) => link.id === active.id);
+      const newIndex = links.findIndex((link) => link.id === over.id);
+      const newLinks = arrayMove(links, oldIndex, newIndex);
+      onReorderLinks(newLinks);
+    }
+  };
+
   return (
     <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
       <div className={`${colorClasses[color]} p-6 flex items-center justify-between`}>
@@ -72,25 +201,25 @@ export const LinkCategory = ({ title, links, color, onAddLink, onChangeColor }: 
         </DropdownMenu>
       </div>
       <div className="p-6 space-y-3">
-        {links.map((link, index) => (
-          <a
-            key={index}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group"
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={links.map((link) => link.id)}
+            strategy={verticalListSortingStrategy}
           >
-            <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors mt-0.5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors">
-                {link.title}
-              </h3>
-              {link.description && (
-                <p className="text-sm text-muted-foreground mt-1">{link.description}</p>
-              )}
-            </div>
-          </a>
-        ))}
+            {links.map((link) => (
+              <SortableLink
+                key={link.id}
+                link={link}
+                onEdit={() => onEditLink(link.id)}
+                onDelete={() => onDeleteLink(link.id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
     </Card>
   );

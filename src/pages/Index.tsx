@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { LinkCategory } from "@/components/LinkCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
+import { EditLinkDialog } from "@/components/EditLinkDialog";
+import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { Compass, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -26,20 +28,24 @@ interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
-  links: {
+  links: Array<{
+    id: string;
     title: string;
     url: string;
     description?: string;
-  }[];
+  }>;
 }
 
 interface SortableCategoryProps {
   category: CategoryData;
   onAddLink: () => void;
   onChangeColor: () => void;
+  onReorderLinks: (newLinks: Array<{id: string; title: string; url: string; description?: string}>) => void;
+  onEditLink: (linkId: string) => void;
+  onDeleteLink: (linkId: string) => void;
 }
 
-const SortableCategory = ({ category, onAddLink, onChangeColor }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
@@ -70,6 +76,9 @@ const SortableCategory = ({ category, onAddLink, onChangeColor }: SortableCatego
         links={category.links}
         onAddLink={onAddLink}
         onChangeColor={onChangeColor}
+        onReorderLinks={onReorderLinks}
+        onEditLink={onEditLink}
+        onDeleteLink={onDeleteLink}
       />
     </div>
   );
@@ -83,16 +92,19 @@ const Index = () => {
       color: "blue" as const,
       links: [
         {
+          id: "github",
           title: "GitHub",
           url: "https://github.com",
           description: "Platforma pro vývoj a sdílení kódu",
         },
         {
+          id: "stackoverflow",
           title: "Stack Overflow",
           url: "https://stackoverflow.com",
           description: "Komunita pro programátory",
         },
         {
+          id: "mdn",
           title: "MDN Web Docs",
           url: "https://developer.mozilla.org",
           description: "Dokumentace pro webové technologie",
@@ -105,16 +117,19 @@ const Index = () => {
       color: "orange" as const,
       links: [
         {
+          id: "idnes",
           title: "iDNES.cz",
           url: "https://www.idnes.cz",
           description: "Zpravodajský portál",
         },
         {
+          id: "novinky",
           title: "Novinky.cz",
           url: "https://www.novinky.cz",
           description: "Aktuální zprávy ze světa i domova",
         },
         {
+          id: "ct24",
           title: "ČT24",
           url: "https://ct24.ceskatelevize.cz",
           description: "Zpravodajství České televize",
@@ -127,21 +142,25 @@ const Index = () => {
       color: "purple" as const,
       links: [
         {
+          id: "facebook",
           title: "Facebook",
           url: "https://www.facebook.com",
           description: "Největší sociální síť",
         },
         {
+          id: "twitter",
           title: "Twitter / X",
           url: "https://twitter.com",
           description: "Mikroblogovací platforma",
         },
         {
+          id: "linkedin",
           title: "LinkedIn",
           url: "https://www.linkedin.com",
           description: "Profesní síť",
         },
         {
+          id: "instagram",
           title: "Instagram",
           url: "https://www.instagram.com",
           description: "Sdílení fotek a videí",
@@ -154,16 +173,19 @@ const Index = () => {
       color: "green" as const,
       links: [
         {
+          id: "gdrive",
           title: "Google Drive",
           url: "https://drive.google.com",
           description: "Cloudové úložiště",
         },
         {
+          id: "notion",
           title: "Notion",
           url: "https://www.notion.so",
           description: "Nástroj pro produktivitu",
         },
         {
+          id: "figma",
           title: "Figma",
           url: "https://www.figma.com",
           description: "Nástroj pro design",
@@ -176,16 +198,19 @@ const Index = () => {
       color: "red" as const,
       links: [
         {
+          id: "youtube",
           title: "YouTube",
           url: "https://www.youtube.com",
           description: "Platforma pro sdílení videí",
         },
         {
+          id: "netflix",
           title: "Netflix",
           url: "https://www.netflix.com",
           description: "Streamovací služba",
         },
         {
+          id: "spotify",
           title: "Spotify",
           url: "https://www.spotify.com",
           description: "Hudební streaming",
@@ -198,16 +223,19 @@ const Index = () => {
       color: "cyan" as const,
       links: [
         {
+          id: "alza",
           title: "Alza.cz",
           url: "https://www.alza.cz",
           description: "Elektronika a gadgety",
         },
         {
+          id: "mall",
           title: "Mall.cz",
           url: "https://www.mall.cz",
           description: "Největší český e-shop",
         },
         {
+          id: "amazon",
           title: "Amazon",
           url: "https://www.amazon.com",
           description: "Mezinárodní e-shop",
@@ -218,11 +246,15 @@ const Index = () => {
 
   const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
   const [addLinkDialogOpen, setAddLinkDialogOpen] = useState(false);
+  const [editLinkDialogOpen, setEditLinkDialogOpen] = useState(false);
+  const [deleteLinkDialogOpen, setDeleteLinkDialogOpen] = useState(false);
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
+  const selectedLink = selectedCategory?.links.find((link) => link.id === selectedLinkId);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -256,10 +288,14 @@ const Index = () => {
 
   const handleAddLinkSubmit = (link: { title: string; url: string; description?: string }) => {
     if (selectedCategoryId) {
+      const newLink = {
+        ...link,
+        id: `${selectedCategoryId}-${Date.now()}`,
+      };
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
           cat.id === selectedCategoryId
-            ? { ...cat, links: [...cat.links, link] }
+            ? { ...cat, links: [...cat.links, newLink] }
             : cat
         )
       );
@@ -268,6 +304,70 @@ const Index = () => {
         description: `"${link.title}" byl úspěšně přidán.`,
       });
     }
+  };
+
+  const handleEditLink = (categoryId: string, linkId: string) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedLinkId(linkId);
+    setEditLinkDialogOpen(true);
+  };
+
+  const handleEditLinkSubmit = (link: { title: string; url: string; description?: string }) => {
+    if (selectedCategoryId && selectedLinkId) {
+      setCategories((prevCategories) =>
+        prevCategories.map((cat) =>
+          cat.id === selectedCategoryId
+            ? {
+                ...cat,
+                links: cat.links.map((l) =>
+                  l.id === selectedLinkId ? { ...l, ...link } : l
+                ),
+              }
+            : cat
+        )
+      );
+      toast({
+        title: "Odkaz upraven",
+        description: `"${link.title}" byl úspěšně upraven.`,
+      });
+    }
+  };
+
+  const handleDeleteLink = (categoryId: string, linkId: string) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedLinkId(linkId);
+    setDeleteLinkDialogOpen(true);
+  };
+
+  const handleDeleteLinkConfirm = () => {
+    if (selectedCategoryId && selectedLinkId) {
+      const link = categories
+        .find((cat) => cat.id === selectedCategoryId)
+        ?.links.find((l) => l.id === selectedLinkId);
+      
+      setCategories((prevCategories) =>
+        prevCategories.map((cat) =>
+          cat.id === selectedCategoryId
+            ? {
+                ...cat,
+                links: cat.links.filter((l) => l.id !== selectedLinkId),
+              }
+            : cat
+        )
+      );
+      toast({
+        title: "Odkaz smazán",
+        description: `"${link?.title}" byl úspěšně smazán.`,
+      });
+    }
+  };
+
+  const handleReorderLinks = (categoryId: string, newLinks: Array<{id: string; title: string; url: string; description?: string}>) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((cat) =>
+        cat.id === categoryId ? { ...cat, links: newLinks } : cat
+      )
+    );
   };
 
   const handleColorChange = (color: ColorValue) => {
@@ -315,6 +415,9 @@ const Index = () => {
                   category={category}
                   onAddLink={() => handleAddLink(category.id)}
                   onChangeColor={() => handleChangeColor(category.id)}
+                  onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                  onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                  onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
                 />
               ))}
             </div>
@@ -327,6 +430,21 @@ const Index = () => {
         onOpenChange={setAddLinkDialogOpen}
         onAdd={handleAddLinkSubmit}
         categoryTitle={selectedCategory?.title || ""}
+      />
+
+      <EditLinkDialog
+        open={editLinkDialogOpen}
+        onOpenChange={setEditLinkDialogOpen}
+        onEdit={handleEditLinkSubmit}
+        linkData={selectedLink || { title: "", url: "", description: "" }}
+        categoryTitle={selectedCategory?.title || ""}
+      />
+
+      <DeleteLinkDialog
+        open={deleteLinkDialogOpen}
+        onOpenChange={setDeleteLinkDialogOpen}
+        onConfirm={handleDeleteLinkConfirm}
+        linkTitle={selectedLink?.title || ""}
       />
 
       <ColorPickerDialog
