@@ -43,6 +43,7 @@ interface LinkCategoryProps {
   onReorderLinks: (links: Link[]) => void;
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
+  editMode: boolean;
 }
 
 const colorClasses: Record<ColorValue, string> = {
@@ -70,9 +71,10 @@ interface SortableLinkProps {
   link: Link;
   onEdit: () => void;
   onDelete: () => void;
+  editMode: boolean;
 }
 
-const SortableLink = ({ link, onEdit, onDelete }: SortableLinkProps) => {
+const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) => {
   const {
     attributes,
     listeners,
@@ -91,13 +93,15 @@ const SortableLink = ({ link, onEdit, onDelete }: SortableLinkProps) => {
   return (
     <div ref={setNodeRef} style={style} className="relative group/link">
       <div className="flex items-start gap-2 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1 opacity-0 group-hover/link:opacity-100 transition-opacity"
-        >
-          <GripVertical className="w-4 h-4 text-muted-foreground" />
-        </div>
+        {editMode && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing p-1 opacity-0 group-hover/link:opacity-100 transition-opacity"
+          >
+            <GripVertical className="w-4 h-4 text-muted-foreground" />
+          </div>
+        )}
         
         <a
           href={link.url}
@@ -116,31 +120,33 @@ const SortableLink = ({ link, onEdit, onDelete }: SortableLinkProps) => {
           </div>
         </a>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0"
-              onClick={(e) => e.preventDefault()}
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
-            <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
-              <Pencil className="mr-2 h-4 w-4" />
-              Upravit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={onDelete} 
-              className="cursor-pointer text-destructive focus:text-destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Smazat
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {editMode && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0"
+                onClick={(e) => e.preventDefault()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
+              <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+                <Pencil className="mr-2 h-4 w-4" />
+                Upravit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={onDelete} 
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Smazat
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );
@@ -154,7 +160,8 @@ export const LinkCategory = ({
   onChangeColor, 
   onReorderLinks,
   onEditLink,
-  onDeleteLink 
+  onDeleteLink,
+  editMode
 }: LinkCategoryProps) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -201,25 +208,48 @@ export const LinkCategory = ({
         </DropdownMenu>
       </div>
       <div className="p-6 space-y-3">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={links.map((link) => link.id)}
-            strategy={verticalListSortingStrategy}
+        {editMode ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {links.map((link) => (
-              <SortableLink
-                key={link.id}
-                link={link}
-                onEdit={() => onEditLink(link.id)}
-                onDelete={() => onDeleteLink(link.id)}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={links.map((link) => link.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {links.map((link) => (
+                <SortableLink
+                  key={link.id}
+                  link={link}
+                  onEdit={() => onEditLink(link.id)}
+                  onDelete={() => onDeleteLink(link.id)}
+                  editMode={editMode}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        ) : (
+          links.map((link) => (
+            <a
+              key={link.id}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
+            >
+              <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+                  {link.title}
+                </h3>
+                {link.description && (
+                  <p className="text-sm text-muted-foreground mt-1">{link.description}</p>
+                )}
+              </div>
+            </a>
+          ))
+        )}
       </div>
     </Card>
   );

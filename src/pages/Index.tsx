@@ -4,7 +4,7 @@ import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3 } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import {
@@ -53,9 +53,10 @@ interface SortableCategoryProps {
   onReorderLinks: (newLinks: Array<{id: string; title: string; url: string; description?: string}>) => void;
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
+  editMode: boolean;
 }
 
-const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, editMode }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
@@ -73,13 +74,15 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute -top-2 -left-2 z-10 p-2 bg-primary text-primary-foreground rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-      >
-        <GripVertical className="w-5 h-5" />
-      </div>
+      {editMode && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute -top-2 -left-2 z-10 p-2 bg-primary text-primary-foreground rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+        >
+          <GripVertical className="w-5 h-5" />
+        </div>
+      )}
       <LinkCategory
         title={category.title}
         color={category.color}
@@ -89,6 +92,7 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
         onReorderLinks={onReorderLinks}
         onEditLink={onEditLink}
         onDeleteLink={onDeleteLink}
+        editMode={editMode}
       />
     </div>
   );
@@ -262,6 +266,7 @@ const Index = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
+  const [editMode, setEditMode] = useState(false);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
@@ -441,6 +446,12 @@ const Index = () => {
                   <Grid3x3 className="mr-2 h-4 w-4" />
                   5 sloupců
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Režim úprav</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -458,30 +469,50 @@ const Index = () => {
       </header>
 
       <main className="px-4 py-12">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={categories.map((cat) => cat.id)}
-            strategy={rectSortingStrategy}
+        {editMode ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div className={`grid ${getGridCols()} gap-6`}>
-              {categories.map((category) => (
-                <SortableCategory 
-                  key={category.id} 
-                  category={category}
-                  onAddLink={() => handleAddLink(category.id)}
-                  onChangeColor={() => handleChangeColor(category.id)}
-                  onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                  onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                  onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={categories.map((cat) => cat.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className={`grid ${getGridCols()} gap-6`}>
+                {categories.map((category) => (
+                  <SortableCategory 
+                    key={category.id} 
+                    category={category}
+                    onAddLink={() => handleAddLink(category.id)}
+                    onChangeColor={() => handleChangeColor(category.id)}
+                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                    editMode={editMode}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className={`grid ${getGridCols()} gap-6`}>
+            {categories.map((category) => (
+              <LinkCategory
+                key={category.id}
+                title={category.title}
+                color={category.color}
+                links={category.links}
+                onAddLink={() => handleAddLink(category.id)}
+                onChangeColor={() => handleChangeColor(category.id)}
+                onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                editMode={editMode}
+              />
+            ))}
+          </div>
+        )}
       </main>
 
       <AddLinkDialog
