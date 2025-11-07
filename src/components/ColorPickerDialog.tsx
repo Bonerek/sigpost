@@ -49,7 +49,7 @@ export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryT
             Vyber novou barvu pro hlavičku kategorie
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-3 gap-2 py-4 max-h-[400px] overflow-y-auto">
+        <div className="grid grid-cols-6 gap-2 py-4">
           {colors.map((color) => (
             <button
               key={color.value}
@@ -57,13 +57,11 @@ export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryT
                 onSelectColor(color.value);
                 onOpenChange(false);
               }}
-              className={`h-14 rounded-lg text-white hover:opacity-90 transition-all ${color.class} ${
-                currentColor === color.value ? "ring-4 ring-ring ring-offset-2 scale-105" : "hover:scale-105"
-              } flex flex-col items-center justify-center gap-0.5`}
-            >
-              <div className={`w-6 h-6 rounded-full ${color.class} border-2 border-white/50`} />
-              <span className="text-xs font-medium">{color.label}</span>
-            </button>
+              title={color.label}
+              className={`h-10 w-full rounded-lg hover:opacity-90 transition-all ${color.class} ${
+                currentColor === color.value ? "ring-4 ring-ring ring-offset-2 scale-110" : "hover:scale-110"
+              }`}
+            />
           ))}
         </div>
         <DialogFooter>
