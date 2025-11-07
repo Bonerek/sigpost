@@ -1,9 +1,77 @@
+import { useState } from "react";
 import { LinkCategory } from "@/components/LinkCategory";
-import { Compass } from "lucide-react";
+import { Compass, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface CategoryData {
+  id: string;
+  title: string;
+  color: "blue" | "green" | "orange" | "purple" | "red" | "cyan";
+  links: {
+    title: string;
+    url: string;
+    description?: string;
+  }[];
+}
+
+interface SortableCategoryProps {
+  category: CategoryData;
+}
+
+const SortableCategory = ({ category }: SortableCategoryProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute -top-2 -left-2 z-10 p-2 bg-primary text-primary-foreground rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+      >
+        <GripVertical className="w-5 h-5" />
+      </div>
+      <LinkCategory
+        title={category.title}
+        color={category.color}
+        links={category.links}
+      />
+    </div>
+  );
+};
 
 const Index = () => {
-  const categories = [
+  const initialCategories: CategoryData[] = [
     {
+      id: "tech",
       title: "Technologie",
       color: "blue" as const,
       links: [
@@ -25,6 +93,7 @@ const Index = () => {
       ],
     },
     {
+      id: "news",
       title: "Zprávy",
       color: "orange" as const,
       links: [
@@ -46,6 +115,7 @@ const Index = () => {
       ],
     },
     {
+      id: "social",
       title: "Sociální sítě",
       color: "purple" as const,
       links: [
@@ -72,6 +142,7 @@ const Index = () => {
       ],
     },
     {
+      id: "tools",
       title: "Nástroje",
       color: "green" as const,
       links: [
@@ -93,6 +164,7 @@ const Index = () => {
       ],
     },
     {
+      id: "entertainment",
       title: "Zábava",
       color: "red" as const,
       links: [
@@ -114,6 +186,7 @@ const Index = () => {
       ],
     },
     {
+      id: "eshops",
       title: "E-shopy",
       color: "cyan" as const,
       links: [
@@ -136,6 +209,28 @@ const Index = () => {
     },
   ];
 
+  const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setCategories((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
@@ -145,22 +240,28 @@ const Index = () => {
             <h1 className="text-4xl font-bold text-foreground">Rozcestník odkazů</h1>
           </div>
           <p className="text-center text-muted-foreground mt-3 text-lg">
-            Rychlý přístup k oblíbeným webům
+            Rychlý přístup k oblíbeným webům • Přetáhni pro změnu pořadí
           </p>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category, index) => (
-            <LinkCategory
-              key={index}
-              title={category.title}
-              color={category.color}
-              links={category.links}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={categories.map((cat) => cat.id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.map((category) => (
+                <SortableCategory key={category.id} category={category} />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       </main>
 
       <footer className="bg-card border-t border-border mt-16">
