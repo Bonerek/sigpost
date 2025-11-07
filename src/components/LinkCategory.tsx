@@ -1,5 +1,12 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MoreVertical, Plus, Palette } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface Link {
   title: string;
@@ -11,6 +18,8 @@ interface LinkCategoryProps {
   title: string;
   links: Link[];
   color: "blue" | "green" | "orange" | "purple" | "red" | "cyan";
+  onAddLink: () => void;
+  onChangeColor: () => void;
 }
 
 const colorClasses = {
@@ -22,11 +31,32 @@ const colorClasses = {
   cyan: "bg-category-cyan text-category-cyan-foreground",
 };
 
-export const LinkCategory = ({ title, links, color }: LinkCategoryProps) => {
+export const LinkCategory = ({ title, links, color, onAddLink, onChangeColor }: LinkCategoryProps) => {
   return (
     <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <div className={`${colorClasses[color]} p-6`}>
+      <div className={`${colorClasses[color]} p-6 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold">{title}</h2>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hover:bg-white/20 text-current"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-popover z-50">
+            <DropdownMenuItem onClick={onAddLink} className="cursor-pointer">
+              <Plus className="mr-2 h-4 w-4" />
+              Přidat odkaz
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onChangeColor} className="cursor-pointer">
+              <Palette className="mr-2 h-4 w-4" />
+              Změnit barvu
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="p-6 space-y-3">
         {links.map((link, index) => (

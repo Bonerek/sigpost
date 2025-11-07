@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { LinkCategory } from "@/components/LinkCategory";
+import { AddLinkDialog } from "@/components/AddLinkDialog";
+import { ColorPickerDialog } from "@/components/ColorPickerDialog";
 import { Compass, GripVertical } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   DndContext,
   closestCenter,
@@ -32,9 +35,11 @@ interface CategoryData {
 
 interface SortableCategoryProps {
   category: CategoryData;
+  onAddLink: () => void;
+  onChangeColor: () => void;
 }
 
-const SortableCategory = ({ category }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onAddLink, onChangeColor }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
@@ -63,6 +68,8 @@ const SortableCategory = ({ category }: SortableCategoryProps) => {
         title={category.title}
         color={category.color}
         links={category.links}
+        onAddLink={onAddLink}
+        onChangeColor={onChangeColor}
       />
     </div>
   );
@@ -210,6 +217,12 @@ const Index = () => {
   ];
 
   const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
+  const [addLinkDialogOpen, setAddLinkDialogOpen] = useState(false);
+  const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -227,6 +240,46 @@ const Index = () => {
         const newIndex = items.findIndex((item) => item.id === over.id);
 
         return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const handleAddLink = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setAddLinkDialogOpen(true);
+  };
+
+  const handleChangeColor = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setColorPickerDialogOpen(true);
+  };
+
+  const handleAddLinkSubmit = (link: { title: string; url: string; description?: string }) => {
+    if (selectedCategoryId) {
+      setCategories((prevCategories) =>
+        prevCategories.map((cat) =>
+          cat.id === selectedCategoryId
+            ? { ...cat, links: [...cat.links, link] }
+            : cat
+        )
+      );
+      toast({
+        title: "Odkaz přidán",
+        description: `"${link.title}" byl úspěšně přidán.`,
+      });
+    }
+  };
+
+  const handleColorChange = (color: "blue" | "green" | "orange" | "purple" | "red" | "cyan") => {
+    if (selectedCategoryId) {
+      setCategories((prevCategories) =>
+        prevCategories.map((cat) =>
+          cat.id === selectedCategoryId ? { ...cat, color } : cat
+        )
+      );
+      toast({
+        title: "Barva změněna",
+        description: "Barva kategorie byla úspěšně aktualizována.",
       });
     }
   };
@@ -257,12 +310,32 @@ const Index = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {categories.map((category) => (
-                <SortableCategory key={category.id} category={category} />
+                <SortableCategory 
+                  key={category.id} 
+                  category={category}
+                  onAddLink={() => handleAddLink(category.id)}
+                  onChangeColor={() => handleChangeColor(category.id)}
+                />
               ))}
             </div>
           </SortableContext>
         </DndContext>
       </main>
+
+      <AddLinkDialog
+        open={addLinkDialogOpen}
+        onOpenChange={setAddLinkDialogOpen}
+        onAdd={handleAddLinkSubmit}
+        categoryTitle={selectedCategory?.title || ""}
+      />
+
+      <ColorPickerDialog
+        open={colorPickerDialogOpen}
+        onOpenChange={setColorPickerDialogOpen}
+        onSelectColor={handleColorChange}
+        categoryTitle={selectedCategory?.title || ""}
+        currentColor={selectedCategory?.color || "blue"}
+      />
 
       <footer className="bg-card border-t border-border mt-16">
         <div className="container mx-auto px-4 py-6 text-center text-muted-foreground">
