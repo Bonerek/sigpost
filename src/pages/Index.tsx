@@ -40,6 +40,7 @@ interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
+  fullWidth?: boolean;
   links: Array<{
     id: string;
     title: string;
@@ -56,10 +57,11 @@ interface SortableCategoryProps {
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
   onDeleteCategory: () => void;
+  onToggleFullWidth: () => void;
   editMode: boolean;
 }
 
-const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, onDeleteCategory, editMode }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, onEditLink, onDeleteLink, onDeleteCategory, onToggleFullWidth, editMode }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
@@ -96,6 +98,7 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
         onEditLink={onEditLink}
         onDeleteLink={onDeleteLink}
         onDeleteCategory={onDeleteCategory}
+        onToggleFullWidth={onToggleFullWidth}
         editMode={editMode}
       />
     </div>
@@ -428,6 +431,14 @@ const Index = () => {
     }
   };
 
+  const handleToggleFullWidth = (categoryId: string) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((cat) =>
+        cat.id === categoryId ? { ...cat, fullWidth: !cat.fullWidth } : cat
+      )
+    );
+  };
+
   const getGridCols = () => {
     if (columns === 3) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
     if (columns === 4) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
@@ -514,17 +525,34 @@ const Index = () => {
             >
               <div className={`grid ${getGridCols()} gap-6`}>
                 {categories.map((category) => (
-                  <SortableCategory 
-                    key={category.id} 
-                    category={category}
-                    onAddLink={() => handleAddLink(category.id)}
-                    onChangeColor={() => handleChangeColor(category.id)}
-                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                    onDeleteCategory={() => handleDeleteCategory(category.id)}
-                    editMode={editMode}
-                  />
+                  category.fullWidth ? (
+                    <div key={category.id} className="col-span-full">
+                      <SortableCategory 
+                        category={category}
+                        onAddLink={() => handleAddLink(category.id)}
+                        onChangeColor={() => handleChangeColor(category.id)}
+                        onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                        onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                        onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                        onDeleteCategory={() => handleDeleteCategory(category.id)}
+                        onToggleFullWidth={() => handleToggleFullWidth(category.id)}
+                        editMode={editMode}
+                      />
+                    </div>
+                  ) : (
+                    <SortableCategory 
+                      key={category.id} 
+                      category={category}
+                      onAddLink={() => handleAddLink(category.id)}
+                      onChangeColor={() => handleChangeColor(category.id)}
+                      onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                      onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                      onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                      onDeleteCategory={() => handleDeleteCategory(category.id)}
+                      onToggleFullWidth={() => handleToggleFullWidth(category.id)}
+                      editMode={editMode}
+                    />
+                  )
                 ))}
               </div>
             </SortableContext>
@@ -532,19 +560,38 @@ const Index = () => {
         ) : (
           <div className={`grid ${getGridCols()} gap-6`}>
             {categories.map((category) => (
-              <LinkCategory
-                key={category.id}
-                title={category.title}
-                color={category.color}
-                links={category.links}
-                onAddLink={() => handleAddLink(category.id)}
-                onChangeColor={() => handleChangeColor(category.id)}
-                onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                onDeleteCategory={() => handleDeleteCategory(category.id)}
-                editMode={editMode}
-              />
+              category.fullWidth ? (
+                <div key={category.id} className="col-span-full">
+                  <LinkCategory
+                    title={category.title}
+                    color={category.color}
+                    links={category.links}
+                    onAddLink={() => handleAddLink(category.id)}
+                    onChangeColor={() => handleChangeColor(category.id)}
+                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                    onDeleteCategory={() => handleDeleteCategory(category.id)}
+                    onToggleFullWidth={() => handleToggleFullWidth(category.id)}
+                    editMode={editMode}
+                  />
+                </div>
+              ) : (
+                <LinkCategory
+                  key={category.id}
+                  title={category.title}
+                  color={category.color}
+                  links={category.links}
+                  onAddLink={() => handleAddLink(category.id)}
+                  onChangeColor={() => handleChangeColor(category.id)}
+                  onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                  onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                  onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                  onDeleteCategory={() => handleDeleteCategory(category.id)}
+                  onToggleFullWidth={() => handleToggleFullWidth(category.id)}
+                  editMode={editMode}
+                />
+              )
             ))}
           </div>
         )}

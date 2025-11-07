@@ -1,4 +1,4 @@
-import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2 } from "lucide-react";
+import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Maximize2, Minimize2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ColorValue } from "@/components/ColorPickerDialog";
@@ -45,6 +45,7 @@ interface LinkCategoryProps {
   onEditLink: (linkId: string) => void;
   onDeleteLink: (linkId: string) => void;
   onDeleteCategory: () => void;
+  onToggleFullWidth: () => void;
   editMode: boolean;
 }
 
@@ -168,6 +169,7 @@ export const LinkCategory = ({
   onEditLink,
   onDeleteLink,
   onDeleteCategory,
+  onToggleFullWidth,
   editMode
 }: LinkCategoryProps) => {
   const sensors = useSensors(
@@ -211,6 +213,10 @@ export const LinkCategory = ({
               <DropdownMenuItem onClick={onChangeColor} className="cursor-pointer">
                 <Palette className="mr-2 h-4 w-4" />
                 Změnit barvu
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onToggleFullWidth} className="cursor-pointer">
+                <Maximize2 className="mr-2 h-4 w-4" />
+                Celá šířka
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onDeleteCategory} 
