@@ -1,4 +1,5 @@
 import { useState } from "react";
+import esaLogo from "@/assets/esa-logo.png";
 import { LinkCategory } from "@/components/LinkCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
@@ -435,59 +436,61 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
         <div className="px-4 py-8">
-          <div className="flex items-center gap-3 justify-between">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-card">
-                <DropdownMenuLabel>Motiv</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setTheme("light")}>
-                  <Sun className="mr-2 h-4 w-4" />
-                  Světlý
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                  <Moon className="mr-2 h-4 w-4" />
-                  Tmavý
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                  <Laptop className="mr-2 h-4 w-4" />
-                  Systémový
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setColumns(3)}>
-                  <Grid3x3 className="mr-2 h-4 w-4" />
-                  3 sloupce
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setColumns(4)}>
-                  <Grid3x3 className="mr-2 h-4 w-4" />
-                  4 sloupce
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setColumns(5)}>
-                  <Grid3x3 className="mr-2 h-4 w-4" />
-                  5 sloupců
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Režim úprav</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Compass className="w-10 h-10 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">Rozcestník odkazů</h1>
+              <h1 className="text-4xl font-bold text-foreground">Signpost</h1>
             </div>
 
-            <div className="w-10" />
+            <div className="flex items-center gap-4">
+              <img src={esaLogo} alt="ESA Logo" className="h-12" />
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card">
+                  <DropdownMenuLabel>Motiv</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    Světlý
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    Tmavý
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <Laptop className="mr-2 h-4 w-4" />
+                    Systémový
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setColumns(3)}>
+                    <Grid3x3 className="mr-2 h-4 w-4" />
+                    3 sloupce
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setColumns(4)}>
+                    <Grid3x3 className="mr-2 h-4 w-4" />
+                    4 sloupce
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setColumns(5)}>
+                    <Grid3x3 className="mr-2 h-4 w-4" />
+                    5 sloupců
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Režim úprav</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          <p className="text-center text-muted-foreground mt-3 text-lg">
-            Rychlý přístup k oblíbeným webům • Přetáhni pro změnu pořadí
+          <p className="text-left text-muted-foreground mt-3 text-lg">
+            Quick access to favorite websites • Drag to reorder
           </p>
         </div>
       </header>
