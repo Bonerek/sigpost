@@ -510,56 +510,52 @@ const Index = () => {
       </header>
 
       <main className="px-4 py-12">
-        {editMode ? (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={categories.map((cat) => cat.id)}
+            strategy={rectSortingStrategy}
           >
-            <SortableContext
-              items={categories.map((cat) => cat.id)}
-              strategy={rectSortingStrategy}
-            >
-              <div className="max-w-4xl mx-auto flex flex-col gap-6">
-                {categories.map((category) => (
-                  <SortableCategory 
-                    key={category.id}
-                    category={category}
-                    onAddLink={() => handleAddLink(category.id)}
-                    onChangeColor={() => handleChangeColor(category.id)}
-                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                    onDeleteCategory={() => handleDeleteCategory(category.id)}
-                    editMode={editMode}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        ) : (
-          <div className={`grid ${getGridCols()} gap-6`}>
-            {distributeIntoColumns(categories).map((column, colIndex) => (
-              <div key={colIndex} className="flex flex-col gap-6">
-                {column.map((category) => (
-                  <LinkCategory
-                    key={category.id}
-                    title={category.title}
-                    color={category.color}
-                    links={category.links}
-                    onAddLink={() => handleAddLink(category.id)}
-                    onChangeColor={() => handleChangeColor(category.id)}
-                    onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
-                    onEditLink={(linkId) => handleEditLink(category.id, linkId)}
-                    onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
-                    onDeleteCategory={() => handleDeleteCategory(category.id)}
-                    editMode={editMode}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
+            <div className={`grid ${getGridCols()} gap-6`}>
+              {distributeIntoColumns(categories).map((column, colIndex) => (
+                <div key={colIndex} className="flex flex-col gap-6">
+                  {column.map((category) => (
+                    editMode ? (
+                      <SortableCategory 
+                        key={category.id}
+                        category={category}
+                        onAddLink={() => handleAddLink(category.id)}
+                        onChangeColor={() => handleChangeColor(category.id)}
+                        onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                        onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                        onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                        onDeleteCategory={() => handleDeleteCategory(category.id)}
+                        editMode={editMode}
+                      />
+                    ) : (
+                      <LinkCategory
+                        key={category.id}
+                        title={category.title}
+                        color={category.color}
+                        links={category.links}
+                        onAddLink={() => handleAddLink(category.id)}
+                        onChangeColor={() => handleChangeColor(category.id)}
+                        onReorderLinks={(newLinks) => handleReorderLinks(category.id, newLinks)}
+                        onEditLink={(linkId) => handleEditLink(category.id, linkId)}
+                        onDeleteLink={(linkId) => handleDeleteLink(category.id, linkId)}
+                        onDeleteCategory={() => handleDeleteCategory(category.id)}
+                        editMode={editMode}
+                      />
+                    )
+                  ))}
+                </div>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       </main>
 
       <AddLinkDialog
