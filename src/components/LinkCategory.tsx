@@ -125,7 +125,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+              className="flex items-center gap-3 flex-1 min-w-0 group/anchor justify-start"
             >
               {link.icon ? (
                 (() => {
@@ -135,7 +135,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               ) : (
                 <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
               )}
-              <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+              <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors text-left">
                 {link.title}
               </h3>
             </a>
@@ -275,7 +275,7 @@ export const LinkCategory = ({
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+                    className="flex items-center gap-3 flex-1 min-w-0 group/anchor justify-start"
                   >
                     {link.icon ? (
                       (() => {
@@ -285,7 +285,7 @@ export const LinkCategory = ({
                     ) : (
                       <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
                     )}
-                    <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+                    <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors text-left">
                       {link.title}
                     </h3>
                   </a>
