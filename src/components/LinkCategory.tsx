@@ -113,7 +113,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
         <div
           {...attributes}
           {...listeners}
-          className="absolute left-2 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-0 group-hover/link:opacity-100 transition-opacity z-10"
+          className="absolute left-0 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-100 transition-opacity z-10 bg-secondary/80 p-1 rounded"
         >
           <GripVertical className="w-4 h-4 text-muted-foreground" />
         </div>
