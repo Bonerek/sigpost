@@ -118,14 +118,14 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
           <GripVertical className="w-4 h-4 text-muted-foreground" />
         </div>
       )}
-      <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+      <div className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
         <Tooltip>
           <TooltipTrigger asChild>
             <a
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+              className="flex items-center gap-4 flex-1 min-w-0 group/anchor"
             >
               {link.icon ? (
                 (() => {
@@ -268,14 +268,14 @@ export const LinkCategory = ({
           </DndContext>
         ) : (
           links.map((link) => (
-            <div key={link.id} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+            <div key={link.id} className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+                    className="flex items-center gap-4 flex-1 min-w-0 group/anchor"
                   >
                     {link.icon ? (
                       (() => {
