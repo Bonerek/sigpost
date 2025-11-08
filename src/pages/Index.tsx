@@ -634,7 +634,7 @@ const Index = () => {
                   <DropdownMenuLabel>Vlastní nastavení</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => setCustomTextDialogOpen(true)}>
                     <Type className="mr-2 h-4 w-4" />
-                    Upravit vlastní text
+                    Název systému
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
