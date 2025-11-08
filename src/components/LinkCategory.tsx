@@ -109,12 +109,12 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
 
   return (
     <div ref={setNodeRef} style={style} className="relative group/link">
-      <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+      <div className="flex items-center p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
         {editMode && (
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing opacity-0 group-hover/link:opacity-100 transition-opacity -ml-1"
+            className="cursor-grab active:cursor-grabbing opacity-0 group-hover/link:opacity-100 transition-opacity mr-3 flex-shrink-0"
           >
             <GripVertical className="w-4 h-4 text-muted-foreground" />
           </div>
@@ -127,6 +127,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+              style={editMode ? { marginLeft: '-28px', paddingLeft: '28px' } : {}}
             >
               {link.icon ? (
                 (() => {
