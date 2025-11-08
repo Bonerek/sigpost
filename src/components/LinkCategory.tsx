@@ -118,7 +118,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
           <GripVertical className="w-4 h-4 text-muted-foreground" />
         </div>
       )}
-      <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+      <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
         <Tooltip>
           <TooltipTrigger asChild>
             <a
@@ -135,7 +135,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               ) : (
                 <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
               )}
-              <h3 className="font-semibold text-lg text-foreground group-hover/anchor:text-accent transition-colors">
+              <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
                 {link.title}
               </h3>
             </a>
@@ -268,7 +268,7 @@ export const LinkCategory = ({
           </DndContext>
         ) : (
           links.map((link) => (
-            <div key={link.id} className="flex items-center gap-3 px-4 py-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+            <div key={link.id} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a
@@ -285,7 +285,7 @@ export const LinkCategory = ({
                     ) : (
                       <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
                     )}
-                    <h3 className="font-semibold text-lg text-foreground group-hover/anchor:text-accent transition-colors">
+                    <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
                       {link.title}
                     </h3>
                   </a>
