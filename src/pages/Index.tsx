@@ -522,16 +522,16 @@ const Index = () => {
     );
   };
 
-  const handleColorChange = (color: ColorValue) => {
+  const handleColorChange = (color: ColorValue, title: string) => {
     if (selectedCategoryId) {
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
-          cat.id === selectedCategoryId ? { ...cat, color } : cat
+          cat.id === selectedCategoryId ? { ...cat, color, title } : cat
         )
       );
       toast({
-        title: "Barva změněna",
-        description: "Barva kategorie byla úspěšně aktualizována.",
+        title: "Kategorie upravena",
+        description: "Kategorie byla úspěšně aktualizována.",
       });
     }
   };
