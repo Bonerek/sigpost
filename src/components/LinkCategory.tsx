@@ -269,26 +269,27 @@ export const LinkCategory = ({
           </DndContext>
         ) : (
           links.map((link) => (
-            <Tooltip key={link.id}>
-              <TooltipTrigger asChild>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
-                >
-                  {link.icon ? (
-                    (() => {
-                      const IconComponent = iconMap[link.icon];
-                      return <IconComponent className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />;
-                    })()
-                  ) : (
-                    <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
-                  )}
-                  <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
-                    {link.title}
-                  </h3>
-                </a>
+            <div key={link.id} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
+                  >
+                    {link.icon ? (
+                      (() => {
+                        const IconComponent = iconMap[link.icon];
+                        return <IconComponent className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />;
+                      })()
+                    ) : (
+                      <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+                    )}
+                    <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
+                      {link.title}
+                    </h3>
+                  </a>
               </TooltipTrigger>
               {link.description && (
                 <TooltipContent>
@@ -296,6 +297,7 @@ export const LinkCategory = ({
                 </TooltipContent>
               )}
             </Tooltip>
+            </div>
           ))
         )}
       </div>
