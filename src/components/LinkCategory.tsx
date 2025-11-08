@@ -211,8 +211,8 @@ export const LinkCategory = ({
 
   return (
     <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <div className={`${colorClasses[color]} p-3 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold">{title}</h2>
+      <div className={`${colorClasses[color]} p-2 flex items-center justify-between`}>
+        <h2 className="text-xl font-bold">{title}</h2>
         {editMode && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
