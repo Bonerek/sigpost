@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type ColorValue = "blue" | "green" | "orange" | "purple" | "red" | "cyan" | "pink" | "indigo" | "teal" | "amber" | "lime" | "emerald" | "brown" | "gray" | "slate" | "zinc" | "stone" | "black";
+type ColorValue = "blue" | "green" | "orange" | "purple" | "red" | "cyan" | "pink" | "yellow" | "indigo" | "teal" | "amber" | "lime" | "emerald" | "brown" | "gray" | "slate" | "zinc" | "stone" | "black";
 
 interface ColorPickerDialogProps {
   open: boolean;

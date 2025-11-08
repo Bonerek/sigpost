@@ -70,6 +70,7 @@ const colorClasses: Record<ColorValue, string> = {
   red: "bg-category-red text-category-red-foreground",
   cyan: "bg-category-cyan text-category-cyan-foreground",
   pink: "bg-category-pink text-category-pink-foreground",
+  yellow: "bg-category-yellow text-category-yellow-foreground",
   indigo: "bg-category-indigo text-category-indigo-foreground",
   teal: "bg-category-teal text-category-teal-foreground",
   amber: "bg-category-amber text-category-amber-foreground",

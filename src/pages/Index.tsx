@@ -6,7 +6,8 @@ import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
 import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit, Type } from "lucide-react";
+import { AddCategoryDialog } from "@/components/AddCategoryDialog";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit, Type, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import {
@@ -349,6 +350,7 @@ const Index = () => {
   const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
   const [customTextDialogOpen, setCustomTextDialogOpen] = useState(false);
+  const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
@@ -532,6 +534,21 @@ const Index = () => {
     }
   };
 
+  const handleAddCategory = (category: { title: string; color: ColorValue }) => {
+    const newCategory: CategoryData = {
+      id: `category-${Date.now()}`,
+      title: category.title,
+      color: category.color,
+      columnIndex: 0,
+      links: [],
+    };
+    setCategories((prevCategories) => [...prevCategories, newCategory]);
+    toast({
+      title: "Kategorie přidána",
+      description: `Kategorie "${category.title}" byla úspěšně vytvořena.`,
+    });
+  };
+
   const getCategoriesByColumn = (columnIndex: number) => {
     return categories.filter(cat => cat.columnIndex === columnIndex);
   };
@@ -595,6 +612,12 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
                     <Edit className="mr-2 h-4 w-4" />
                     {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Správa kategorií</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setAddCategoryDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Přidat kategorii
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel>Vlastní nastavení</DropdownMenuLabel>
@@ -677,6 +700,12 @@ const Index = () => {
         onOpenChange={setCustomTextDialogOpen}
         onSave={setCustomText}
         currentText={customText}
+      />
+
+      <AddCategoryDialog
+        open={addCategoryDialogOpen}
+        onOpenChange={setAddCategoryDialogOpen}
+        onAdd={handleAddCategory}
       />
 
       <footer className="bg-card border-t border-border mt-16">
