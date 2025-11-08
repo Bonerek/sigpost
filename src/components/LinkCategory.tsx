@@ -109,7 +109,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
 
   return (
     <div ref={setNodeRef} style={style} className="relative group/link">
-      <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 min-h-[56px]">
+      <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
         {editMode && (
           <div
             {...attributes}
