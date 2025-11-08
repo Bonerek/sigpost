@@ -573,6 +573,16 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              {editMode && (
+                <Button 
+                  onClick={() => setAddCategoryDialogOpen(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-5 w-5" />
+                  Přidat kategorii
+                </Button>
+              )}
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -612,12 +622,6 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
                     <Edit className="mr-2 h-4 w-4" />
                     {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Správa kategorií</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setAddCategoryDialogOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Přidat kategorii
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel>Vlastní nastavení</DropdownMenuLabel>
