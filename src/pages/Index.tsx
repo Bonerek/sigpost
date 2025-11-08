@@ -7,7 +7,9 @@ import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
 import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Edit, Type, Plus } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import {
@@ -573,6 +575,17 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  id="edit-mode" 
+                  checked={editMode} 
+                  onCheckedChange={setEditMode}
+                />
+                <Label htmlFor="edit-mode" className="cursor-pointer">
+                  Režim úprav
+                </Label>
+              </div>
+
               {editMode && (
                 <Button 
                   onClick={() => setAddCategoryDialogOpen(true)}
@@ -616,12 +629,6 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => setColumns(5)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
                     5 sloupců
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Režim úprav</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setEditMode(!editMode)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    {editMode ? "Vypnout režim úprav" : "Zapnout režim úprav"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel>Vlastní nastavení</DropdownMenuLabel>
