@@ -118,14 +118,14 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
           <GripVertical className="w-4 h-4 text-muted-foreground" />
         </div>
       )}
-      <div className="flex items-center gap-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+      <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
         <Tooltip>
           <TooltipTrigger asChild>
             <a
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 flex-1 min-w-0 group/anchor p-3"
+              className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
             >
               {link.icon ? (
                 (() => {
@@ -211,8 +211,8 @@ export const LinkCategory = ({
 
   return (
     <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <div className={`${colorClasses[color]} p-3 flex items-center justify-between`}>
-        <h2 className="text-2xl font-bold">{title}</h2>
+      <div className={`${colorClasses[color]} p-2 flex items-center justify-between`}>
+        <h2 className="text-xl font-bold">{title}</h2>
         {editMode && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -268,14 +268,14 @@ export const LinkCategory = ({
           </DndContext>
         ) : (
           links.map((link) => (
-            <div key={link.id} className="flex items-center gap-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+            <div key={link.id} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 flex-1 min-w-0 group/anchor p-3"
+                    className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
                   >
                     {link.icon ? (
                       (() => {
