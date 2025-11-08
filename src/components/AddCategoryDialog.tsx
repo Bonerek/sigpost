@@ -19,14 +19,24 @@ interface AddCategoryDialogProps {
 }
 
 const colors: Array<{ value: ColorValue; label: string; class: string }> = [
-  { value: "blue", label: "Modrá", class: "bg-blue-500" },
-  { value: "red", label: "Červená", class: "bg-red-500" },
-  { value: "green", label: "Zelená", class: "bg-green-500" },
-  { value: "purple", label: "Fialová", class: "bg-purple-500" },
-  { value: "orange", label: "Oranžová", class: "bg-orange-500" },
-  { value: "cyan", label: "Azurová", class: "bg-cyan-500" },
-  { value: "pink", label: "Růžová", class: "bg-pink-500" },
-  { value: "yellow", label: "Žlutá", class: "bg-yellow-500" },
+  { value: "blue", label: "Modrá", class: "bg-category-blue" },
+  { value: "indigo", label: "Indigo", class: "bg-category-indigo" },
+  { value: "purple", label: "Fialová", class: "bg-category-purple" },
+  { value: "pink", label: "Růžová", class: "bg-category-pink" },
+  { value: "red", label: "Červená", class: "bg-category-red" },
+  { value: "orange", label: "Oranžová", class: "bg-category-orange" },
+  { value: "amber", label: "Jantarová", class: "bg-category-amber" },
+  { value: "lime", label: "Limetková", class: "bg-category-lime" },
+  { value: "green", label: "Zelená", class: "bg-category-green" },
+  { value: "emerald", label: "Smaragdová", class: "bg-category-emerald" },
+  { value: "teal", label: "Tyrkysově modrá", class: "bg-category-teal" },
+  { value: "cyan", label: "Tyrkysová", class: "bg-category-cyan" },
+  { value: "brown", label: "Hnědá", class: "bg-category-brown" },
+  { value: "gray", label: "Šedá", class: "bg-category-gray" },
+  { value: "slate", label: "Břidlicová", class: "bg-category-slate" },
+  { value: "zinc", label: "Zinková", class: "bg-category-zinc" },
+  { value: "stone", label: "Kamenná", class: "bg-category-stone" },
+  { value: "black", label: "Černá", class: "bg-category-black" },
 ];
 
 export const AddCategoryDialog = ({ open, onOpenChange, onAdd }: AddCategoryDialogProps) => {
@@ -64,18 +74,18 @@ export const AddCategoryDialog = ({ open, onOpenChange, onAdd }: AddCategoryDial
           </div>
           <div className="grid gap-2">
             <Label>Barva</Label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-6 gap-2">
               {colors.map((color) => (
                 <button
                   key={color.value}
                   type="button"
                   onClick={() => setSelectedColor(color.value)}
-                  className={`h-10 rounded-md transition-all ${color.class} ${
+                  title={color.label}
+                  className={`h-10 rounded-lg hover:opacity-90 transition-all ${color.class} ${
                     selectedColor === color.value
-                      ? "ring-2 ring-primary ring-offset-2 scale-110"
-                      : "hover:scale-105"
+                      ? "ring-4 ring-ring ring-offset-2 scale-110"
+                      : "hover:scale-110"
                   }`}
-                  aria-label={color.label}
                 />
               ))}
             </div>
