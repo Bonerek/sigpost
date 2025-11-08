@@ -231,7 +231,7 @@ export const LinkCategory = ({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onChangeColor} className="cursor-pointer">
                 <Palette className="mr-2 h-4 w-4" />
-                Změnit barvu
+                Upravit kategorii
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onDeleteCategory} 
