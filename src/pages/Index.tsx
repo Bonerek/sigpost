@@ -575,6 +575,16 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              {editMode && (
+                <Button 
+                  onClick={() => setAddCategoryDialogOpen(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-5 w-5" />
+                  Přidat kategorii
+                </Button>
+              )}
+
               <div className="flex items-center gap-2">
                 <Switch 
                   id="edit-mode" 
@@ -585,16 +595,6 @@ const Index = () => {
                   Režim úprav
                 </Label>
               </div>
-
-              {editMode && (
-                <Button 
-                  onClick={() => setAddCategoryDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Plus className="h-5 w-5" />
-                  Přidat kategorii
-                </Button>
-              )}
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
