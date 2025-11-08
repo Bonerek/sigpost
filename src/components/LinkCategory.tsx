@@ -1,4 +1,5 @@
-import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Pencil } from "lucide-react";
+import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Pencil, Monitor, Laptop, DollarSign, ShoppingCart, Mail, FileText, Calendar, Settings, Home, Globe } from "lucide-react";
+import type { IconType } from "./AddLinkDialog";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ColorValue } from "@/components/ColorPickerDialog";
@@ -32,7 +33,21 @@ interface Link {
   title: string;
   url: string;
   description?: string;
+  icon?: IconType;
 }
+
+const iconMap = {
+  monitor: Monitor,
+  laptop: Laptop,
+  dollar: DollarSign,
+  cart: ShoppingCart,
+  mail: Mail,
+  file: FileText,
+  calendar: Calendar,
+  settings: Settings,
+  home: Home,
+  globe: Globe,
+};
 
 interface LinkCategoryProps {
   title: string;
@@ -112,7 +127,14 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               rel="noopener noreferrer"
               className="flex items-center gap-3 flex-1 min-w-0 group/anchor"
             >
-              <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+              {link.icon ? (
+                (() => {
+                  const IconComponent = iconMap[link.icon];
+                  return <IconComponent className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />;
+                })()
+              ) : (
+                <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+              )}
               <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
                 {link.title}
               </h3>
@@ -254,7 +276,14 @@ export const LinkCategory = ({
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 group/anchor"
                 >
-                  <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+                  {link.icon ? (
+                    (() => {
+                      const IconComponent = iconMap[link.icon];
+                      return <IconComponent className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />;
+                    })()
+                  ) : (
+                    <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+                  )}
                   <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors">
                     {link.title}
                   </h3>

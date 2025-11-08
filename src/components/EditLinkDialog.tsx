@@ -11,15 +11,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { iconOptions, IconType } from "./AddLinkDialog";
+import { cn } from "@/lib/utils";
 
 interface EditLinkDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (link: { title: string; url: string; description?: string }) => void;
+  onEdit: (link: { title: string; url: string; description?: string; icon?: IconType }) => void;
   linkData: {
     title: string;
     url: string;
     description?: string;
+    icon?: IconType;
   };
   categoryTitle: string;
 }
@@ -28,12 +31,14 @@ export const EditLinkDialog = ({ open, onOpenChange, onEdit, linkData, categoryT
   const [title, setTitle] = useState(linkData.title);
   const [url, setUrl] = useState(linkData.url);
   const [description, setDescription] = useState(linkData.description || "");
+  const [selectedIcon, setSelectedIcon] = useState<IconType | undefined>(linkData.icon);
 
   // Update local state when linkData changes
   useState(() => {
     setTitle(linkData.title);
     setUrl(linkData.url);
     setDescription(linkData.description || "");
+    setSelectedIcon(linkData.icon);
   });
 
   const handleEdit = () => {
@@ -42,6 +47,7 @@ export const EditLinkDialog = ({ open, onOpenChange, onEdit, linkData, categoryT
         title: title.trim(),
         url: url.trim(),
         description: description.trim() || undefined,
+        icon: selectedIcon,
       });
       onOpenChange(false);
     }
@@ -88,6 +94,27 @@ export const EditLinkDialog = ({ open, onOpenChange, onEdit, linkData, categoryT
               maxLength={200}
               rows={3}
             />
+          </div>
+          <div className="grid gap-2">
+            <Label>Ikona (volitelné)</Label>
+            <div className="grid grid-cols-5 gap-2">
+              {iconOptions.map(({ value, Icon, label }) => (
+                <Button
+                  key={value}
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "h-12 w-12",
+                    selectedIcon === value && "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => setSelectedIcon(selectedIcon === value ? undefined : value)}
+                  title={label}
+                >
+                  <Icon className="h-5 w-5" />
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
         <DialogFooter>
