@@ -12,6 +12,7 @@ import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDial
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
+import { EditTabDialog } from "@/components/EditTabDialog";
 import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -211,14 +212,16 @@ const Index = () => {
   const [shareEnabled, setShareEnabled] = useState(false);
   
   // Tabs state - mockdata for demonstration
-  const [tabs, setTabs] = useState([
-    { id: "tab-1", name: "IP" },
-    { id: "tab-2", name: "Kultura" },
-    { id: "tab-3", name: "Práce" },
+  const [tabs, setTabs] = useState<Array<{ id: string; name: string; color: ColorValue }>>([
+    { id: "tab-1", name: "IP", color: "blue" },
+    { id: "tab-2", name: "Kultura", color: "purple" },
+    { id: "tab-3", name: "Práce", color: "green" },
   ]);
   const [activeTab, setActiveTab] = useState("tab-1");
   const [newTabName, setNewTabName] = useState("");
   const [isAddingTab, setIsAddingTab] = useState(false);
+  const [editTabDialogOpen, setEditTabDialogOpen] = useState(false);
+  const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
   
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -880,63 +883,84 @@ const Index = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <TabsList className="justify-start">
-              {tabs.map((tab) => (
-                <div key={tab.id} className="relative group flex items-center">
-                  <TabsTrigger value={tab.id} className="pr-8">
-                    {tab.name}
-                  </TabsTrigger>
-                  {editMode && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreVertical className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            const newName = prompt("Nový název záložky:", tab.name);
-                            if (newName && newName.trim()) {
-                              setTabs(tabs.map(t => t.id === tab.id ? { ...t, name: newName.trim() } : t));
-                              toast({
-                                title: "Záložka upravena",
-                                description: `Záložka přejmenována na "${newName.trim()}".`,
-                              });
-                            }
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Upravit záložku
-                        </DropdownMenuItem>
-                        {tabs.length > 1 && (
+              {tabs.map((tab) => {
+                const colorClasses: Record<ColorValue, string> = {
+                  blue: "bg-category-blue text-category-blue-foreground data-[state=active]:bg-category-blue data-[state=active]:text-category-blue-foreground",
+                  green: "bg-category-green text-category-green-foreground data-[state=active]:bg-category-green data-[state=active]:text-category-green-foreground",
+                  orange: "bg-category-orange text-category-orange-foreground data-[state=active]:bg-category-orange data-[state=active]:text-category-orange-foreground",
+                  purple: "bg-category-purple text-category-purple-foreground data-[state=active]:bg-category-purple data-[state=active]:text-category-purple-foreground",
+                  red: "bg-category-red text-category-red-foreground data-[state=active]:bg-category-red data-[state=active]:text-category-red-foreground",
+                  cyan: "bg-category-cyan text-category-cyan-foreground data-[state=active]:bg-category-cyan data-[state=active]:text-category-cyan-foreground",
+                  pink: "bg-category-pink text-category-pink-foreground data-[state=active]:bg-category-pink data-[state=active]:text-category-pink-foreground",
+                  yellow: "bg-category-yellow text-category-yellow-foreground data-[state=active]:bg-category-yellow data-[state=active]:text-category-yellow-foreground",
+                  indigo: "bg-category-indigo text-category-indigo-foreground data-[state=active]:bg-category-indigo data-[state=active]:text-category-indigo-foreground",
+                  teal: "bg-category-teal text-category-teal-foreground data-[state=active]:bg-category-teal data-[state=active]:text-category-teal-foreground",
+                  amber: "bg-category-amber text-category-amber-foreground data-[state=active]:bg-category-amber data-[state=active]:text-category-amber-foreground",
+                  lime: "bg-category-lime text-category-lime-foreground data-[state=active]:bg-category-lime data-[state=active]:text-category-lime-foreground",
+                  emerald: "bg-category-emerald text-category-emerald-foreground data-[state=active]:bg-category-emerald data-[state=active]:text-category-emerald-foreground",
+                  brown: "bg-category-brown text-category-brown-foreground data-[state=active]:bg-category-brown data-[state=active]:text-category-brown-foreground",
+                  gray: "bg-category-gray text-category-gray-foreground data-[state=active]:bg-category-gray data-[state=active]:text-category-gray-foreground",
+                  slate: "bg-category-slate text-category-slate-foreground data-[state=active]:bg-category-slate data-[state=active]:text-category-slate-foreground",
+                  zinc: "bg-category-zinc text-category-zinc-foreground data-[state=active]:bg-category-zinc data-[state=active]:text-category-zinc-foreground",
+                  stone: "bg-category-stone text-category-stone-foreground data-[state=active]:bg-category-stone data-[state=active]:text-category-stone-foreground",
+                  black: "bg-category-black text-category-black-foreground data-[state=active]:bg-category-black data-[state=active]:text-category-black-foreground",
+                };
+                
+                return (
+                  <div key={tab.id} className="relative group flex items-center">
+                    <TabsTrigger 
+                      value={tab.id} 
+                      className={`pr-8 font-semibold shadow-md hover:shadow-lg transition-all ${colorClasses[tab.color]}`}
+                    >
+                      {tab.name}
+                    </TabsTrigger>
+                    {editMode && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
                           <DropdownMenuItem 
                             onClick={() => {
-                              setTabs(tabs.filter(t => t.id !== tab.id));
-                              if (activeTab === tab.id) {
-                                setActiveTab(tabs[0].id);
-                              }
-                              toast({
-                                title: "Záložka smazána",
-                                description: `Záložka "${tab.name}" byla odstraněna.`,
-                              });
+                              setSelectedTabId(tab.id);
+                              setEditTabDialogOpen(true);
                             }}
-                            className="cursor-pointer text-destructive focus:text-destructive"
+                            className="cursor-pointer"
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Smazat záložku
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Upravit záložku
                           </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              ))}
+                          {tabs.length > 1 && (
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setTabs(tabs.filter(t => t.id !== tab.id));
+                                if (activeTab === tab.id) {
+                                  setActiveTab(tabs[0].id);
+                                }
+                                toast({
+                                  title: "Záložka smazána",
+                                  description: `Záložka "${tab.name}" byla odstraněna.`,
+                                });
+                              }}
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Smazat záložku
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
+                );
+              })}
             </TabsList>
             
             {editMode && (
@@ -951,9 +975,12 @@ const Index = () => {
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && newTabName.trim()) {
+                        const availableColors: ColorValue[] = ["blue", "green", "orange", "purple", "red", "cyan", "pink", "yellow", "indigo", "teal"];
+                        const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)];
                         const newTab = {
                           id: `tab-${Date.now()}`,
                           name: newTabName.trim(),
+                          color: randomColor,
                         };
                         setTabs([...tabs, newTab]);
                         setNewTabName("");
@@ -1097,6 +1124,22 @@ const Index = () => {
             setShareEnabled(data.share_enabled || false);
           }
         }}
+      />
+
+      <EditTabDialog
+        open={editTabDialogOpen}
+        onOpenChange={setEditTabDialogOpen}
+        onSubmit={(data) => {
+          if (selectedTabId) {
+            setTabs(tabs.map(t => t.id === selectedTabId ? { ...t, name: data.name, color: data.color } : t));
+            toast({
+              title: "Záložka upravena",
+              description: `Záložka byla úspěšně aktualizována.`,
+            });
+          }
+        }}
+        initialName={tabs.find(t => t.id === selectedTabId)?.name || ""}
+        initialColor={tabs.find(t => t.id === selectedTabId)?.color || "blue"}
       />
 
       <footer className="bg-card border-t border-border mt-auto">
