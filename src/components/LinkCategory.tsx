@@ -135,7 +135,7 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               ) : (
                 <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
               )}
-              <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors text-left">
+              <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors text-left truncate">
                 {link.title}
               </h3>
             </a>
@@ -285,7 +285,7 @@ export const LinkCategory = ({
                     ) : (
                       <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
                     )}
-                    <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors text-left">
+                    <h3 className="font-semibold text-foreground group-hover/anchor:text-accent transition-colors text-left truncate">
                       {link.title}
                     </h3>
                   </a>
