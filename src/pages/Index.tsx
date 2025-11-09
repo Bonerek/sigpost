@@ -965,7 +965,7 @@ const Index = () => {
 
       <footer className="bg-card border-t border-border mt-auto">
         <div className="px-4 py-6 text-center text-muted-foreground">
-          <p>Vytvořeno s pomocí Lovable</p>
+          <p>Hey hou!</p>
         </div>
       </footer>
     </div>
