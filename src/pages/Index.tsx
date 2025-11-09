@@ -879,7 +879,7 @@ const Index = () => {
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <TabsList className="flex-1">
+            <TabsList className="justify-start">
               {tabs.map((tab) => (
                 <div key={tab.id} className="relative group">
                   <TabsTrigger value={tab.id} className="pr-8">
