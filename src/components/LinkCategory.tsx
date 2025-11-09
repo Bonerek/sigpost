@@ -1,4 +1,10 @@
-import { ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Pencil, Monitor, Laptop, DollarSign, ShoppingCart, Mail, FileText, Calendar, Settings, Home, Globe } from "lucide-react";
+import { 
+  ExternalLink, MoreVertical, Plus, Palette, GripVertical, Trash2, Pencil, 
+  Monitor, Laptop, DollarSign, ShoppingCart, Mail, FileText, Calendar, Settings, Home, Globe,
+  Github, Code, Book, Terminal, Users, Zap, Star, Briefcase, Lightbulb, Camera, Bookmark,
+  Database, Folder, Rocket, Image, Heart, Video, Download, CheckSquare, Trophy, Flag,
+  TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Youtube
+} from "lucide-react";
 import type { IconType } from "./AddLinkDialog";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -47,6 +53,35 @@ const iconMap = {
   settings: Settings,
   home: Home,
   globe: Globe,
+  github: Github,
+  code: Code,
+  book: Book,
+  terminal: Terminal,
+  users: Users,
+  zap: Zap,
+  star: Star,
+  briefcase: Briefcase,
+  lightbulb: Lightbulb,
+  camera: Camera,
+  bookmark: Bookmark,
+  database: Database,
+  folder: Folder,
+  rocket: Rocket,
+  image: Image,
+  heart: Heart,
+  video: Video,
+  download: Download,
+  "check-square": CheckSquare,
+  trophy: Trophy,
+  flag: Flag,
+  "trending-up": TrendingUp,
+  gift: Gift,
+  linkedin: Linkedin,
+  twitter: Twitter,
+  instagram: Instagram,
+  facebook: Facebook,
+  youtube: Youtube,
+  "shopping-cart": ShoppingCart,
 };
 
 interface LinkCategoryProps {
