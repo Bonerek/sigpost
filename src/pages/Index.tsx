@@ -11,7 +11,8 @@ import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield } from "lucide-react";
+import { ShareDialog } from "@/components/ShareDialog";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -198,12 +199,15 @@ const Index = () => {
   const [customTextDialogOpen, setCustomTextDialogOpen] = useState(false);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
   const [editMode, setEditMode] = useState(false);
   const [customText, setCustomText] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [shareEnabled, setShareEnabled] = useState(false);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -271,6 +275,8 @@ const Index = () => {
       } else if (settingsData) {
         setColumns(settingsData.column_count as 3 | 4 | 5);
         setCustomText(settingsData.custom_text || "");
+        setShareToken(settingsData.share_token);
+        setShareEnabled(settingsData.share_enabled || false);
       }
       
       // Fetch categories
@@ -813,24 +819,9 @@ const Index = () => {
                     Systémový
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => handleColumnsChange(3)}>
-                    <Grid3x3 className="mr-2 h-4 w-4" />
-                    3 sloupce
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleColumnsChange(4)}>
-                    <Grid3x3 className="mr-2 h-4 w-4" />
-                    4 sloupce
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleColumnsChange(5)}>
-                    <Grid3x3 className="mr-2 h-4 w-4" />
-                    5 sloupců
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Vlastní nastavení</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setCustomTextDialogOpen(true)}>
-                    <Type className="mr-2 h-4 w-4" />
-                    Název systému
+                  <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Sdílet stránku
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
@@ -934,9 +925,28 @@ const Index = () => {
         onAdd={handleAddCategory}
       />
 
-      <InfoDialog
-        open={infoDialogOpen}
+      <InfoDialog 
+        open={infoDialogOpen} 
         onOpenChange={setInfoDialogOpen}
+      />
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        shareToken={shareToken}
+        shareEnabled={shareEnabled}
+        onUpdate={async () => {
+          if (!user) return;
+          const { data } = await supabase
+            .from("user_settings")
+            .select("share_token, share_enabled")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (data) {
+            setShareToken(data.share_token);
+            setShareEnabled(data.share_enabled || false);
+          }
+        }}
       />
 
       <footer className="bg-card border-t border-border mt-auto">

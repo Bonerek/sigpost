@@ -174,6 +174,8 @@ export type Database = {
           created_at: string
           custom_text: string | null
           id: string
+          share_enabled: boolean | null
+          share_token: string | null
           updated_at: string
           user_id: string
         }
@@ -182,6 +184,8 @@ export type Database = {
           created_at?: string
           custom_text?: string | null
           id?: string
+          share_enabled?: boolean | null
+          share_token?: string | null
           updated_at?: string
           user_id: string
         }
@@ -190,6 +194,8 @@ export type Database = {
           created_at?: string
           custom_text?: string | null
           id?: string
+          share_enabled?: boolean | null
+          share_token?: string | null
           updated_at?: string
           user_id?: string
         }
