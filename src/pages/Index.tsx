@@ -863,7 +863,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-12">
+      <main className="flex-1 px-4 py-4">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

@@ -209,7 +209,7 @@ export default function Share() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-12">
+      <main className="flex-1 px-4 py-4">
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className={`grid ${getGridCols()} gap-6`}>
             {columnCategories.map((columnCats, columnIndex) => (
