@@ -37,6 +37,8 @@ export default function Admin() {
   const [editDescription, setEditDescription] = useState("");
   const [changingPasswordUser, setChangingPasswordUser] = useState<UserWithRole | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [deletingUser, setDeletingUser] = useState<UserWithRole | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -192,11 +194,50 @@ export default function Admin() {
       return;
     }
 
-    // Delete user - this requires admin API via edge function
-    toast({
-      title: "Informace",
-      description: "Mazání uživatelů bude implementováno v další verzi",
+    // Open confirmation dialog
+    setDeletingUser(user);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingUser) return;
+
+    setIsDeleting(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Chyba",
+        description: "Nejste přihlášeni",
+        variant: "destructive",
+      });
+      setIsDeleting(false);
+      return;
+    }
+
+    const { error } = await supabase.functions.invoke('delete-user', {
+      body: {
+        userId: deletingUser.user_id,
+      },
     });
+
+    setIsDeleting(false);
+
+    if (error) {
+      toast({
+        title: "Chyba při mazání",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Úspěch",
+      description: "Uživatel a všechna jeho data byla smazána",
+    });
+
+    setDeletingUser(null);
+    loadData();
   };
 
   const handleEditDescription = (user: UserWithRole) => {
@@ -565,6 +606,48 @@ export default function Admin() {
                 Zrušit
               </Button>
               <Button onClick={handleSavePassword}>Změnit heslo</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete User Confirmation Dialog */}
+        <Dialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-destructive">Smazat uživatelský účet?</DialogTitle>
+              <DialogDescription className="space-y-2 pt-4">
+                <p className="font-semibold">
+                  Opravdu chcete smazat účet uživatele <span className="text-foreground">{deletingUser?.email}</span>?
+                </p>
+                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4 mt-4">
+                  <p className="text-sm font-medium text-destructive mb-2">⚠️ Varování:</p>
+                  <p className="text-sm text-muted-foreground">
+                    Tato akce je <strong>nevratná</strong> a smaže:
+                  </p>
+                  <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                    <li>Uživatelský účet</li>
+                    <li>Všechny kategorie</li>
+                    <li>Všechny odkazy ve všech kategoriích</li>
+                    <li>Uživatelské nastavení</li>
+                  </ul>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setDeletingUser(null)}
+                disabled={isDeleting}
+              >
+                Zrušit
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Mazání..." : "Smazat vše"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
