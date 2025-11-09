@@ -3,7 +3,7 @@ import {
   Monitor, Laptop, DollarSign, ShoppingCart, Mail, FileText, Calendar, Settings, Home, Globe,
   Github, Code, Book, Terminal, Users, Zap, Star, Briefcase, Lightbulb, Camera, Bookmark,
   Database, Folder, Rocket, Image, Heart, Video, Download, CheckSquare, Trophy, Flag,
-  TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Youtube
+  TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Music, Server
 } from "lucide-react";
 import type { IconType } from "./AddLinkDialog";
 import { Card } from "@/components/ui/card";
@@ -42,7 +42,7 @@ interface Link {
   icon?: IconType;
 }
 
-const iconMap = {
+const iconMap: Record<string, React.ComponentType<any>> = {
   monitor: Monitor,
   laptop: Laptop,
   dollar: DollarSign,
@@ -80,8 +80,10 @@ const iconMap = {
   twitter: Twitter,
   instagram: Instagram,
   facebook: Facebook,
-  youtube: Youtube,
+  youtube: Video, // YouTube ikona neexistuje v lucide-react, použijeme Video
   "shopping-cart": ShoppingCart,
+  music: Music,
+  server: Server,
 };
 
 interface LinkCategoryProps {
@@ -315,7 +317,11 @@ export const LinkCategory = ({
                     {link.icon ? (
                       (() => {
                         const IconComponent = iconMap[link.icon];
-                        return <IconComponent className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />;
+                        return IconComponent ? (
+                          <IconComponent className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+                        ) : (
+                          <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
+                        );
                       })()
                     ) : (
                       <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/anchor:text-foreground transition-colors flex-shrink-0" />
