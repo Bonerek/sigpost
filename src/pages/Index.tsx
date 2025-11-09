@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from "@supabase/supabase-js";
 import { LinkCategory } from "@/components/LinkCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
@@ -8,7 +11,7 @@ import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -183,172 +186,10 @@ const DroppableColumn = ({
 };
 
 const Index = () => {
-  const initialCategories: CategoryData[] = [
-    {
-      id: "tech",
-      title: "Technologie",
-      color: "blue" as const,
-      columnIndex: 0,
-      links: [
-        {
-          id: "github",
-          title: "GitHub",
-          url: "https://github.com",
-          description: "Platforma pro vývoj a sdílení kódu",
-        },
-        {
-          id: "stackoverflow",
-          title: "Stack Overflow",
-          url: "https://stackoverflow.com",
-          description: "Komunita pro programátory",
-        },
-        {
-          id: "mdn",
-          title: "MDN Web Docs",
-          url: "https://developer.mozilla.org",
-          description: "Dokumentace pro webové technologie",
-        },
-      ],
-    },
-    {
-      id: "news",
-      title: "Zprávy",
-      color: "orange" as const,
-      columnIndex: 1,
-      links: [
-        {
-          id: "idnes",
-          title: "iDNES.cz",
-          url: "https://www.idnes.cz",
-          description: "Zpravodajský portál",
-        },
-        {
-          id: "novinky",
-          title: "Novinky.cz",
-          url: "https://www.novinky.cz",
-          description: "Aktuální zprávy ze světa i domova",
-        },
-        {
-          id: "ct24",
-          title: "ČT24",
-          url: "https://ct24.ceskatelevize.cz",
-          description: "Zpravodajství České televize",
-        },
-      ],
-    },
-    {
-      id: "social",
-      title: "Sociální sítě",
-      color: "purple" as const,
-      columnIndex: 2,
-      links: [
-        {
-          id: "facebook",
-          title: "Facebook",
-          url: "https://www.facebook.com",
-          description: "Největší sociální síť",
-        },
-        {
-          id: "twitter",
-          title: "Twitter / X",
-          url: "https://twitter.com",
-          description: "Mikroblogovací platforma",
-        },
-        {
-          id: "linkedin",
-          title: "LinkedIn",
-          url: "https://www.linkedin.com",
-          description: "Profesní síť",
-        },
-        {
-          id: "instagram",
-          title: "Instagram",
-          url: "https://www.instagram.com",
-          description: "Sdílení fotek a videí",
-        },
-      ],
-    },
-    {
-      id: "tools",
-      title: "Nástroje",
-      color: "green" as const,
-      columnIndex: 0,
-      links: [
-        {
-          id: "gdrive",
-          title: "Google Drive",
-          url: "https://drive.google.com",
-          description: "Cloudové úložiště",
-        },
-        {
-          id: "notion",
-          title: "Notion",
-          url: "https://www.notion.so",
-          description: "Nástroj pro produktivitu",
-        },
-        {
-          id: "figma",
-          title: "Figma",
-          url: "https://www.figma.com",
-          description: "Nástroj pro design",
-        },
-      ],
-    },
-    {
-      id: "entertainment",
-      title: "Zábava",
-      color: "red" as const,
-      columnIndex: 1,
-      links: [
-        {
-          id: "youtube",
-          title: "YouTube",
-          url: "https://www.youtube.com",
-          description: "Platforma pro sdílení videí",
-        },
-        {
-          id: "netflix",
-          title: "Netflix",
-          url: "https://www.netflix.com",
-          description: "Streamovací služba",
-        },
-        {
-          id: "spotify",
-          title: "Spotify",
-          url: "https://www.spotify.com",
-          description: "Hudební streaming",
-        },
-      ],
-    },
-    {
-      id: "eshops",
-      title: "E-shopy",
-      color: "cyan" as const,
-      columnIndex: 2,
-      links: [
-        {
-          id: "alza",
-          title: "Alza.cz",
-          url: "https://www.alza.cz",
-          description: "Elektronika a gadgety",
-        },
-        {
-          id: "mall",
-          title: "Mall.cz",
-          url: "https://www.mall.cz",
-          description: "Největší český e-shop",
-        },
-        {
-          id: "amazon",
-          title: "Amazon",
-          url: "https://www.amazon.com",
-          description: "Mezinárodní e-shop",
-        },
-      ],
-    },
-  ];
-
-  const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [addLinkDialogOpen, setAddLinkDialogOpen] = useState(false);
   const [editLinkDialogOpen, setEditLinkDialogOpen] = useState(false);
   const [deleteLinkDialogOpen, setDeleteLinkDialogOpen] = useState(false);
@@ -364,19 +205,132 @@ const Index = () => {
   const [customText, setCustomText] = useState("");
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
   const selectedLink = selectedCategory?.links.find((link) => link.id === selectedLinkId);
+
+  // Auth check and session management
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (!session) {
+        navigate("/auth");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  // Fetch categories and links from database
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      
+      // Fetch categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("position");
+
+      if (categoriesError) {
+        toast({
+          title: "Chyba při načítání kategorií",
+          description: categoriesError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Fetch all links
+      const categoryIds = categoriesData?.map(c => c.id) || [];
+      const { data: linksData, error: linksError } = await supabase
+        .from("links")
+        .select("*")
+        .in("category_id", categoryIds)
+        .order("position");
+
+      if (linksError) {
+        toast({
+          title: "Chyba při načítání odkazů",
+          description: linksError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Combine categories with their links
+      const categoriesWithLinks: CategoryData[] = (categoriesData || []).map(cat => ({
+        id: cat.id,
+        title: cat.title,
+        color: cat.color as ColorValue,
+        columnIndex: cat.column_index,
+        links: (linksData || [])
+          .filter(link => link.category_id === cat.id)
+          .map(link => ({
+            id: link.id,
+            title: link.title,
+            url: link.url,
+            description: link.description || undefined,
+            icon: link.icon || undefined,
+          })),
+      }));
+
+      setCategories(categoriesWithLinks);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [user, toast]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
 
   const handleDeleteCategory = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
     setDeleteCategoryDialogOpen(true);
   };
 
-  const handleDeleteCategoryConfirm = () => {
+  const handleDeleteCategoryConfirm = async () => {
     if (selectedCategoryId) {
       const category = categories.find((cat) => cat.id === selectedCategoryId);
       
+      const { error } = await supabase
+        .from("categories")
+        .delete()
+        .eq("id", selectedCategoryId);
+
+      if (error) {
+        toast({
+          title: "Chyba při mazání kategorie",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       setCategories((prevCategories) =>
         prevCategories.filter((cat) => cat.id !== selectedCategoryId)
       );
@@ -395,7 +349,7 @@ const Index = () => {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) return;
@@ -406,6 +360,21 @@ const Index = () => {
     // If dropped on a column droppable
     if (overId.startsWith('column-')) {
       const targetColumnIndex = parseInt(overId.replace('column-', ''));
+      
+      const { error } = await supabase
+        .from("categories")
+        .update({ column_index: targetColumnIndex })
+        .eq("id", activeId);
+
+      if (error) {
+        toast({
+          title: "Chyba při přesouvání kategorie",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       setCategories((items) => 
         items.map((item) => 
           item.id === activeId ? { ...item, columnIndex: targetColumnIndex } : item
@@ -425,9 +394,31 @@ const Index = () => {
         
         // Update the active item's column to match the over item's column
         const reordered = arrayMove(items, oldIndex, newIndex);
-        return reordered.map((item) => 
-          item.id === activeId ? { ...item, columnIndex: overItem.columnIndex } : item
+        const updated = reordered.map((item, index) => 
+          item.id === activeId 
+            ? { ...item, columnIndex: overItem.columnIndex } 
+            : item
         );
+
+        // Update position in database
+        supabase
+          .from("categories")
+          .update({ 
+            column_index: overItem.columnIndex,
+            position: newIndex 
+          })
+          .eq("id", activeId)
+          .then(({ error }) => {
+            if (error) {
+              toast({
+                title: "Chyba při přesouvání kategorie",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
+          });
+
+        return updated;
       });
     }
   };
@@ -442,12 +433,37 @@ const Index = () => {
     setColorPickerDialogOpen(true);
   };
 
-  const handleAddLinkSubmit = (link: { title: string; url: string; description?: string }) => {
+  const handleAddLinkSubmit = async (link: { title: string; url: string; description?: string }) => {
     if (selectedCategoryId) {
+      const { data, error } = await supabase
+        .from("links")
+        .insert({
+          category_id: selectedCategoryId,
+          title: link.title,
+          url: link.url,
+          description: link.description || null,
+          position: selectedCategory?.links.length || 0,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Chyba při přidávání odkazu",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const newLink = {
-        ...link,
-        id: `${selectedCategoryId}-${Date.now()}`,
+        id: data.id,
+        title: data.title,
+        url: data.url,
+        description: data.description || undefined,
+        icon: data.icon || undefined,
       };
+
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
           cat.id === selectedCategoryId
@@ -468,8 +484,26 @@ const Index = () => {
     setEditLinkDialogOpen(true);
   };
 
-  const handleEditLinkSubmit = (link: { title: string; url: string; description?: string }) => {
+  const handleEditLinkSubmit = async (link: { title: string; url: string; description?: string }) => {
     if (selectedCategoryId && selectedLinkId) {
+      const { error } = await supabase
+        .from("links")
+        .update({
+          title: link.title,
+          url: link.url,
+          description: link.description || null,
+        })
+        .eq("id", selectedLinkId);
+
+      if (error) {
+        toast({
+          title: "Chyba při upravování odkazu",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
           cat.id === selectedCategoryId
@@ -495,12 +529,26 @@ const Index = () => {
     setDeleteLinkDialogOpen(true);
   };
 
-  const handleDeleteLinkConfirm = () => {
+  const handleDeleteLinkConfirm = async () => {
     if (selectedCategoryId && selectedLinkId) {
       const link = categories
         .find((cat) => cat.id === selectedCategoryId)
         ?.links.find((l) => l.id === selectedLinkId);
       
+      const { error } = await supabase
+        .from("links")
+        .delete()
+        .eq("id", selectedLinkId);
+
+      if (error) {
+        toast({
+          title: "Chyba při mazání odkazu",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
           cat.id === selectedCategoryId
@@ -518,7 +566,17 @@ const Index = () => {
     }
   };
 
-  const handleReorderLinks = (categoryId: string, newLinks: Array<{id: string; title: string; url: string; description?: string}>) => {
+  const handleReorderLinks = async (categoryId: string, newLinks: Array<{id: string; title: string; url: string; description?: string}>) => {
+    // Update positions in database
+    const updates = newLinks.map((link, index) =>
+      supabase
+        .from("links")
+        .update({ position: index })
+        .eq("id", link.id)
+    );
+
+    await Promise.all(updates);
+
     setCategories((prevCategories) =>
       prevCategories.map((cat) =>
         cat.id === categoryId ? { ...cat, links: newLinks } : cat
@@ -526,8 +584,22 @@ const Index = () => {
     );
   };
 
-  const handleColorChange = (color: ColorValue, title: string) => {
+  const handleColorChange = async (color: ColorValue, title: string) => {
     if (selectedCategoryId) {
+      const { error } = await supabase
+        .from("categories")
+        .update({ color, title })
+        .eq("id", selectedCategoryId);
+
+      if (error) {
+        toast({
+          title: "Chyba při upravování kategorie",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
           cat.id === selectedCategoryId ? { ...cat, color, title } : cat
@@ -540,12 +612,35 @@ const Index = () => {
     }
   };
 
-  const handleAddCategory = (category: { title: string; color: ColorValue }) => {
+  const handleAddCategory = async (category: { title: string; color: ColorValue }) => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("categories")
+      .insert({
+        user_id: user.id,
+        title: category.title,
+        color: category.color,
+        column_index: 0,
+        position: categories.length,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Chyba při přidávání kategorie",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newCategory: CategoryData = {
-      id: `category-${Date.now()}`,
-      title: category.title,
-      color: category.color,
-      columnIndex: 0,
+      id: data.id,
+      title: data.title,
+      color: data.color as ColorValue,
+      columnIndex: data.column_index,
       links: [],
     };
     setCategories((prevCategories) => [...prevCategories, newCategory]);
@@ -564,6 +659,17 @@ const Index = () => {
     if (columns === 4) return "grid-cols-1 md:grid-cols-4";
     return "grid-cols-1 md:grid-cols-5";
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Compass className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Načítání...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -644,6 +750,11 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
                     <Info className="mr-2 h-4 w-4" />
                     Info
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Odhlásit se
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
