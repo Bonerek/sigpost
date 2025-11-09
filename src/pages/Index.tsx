@@ -819,6 +819,20 @@ const Index = () => {
                     Systémový
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => handleColumnsChange(3)}>
+                    <Grid3x3 className="mr-2 h-4 w-4" />
+                    3 sloupce
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleColumnsChange(4)}>
+                    <Grid3x3 className="mr-2 h-4 w-4" />
+                    4 sloupce
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleColumnsChange(5)}>
+                    <Grid3x3 className="mr-2 h-4 w-4" />
+                    5 sloupců
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Sdílet stránku
