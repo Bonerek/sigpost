@@ -18,6 +18,7 @@ interface UserWithRole {
   description: string | null;
   created_at: string;
   is_admin: boolean;
+  is_active: boolean;
 }
 
 export default function Admin() {
@@ -84,7 +85,8 @@ export default function Admin() {
         user_id,
         email,
         description,
-        created_at
+        created_at,
+        is_active
       `);
 
     if (profilesError) {
@@ -288,6 +290,50 @@ export default function Admin() {
     setNewPassword("");
   };
 
+  const handleToggleUserAccess = async (user: UserWithRole) => {
+    if (user.email === 'admin@admin.local' && user.is_active) {
+      toast({
+        title: "Chyba",
+        description: "Nelze zakázat hlavní administrátorský účet",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Chyba",
+        description: "Nejste přihlášeni",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase.functions.invoke('toggle-user-access', {
+      body: {
+        userId: user.user_id,
+        isActive: !user.is_active,
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Chyba",
+        description: "Nepodařilo se změnit přístup: " + error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Úspěch",
+      description: user.is_active ? "Přístup byl zakázán" : "Přístup byl povolen",
+    });
+
+    loadData();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -386,6 +432,7 @@ export default function Admin() {
                 <TableHead>Email</TableHead>
                 <TableHead>Popis</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Stav</TableHead>
                 <TableHead className="text-right">Akce</TableHead>
               </TableRow>
             </TableHeader>
@@ -408,6 +455,18 @@ export default function Admin() {
                         Uživatel
                       </span>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={user.is_active}
+                        onCheckedChange={() => handleToggleUserAccess(user)}
+                        disabled={user.email === 'admin@admin.local'}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {user.is_active ? 'Aktivní' : 'Zakázán'}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

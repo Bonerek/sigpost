@@ -97,6 +97,7 @@ export type Database = {
           description: string | null
           email: string
           id: string
+          is_active: boolean
           updated_at: string
           user_id: string
         }
@@ -105,6 +106,7 @@ export type Database = {
           description?: string | null
           email: string
           id?: string
+          is_active?: boolean
           updated_at?: string
           user_id: string
         }
@@ -113,6 +115,7 @@ export type Database = {
           description?: string | null
           email?: string
           id?: string
+          is_active?: boolean
           updated_at?: string
           user_id?: string
         }
