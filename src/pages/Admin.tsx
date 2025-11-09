@@ -31,6 +31,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserDescription, setNewUserDescription] = useState("");
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
@@ -162,17 +163,59 @@ export default function Admin() {
       return;
     }
 
-    // Create user using admin API - note: this requires service role key in edge function
-    // For now, we'll show a message that this needs to be implemented via edge function
+    if (newUserPassword.length < 6) {
+      toast({
+        title: "Chyba",
+        description: "Heslo musí mít alespoň 6 znaků",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Chyba",
+        description: "Nejste přihlášeni",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.functions.invoke('create-user', {
+      body: {
+        email: newUserEmail,
+        password: newUserPassword,
+        isAdmin: newUserIsAdmin,
+        description: newUserDescription || null,
+      },
+    });
+
+    setLoading(false);
+
+    if (error) {
+      toast({
+        title: "Chyba při vytváření uživatele",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
-      title: "Informace",
-      description: "Přidání uživatele administrátorem bude implementováno v další verzi. Prozatím použijte samoregistraci.",
+      title: "Úspěch",
+      description: "Uživatel byl úspěšně vytvořen",
     });
 
     setIsAddUserOpen(false);
     setNewUserEmail("");
     setNewUserPassword("");
+    setNewUserDescription("");
     setNewUserIsAdmin(false);
+    loadData();
   };
 
   const handleDeleteUser = async (user: UserWithRole) => {
@@ -446,6 +489,17 @@ export default function Admin() {
                       value={newUserPassword}
                       onChange={(e) => setNewUserPassword(e.target.value)}
                       placeholder="••••••••"
+                      minLength={6}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Popis (volitelné)</Label>
+                    <Input
+                      id="description"
+                      type="text"
+                      value={newUserDescription}
+                      onChange={(e) => setNewUserDescription(e.target.value)}
+                      placeholder="např. Marketing manager"
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -458,10 +512,18 @@ export default function Admin() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddUserOpen(false)}>
+                  <Button variant="outline" onClick={() => {
+                    setIsAddUserOpen(false);
+                    setNewUserEmail("");
+                    setNewUserPassword("");
+                    setNewUserDescription("");
+                    setNewUserIsAdmin(false);
+                  }}>
                     Zrušit
                   </Button>
-                  <Button onClick={handleAddUser}>Přidat</Button>
+                  <Button onClick={handleAddUser} disabled={loading}>
+                    {loading ? "Vytváření..." : "Přidat"}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
