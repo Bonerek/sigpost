@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, UserPlus, ArrowLeft, Edit } from "lucide-react";
+import { Trash2, UserPlus, ArrowLeft, Edit, Key } from "lucide-react";
 
 interface UserWithRole {
   id: string;
@@ -34,6 +34,8 @@ export default function Admin() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
   const [editDescription, setEditDescription] = useState("");
+  const [changingPasswordUser, setChangingPasswordUser] = useState<UserWithRole | null>(null);
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -169,11 +171,20 @@ export default function Admin() {
     setNewUserIsAdmin(false);
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (userId === currentUser?.id) {
+  const handleDeleteUser = async (user: UserWithRole) => {
+    if (user.user_id === currentUser?.id) {
       toast({
         title: "Chyba",
         description: "Nemůžete smazat svůj vlastní účet",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (user.email === 'admin@admin.local') {
+      toast({
+        title: "Chyba",
+        description: "Nelze smazat hlavní administrátorský účet",
         variant: "destructive",
       });
       return;
@@ -216,6 +227,65 @@ export default function Admin() {
     setEditingUser(null);
     setEditDescription("");
     loadData();
+  };
+
+  const handleChangePassword = (user: UserWithRole) => {
+    setChangingPasswordUser(user);
+    setNewPassword("");
+  };
+
+  const handleSavePassword = async () => {
+    if (!changingPasswordUser || !newPassword) {
+      toast({
+        title: "Chyba",
+        description: "Zadejte nové heslo",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Chyba",
+        description: "Heslo musí mít alespoň 6 znaků",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Chyba",
+        description: "Nejste přihlášeni",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase.functions.invoke('change-user-password', {
+      body: {
+        userId: changingPasswordUser.user_id,
+        newPassword: newPassword,
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Chyba",
+        description: "Nepodařilo se změnit heslo: " + error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Úspěch",
+      description: "Heslo bylo změněno",
+    });
+
+    setChangingPasswordUser(null);
+    setNewPassword("");
   };
 
   if (loading) {
@@ -344,15 +414,31 @@ export default function Admin() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => handleChangePassword(user)}
+                        title="Změnit heslo"
+                      >
+                        <Key className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleEditDescription(user)}
+                        title="Upravit popis"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteUser(user.user_id)}
-                        disabled={user.user_id === currentUser?.id}
+                        onClick={() => handleDeleteUser(user)}
+                        disabled={user.user_id === currentUser?.id || user.email === 'admin@admin.local'}
+                        title={
+                          user.user_id === currentUser?.id 
+                            ? "Nemůžete smazat svůj účet" 
+                            : user.email === 'admin@admin.local'
+                            ? "Hlavní admin účet nelze smazat"
+                            : "Smazat uživatele"
+                        }
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -389,6 +475,37 @@ export default function Admin() {
                 Zrušit
               </Button>
               <Button onClick={handleSaveDescription}>Uložit</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Password Dialog */}
+        <Dialog open={!!changingPasswordUser} onOpenChange={(open) => !open && setChangingPasswordUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Změnit heslo</DialogTitle>
+              <DialogDescription>
+                Změnit heslo pro uživatele {changingPasswordUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="new-password">Nové heslo</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Zadejte nové heslo (min. 6 znaků)"
+                  minLength={6}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setChangingPasswordUser(null)}>
+                Zrušit
+              </Button>
+              <Button onClick={handleSavePassword}>Změnit heslo</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
