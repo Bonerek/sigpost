@@ -11,7 +11,7 @@ import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -203,6 +203,7 @@ const Index = () => {
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
   const [editMode, setEditMode] = useState(false);
   const [customText, setCustomText] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -243,6 +244,16 @@ const Index = () => {
 
     const fetchData = async () => {
       setLoading(true);
+      
+      // Check if user is admin
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      setIsAdmin(!!roleData);
       
       // Fetch user settings
       const { data: settingsData, error: settingsError } = await supabase
@@ -826,6 +837,15 @@ const Index = () => {
                     <Info className="mr-2 h-4 w-4" />
                     Info
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate("/admin")}>
+                        <Shield className="mr-2 h-4 w-4" />
+                        Administrace
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
