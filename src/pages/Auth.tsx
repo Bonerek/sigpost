@@ -13,8 +13,31 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const checkRegistrationStatus = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const data = await response.json();
+      setRegistrationEnabled(data.registration_enabled);
+    } catch (error) {
+      console.error('Error checking registration status:', error);
+      setRegistrationEnabled(true); // Default to enabled on error
+    }
+  };
+
+  useState(() => {
+    checkRegistrationStatus();
+  });
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,9 +110,9 @@ const Auth = () => {
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={`grid w-full ${registrationEnabled ? 'grid-cols-2' : 'grid-cols-1'}`}>
             <TabsTrigger value="signin">Přihlášení</TabsTrigger>
-            <TabsTrigger value="signup">Registrace</TabsTrigger>
+            {registrationEnabled && <TabsTrigger value="signup">Registrace</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="signin">
@@ -133,7 +156,7 @@ const Auth = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="signup">
+          {registrationEnabled && <TabsContent value="signup">
             <Card>
               <CardHeader>
                 <CardTitle>Registrace</CardTitle>
@@ -173,7 +196,7 @@ const Auth = () => {
                 </CardFooter>
               </form>
             </Card>
-          </TabsContent>
+          </TabsContent>}
         </Tabs>
       </div>
     </div>
