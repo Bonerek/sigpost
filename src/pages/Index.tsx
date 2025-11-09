@@ -12,10 +12,11 @@ import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDial
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2 } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
@@ -208,6 +209,17 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareEnabled, setShareEnabled] = useState(false);
+  
+  // Tabs state - mockdata for demonstration
+  const [tabs, setTabs] = useState([
+    { id: "tab-1", name: "IP" },
+    { id: "tab-2", name: "Kultura" },
+    { id: "tab-3", name: "Práce" },
+  ]);
+  const [activeTab, setActiveTab] = useState("tab-1");
+  const [newTabName, setNewTabName] = useState("");
+  const [isAddingTab, setIsAddingTab] = useState(false);
+  
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -864,28 +876,120 @@ const Index = () => {
       </header>
 
       <main className="flex-1 px-4 py-4">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <div className={`grid ${getGridCols()} gap-6`}>
-            {Array.from({ length: columns }, (_, colIndex) => (
-              <DroppableColumn
-                key={colIndex}
-                columnIndex={colIndex}
-                categories={getCategoriesByColumn(colIndex)}
-                editMode={editMode}
-                onAddLink={handleAddLink}
-                onChangeColor={handleChangeColor}
-                onReorderLinks={handleReorderLinks}
-                onEditLink={handleEditLink}
-                onDeleteLink={handleDeleteLink}
-                onDeleteCategory={handleDeleteCategory}
-              />
-            ))}
+        {/* Tabs Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TabsList className="flex-1">
+              {tabs.map((tab) => (
+                <div key={tab.id} className="relative group">
+                  <TabsTrigger value={tab.id} className="pr-8">
+                    {tab.name}
+                  </TabsTrigger>
+                  {editMode && tabs.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTabs(tabs.filter(t => t.id !== tab.id));
+                        if (activeTab === tab.id) {
+                          setActiveTab(tabs[0].id);
+                        }
+                        toast({
+                          title: "Záložka smazána",
+                          description: `Záložka "${tab.name}" byla odstraněna.`,
+                        });
+                      }}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
+                    >
+                      <X className="h-3 w-3 text-destructive" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </TabsList>
+            
+            {editMode && (
+              isAddingTab ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTabName}
+                    onChange={(e) => setNewTabName(e.target.value)}
+                    placeholder="Název záložky..."
+                    className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newTabName.trim()) {
+                        const newTab = {
+                          id: `tab-${Date.now()}`,
+                          name: newTabName.trim(),
+                        };
+                        setTabs([...tabs, newTab]);
+                        setNewTabName("");
+                        setIsAddingTab(false);
+                        setActiveTab(newTab.id);
+                        toast({
+                          title: "Záložka přidána",
+                          description: `Záložka "${newTab.name}" byla vytvořena.`,
+                        });
+                      } else if (e.key === 'Escape') {
+                        setIsAddingTab(false);
+                        setNewTabName("");
+                      }
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsAddingTab(false);
+                      setNewTabName("");
+                    }}
+                  >
+                    Zrušit
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsAddingTab(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Přidat záložku
+                </Button>
+              )
+            )}
           </div>
-        </DndContext>
+
+          {/* Tab Content - Categories Grid */}
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id} className="mt-0">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <div className={`grid ${getGridCols()} gap-6`}>
+                  {Array.from({ length: columns }, (_, colIndex) => (
+                    <DroppableColumn
+                      key={colIndex}
+                      columnIndex={colIndex}
+                      categories={getCategoriesByColumn(colIndex)}
+                      editMode={editMode}
+                      onAddLink={handleAddLink}
+                      onChangeColor={handleChangeColor}
+                      onReorderLinks={handleReorderLinks}
+                      onEditLink={handleEditLink}
+                      onDeleteLink={handleDeleteLink}
+                      onDeleteCategory={handleDeleteCategory}
+                    />
+                  ))}
+                </div>
+              </DndContext>
+            </TabsContent>
+          ))}
+        </Tabs>
       </main>
 
       <AddLinkDialog
