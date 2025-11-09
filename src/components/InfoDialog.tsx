@@ -19,14 +19,16 @@ export const InfoDialog = ({ open, onOpenChange }: InfoDialogProps) => {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Info</AlertDialogTitle>
-          <AlertDialogDescription className="text-foreground">
-            If you have any question or request please contact OPS-GS MOI-IT Team.{" "}
-            <a 
-              href="mailto:ops-gs.moi-it@esa.int" 
-              className="text-primary hover:underline"
-            >
-              ops-gs.moi-it@esa.int
-            </a>
+          <AlertDialogDescription className="text-foreground space-y-2">
+            <p>If you have any question or request please contact OPS-GS MOI-IT Team.</p>
+            <p>
+              <a 
+                href="mailto:ops-gs.moi-it@esa.int" 
+                className="text-primary hover:underline break-all"
+              >
+                ops-gs.moi-it@esa.int
+              </a>
+            </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
