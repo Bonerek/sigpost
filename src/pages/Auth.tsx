@@ -64,14 +64,6 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
-      // Assign user role to new user
-      if (data.user) {
-        await supabase.from("user_roles").insert({
-          user_id: data.user.id,
-          role: "user",
-        });
-      }
-      
       toast({
         title: "Registrace úspěšná",
         description: "Byli jste úspěšně zaregistrováni.",
