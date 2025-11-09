@@ -14,8 +14,16 @@ import {
 import { SortableContext } from "@dnd-kit/sortable";
 import { LinkCategory } from "@/components/LinkCategory";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Info, Moon, Sun } from "lucide-react";
+import { Compass, Info, Moon, Sun, Laptop, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import type { IconType } from "@/components/AddLinkDialog";
 import type { ColorValue } from "@/components/ColorPickerDialog";
@@ -134,10 +142,19 @@ export default function Share() {
 
   const activeCategory = categories.find((cat) => cat.id === activeCategoryId);
 
+  const getGridCols = () => {
+    if (columnCount === 3) return "grid-cols-1 md:grid-cols-3";
+    if (columnCount === 4) return "grid-cols-1 md:grid-cols-4";
+    return "grid-cols-1 md:grid-cols-5";
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-foreground">Načítání...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Compass className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Načítání...</p>
+        </div>
       </div>
     );
   }
@@ -147,34 +164,54 @@ export default function Share() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-foreground">{customText}</h1>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => setInfoDialogOpen(true)}>
-                <Info className="h-5 w-5" />
-              </Button>
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="bg-card border-b border-border">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Compass className="w-8 h-8 text-primary" />
+              {customText && (
+                <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
+              )}
+              <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card">
+                  <DropdownMenuLabel>Motiv</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    Světlý
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    Tmavý
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <Laptop className="mr-2 h-4 w-4" />
+                    Systémový
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
+                    <Info className="mr-2 h-4 w-4" />
+                    Info
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 px-4 py-12">
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className={`grid gap-6 grid-cols-1 md:grid-cols-${columnCount}`}>
+          <div className={`grid ${getGridCols()} gap-6`}>
             {columnCategories.map((columnCats, columnIndex) => (
               <div key={columnIndex} className="space-y-6">
                 <SortableContext items={columnCats.map((cat) => cat.id)}>
