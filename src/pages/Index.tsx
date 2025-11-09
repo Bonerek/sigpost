@@ -144,8 +144,8 @@ const DroppableColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className={`flex flex-col gap-6 min-h-[200px] p-4 rounded-lg transition-colors ${
-        isOver && editMode ? 'bg-accent/20 border-2 border-dashed border-primary' : 'bg-transparent'
+      className={`space-y-6 ${
+        isOver && editMode ? 'bg-accent/20 p-4 rounded-lg border-2 border-dashed border-primary' : ''
       }`}
     >
       <SortableContext
