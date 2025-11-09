@@ -113,12 +113,12 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
         <div
           {...attributes}
           {...listeners}
-          className="absolute left-0 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-100 transition-opacity z-10 bg-secondary/80 p-1 rounded"
+          className="absolute left-0 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-100 transition-opacity z-10 bg-secondary/80 p-1 rounded touch-none"
         >
-          <GripVertical className="w-4 h-4 text-muted-foreground" />
+          <GripVertical className="w-4 h-4 text-muted-foreground pointer-events-none" />
         </div>
       )}
-      <div className="flex items-center gap-3 pl-7 pr-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+      <div className={`flex items-center gap-3 pl-7 pr-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors duration-200 ${isDragging ? "pointer-events-none" : ""}`}>
         <Tooltip>
           <TooltipTrigger asChild>
             <a

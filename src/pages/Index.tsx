@@ -86,23 +86,25 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
         <div
           {...attributes}
           {...listeners}
-          className="absolute -top-2 -left-2 z-10 p-2 bg-primary text-primary-foreground rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+          className="absolute -top-2 -left-2 z-10 p-2 bg-primary text-primary-foreground rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-lg touch-none"
         >
-          <GripVertical className="w-5 h-5" />
+          <GripVertical className="w-5 h-5 pointer-events-none" />
         </div>
       )}
-      <LinkCategory
-        title={category.title}
-        color={category.color}
-        links={category.links}
-        onAddLink={onAddLink}
-        onChangeColor={onChangeColor}
-        onReorderLinks={onReorderLinks}
-        onEditLink={onEditLink}
-        onDeleteLink={onDeleteLink}
-        onDeleteCategory={onDeleteCategory}
-        editMode={editMode}
-      />
+      <div className={isDragging ? "pointer-events-none" : ""}>
+        <LinkCategory
+          title={category.title}
+          color={category.color}
+          links={category.links}
+          onAddLink={onAddLink}
+          onChangeColor={onChangeColor}
+          onReorderLinks={onReorderLinks}
+          onEditLink={onEditLink}
+          onDeleteLink={onDeleteLink}
+          onDeleteCategory={onDeleteCategory}
+          editMode={editMode}
+        />
+      </div>
     </div>
   );
 };
