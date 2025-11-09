@@ -9,11 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, UserPlus, ArrowLeft } from "lucide-react";
+import { Trash2, UserPlus, ArrowLeft, Edit } from "lucide-react";
 
 interface UserWithRole {
   id: string;
+  user_id: string;
   email: string;
+  description: string | null;
   created_at: string;
   is_admin: boolean;
 }
@@ -30,6 +32,8 @@ export default function Admin() {
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
+  const [editDescription, setEditDescription] = useState("");
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -70,32 +74,42 @@ export default function Admin() {
   const loadData = async () => {
     setLoading(true);
 
-    // Load users (from auth.users via admin API is not available, so we'll get from user_roles)
+    // Load profiles with roles
+    const { data: profilesData, error: profilesError } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        user_id,
+        email,
+        description,
+        created_at
+      `);
+
+    if (profilesError) {
+      toast({
+        title: "Chyba při načítání uživatelů",
+        description: profilesError.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Load roles
     const { data: rolesData } = await supabase
       .from("user_roles")
       .select("user_id, role");
 
-    // We need to get user emails - we'll create a profiles table approach or use a different method
-    // For now, let's just show user IDs
-    const usersMap = new Map<string, UserWithRole>();
-    
-    rolesData?.forEach((role) => {
-      if (!usersMap.has(role.user_id)) {
-        usersMap.set(role.user_id, {
-          id: role.user_id,
-          email: role.user_id,
-          created_at: "",
-          is_admin: role.role === "admin",
-        });
-      } else {
-        const user = usersMap.get(role.user_id)!;
-        if (role.role === "admin") {
-          user.is_admin = true;
-        }
-      }
-    });
+    // Combine profiles with roles
+    const usersWithRoles = profilesData?.map((profile) => {
+      const userRole = rolesData?.find((r) => r.user_id === profile.user_id);
+      return {
+        ...profile,
+        is_admin: userRole?.role === "admin",
+      };
+    }) || [];
 
-    setUsers(Array.from(usersMap.values()));
+    setUsers(usersWithRoles);
 
     // Load system settings
     const { data: settingsData } = await supabase
@@ -170,6 +184,38 @@ export default function Admin() {
       title: "Informace",
       description: "Mazání uživatelů bude implementováno v další verzi",
     });
+  };
+
+  const handleEditDescription = (user: UserWithRole) => {
+    setEditingUser(user);
+    setEditDescription(user.description || "");
+  };
+
+  const handleSaveDescription = async () => {
+    if (!editingUser) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ description: editDescription })
+      .eq("user_id", editingUser.user_id);
+
+    if (error) {
+      toast({
+        title: "Chyba",
+        description: "Nepodařilo se uložit popis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Uloženo",
+      description: "Popis účtu byl aktualizován",
+    });
+
+    setEditingUser(null);
+    setEditDescription("");
+    loadData();
   };
 
   if (loading) {
@@ -267,7 +313,8 @@ export default function Admin() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID uživatele</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Popis</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead className="text-right">Akce</TableHead>
               </TableRow>
@@ -275,7 +322,12 @@ export default function Admin() {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-mono text-sm">{user.id}</TableCell>
+                  <TableCell className="font-medium">{user.email}</TableCell>
+                  <TableCell className="max-w-xs">
+                    {user.description || (
+                      <span className="text-muted-foreground italic">Bez popisu</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     {user.is_admin ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
@@ -288,20 +340,58 @@ export default function Admin() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteUser(user.id)}
-                      disabled={user.id === currentUser?.id}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditDescription(user)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteUser(user.user_id)}
+                        disabled={user.user_id === currentUser?.id}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+
+        {/* Edit Description Dialog */}
+        <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Upravit popis účtu</DialogTitle>
+              <DialogDescription>
+                Upravte popis pro uživatele {editingUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="description">Popis</Label>
+                <Input
+                  id="description"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Zadejte popis účtu..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingUser(null)}>
+                Zrušit
+              </Button>
+              <Button onClick={handleSaveDescription}>Uložit</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
