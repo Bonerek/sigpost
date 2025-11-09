@@ -878,11 +878,11 @@ const Index = () => {
       <main className="flex-1 px-4 py-4">
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <div className="flex items-start gap-4 mb-4">
-            <TabsList className="h-auto flex-col items-start justify-start p-2 gap-1">
+          <div className="flex items-center gap-2 mb-4">
+            <TabsList className="flex-1">
               {tabs.map((tab) => (
-                <div key={tab.id} className="relative group w-full">
-                  <TabsTrigger value={tab.id} className="w-full justify-start pr-8">
+                <div key={tab.id} className="relative group">
+                  <TabsTrigger value={tab.id} className="pr-8">
                     {tab.name}
                   </TabsTrigger>
                   {editMode && tabs.length > 1 && (
@@ -905,93 +905,90 @@ const Index = () => {
                   )}
                 </div>
               ))}
-              
-              {editMode && (
-                isAddingTab ? (
-                  <div className="flex flex-col gap-2 w-full p-2">
-                    <input
-                      type="text"
-                      value={newTabName}
-                      onChange={(e) => setNewTabName(e.target.value)}
-                      placeholder="Název záložky..."
-                      className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring w-full"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newTabName.trim()) {
-                          const newTab = {
-                            id: `tab-${Date.now()}`,
-                            name: newTabName.trim(),
-                          };
-                          setTabs([...tabs, newTab]);
-                          setNewTabName("");
-                          setIsAddingTab(false);
-                          setActiveTab(newTab.id);
-                          toast({
-                            title: "Záložka přidána",
-                            description: `Záložka "${newTab.name}" byla vytvořena.`,
-                          });
-                        } else if (e.key === 'Escape') {
-                          setIsAddingTab(false);
-                          setNewTabName("");
-                        }
-                      }}
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
+            </TabsList>
+            
+            {editMode && (
+              isAddingTab ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTabName}
+                    onChange={(e) => setNewTabName(e.target.value)}
+                    placeholder="Název záložky..."
+                    className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newTabName.trim()) {
+                        const newTab = {
+                          id: `tab-${Date.now()}`,
+                          name: newTabName.trim(),
+                        };
+                        setTabs([...tabs, newTab]);
+                        setNewTabName("");
+                        setIsAddingTab(false);
+                        setActiveTab(newTab.id);
+                        toast({
+                          title: "Záložka přidána",
+                          description: `Záložka "${newTab.name}" byla vytvořena.`,
+                        });
+                      } else if (e.key === 'Escape') {
                         setIsAddingTab(false);
                         setNewTabName("");
-                      }}
-                      className="w-full"
-                    >
-                      Zrušit
-                    </Button>
-                  </div>
-                ) : (
+                      }
+                    }}
+                  />
                   <Button
                     size="sm"
-                    variant="outline"
-                    onClick={() => setIsAddingTab(true)}
-                    className="gap-2 w-full justify-start"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsAddingTab(false);
+                      setNewTabName("");
+                    }}
                   >
-                    <Plus className="h-4 w-4" />
-                    Přidat záložku
+                    Zrušit
                   </Button>
-                )
-              )}
-            </TabsList>
-
-            {/* Tab Content - Categories Grid */}
-            <div className="flex-1">
-              {tabs.map((tab) => (
-                <TabsContent key={tab.id} value={tab.id} className="mt-0">
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <div className={`grid ${getGridCols()} gap-6`}>
-                      {Array.from({ length: columns }, (_, colIndex) => (
-                        <DroppableColumn
-                          key={colIndex}
-                          columnIndex={colIndex}
-                          categories={getCategoriesByColumn(colIndex)}
-                          editMode={editMode}
-                          onAddLink={handleAddLink}
-                          onChangeColor={handleChangeColor}
-                          onReorderLinks={handleReorderLinks}
-                          onEditLink={handleEditLink}
-                          onDeleteLink={handleDeleteLink}
-                          onDeleteCategory={handleDeleteCategory}
-                        />
-                      ))}
-                    </div>
-                  </DndContext>
-                </TabsContent>
-              ))}
-            </div>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsAddingTab(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Přidat záložku
+                </Button>
+              )
+            )}
           </div>
+
+          {/* Tab Content - Categories Grid */}
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id} className="mt-0">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <div className={`grid ${getGridCols()} gap-6`}>
+                  {Array.from({ length: columns }, (_, colIndex) => (
+                    <DroppableColumn
+                      key={colIndex}
+                      columnIndex={colIndex}
+                      categories={getCategoriesByColumn(colIndex)}
+                      editMode={editMode}
+                      onAddLink={handleAddLink}
+                      onChangeColor={handleChangeColor}
+                      onReorderLinks={handleReorderLinks}
+                      onEditLink={handleEditLink}
+                      onDeleteLink={handleDeleteLink}
+                      onDeleteCategory={handleDeleteCategory}
+                    />
+                  ))}
+                </div>
+              </DndContext>
+            </TabsContent>
+          ))}
         </Tabs>
       </main>
 
