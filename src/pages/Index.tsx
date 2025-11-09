@@ -758,7 +758,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-card border-b border-border">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
@@ -858,7 +858,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="px-4 py-12">
+      <main className="flex-1 px-4 py-12">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -939,7 +939,7 @@ const Index = () => {
         onOpenChange={setInfoDialogOpen}
       />
 
-      <footer className="bg-card border-t border-border mt-16">
+      <footer className="bg-card border-t border-border mt-auto">
         <div className="px-4 py-6 text-center text-muted-foreground">
           <p>Vytvořeno s pomocí Lovable</p>
         </div>
