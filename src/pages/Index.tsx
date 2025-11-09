@@ -7,7 +7,8 @@ import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
 import { CustomTextDialog } from "@/components/CustomTextDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus } from "lucide-react";
+import { InfoDialog } from "@/components/InfoDialog";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -355,6 +356,7 @@ const Index = () => {
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
   const [customTextDialogOpen, setCustomTextDialogOpen] = useState(false);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
@@ -638,6 +640,11 @@ const Index = () => {
                     <Type className="mr-2 h-4 w-4" />
                     Název systému
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
+                    <Info className="mr-2 h-4 w-4" />
+                    Info
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -719,6 +726,11 @@ const Index = () => {
         open={addCategoryDialogOpen}
         onOpenChange={setAddCategoryDialogOpen}
         onAdd={handleAddCategory}
+      />
+
+      <InfoDialog
+        open={infoDialogOpen}
+        onOpenChange={setInfoDialogOpen}
       />
 
       <footer className="bg-card border-t border-border mt-16">
