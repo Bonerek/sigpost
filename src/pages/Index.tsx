@@ -12,7 +12,7 @@ import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDial
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X } from "lucide-react";
+import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -881,27 +881,59 @@ const Index = () => {
           <div className="flex items-center gap-2 mb-4">
             <TabsList className="justify-start">
               {tabs.map((tab) => (
-                <div key={tab.id} className="relative group">
+                <div key={tab.id} className="relative group flex items-center">
                   <TabsTrigger value={tab.id} className="pr-8">
                     {tab.name}
                   </TabsTrigger>
-                  {editMode && tabs.length > 1 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setTabs(tabs.filter(t => t.id !== tab.id));
-                        if (activeTab === tab.id) {
-                          setActiveTab(tabs[0].id);
-                        }
-                        toast({
-                          title: "Záložka smazána",
-                          description: `Záložka "${tab.name}" byla odstraněna.`,
-                        });
-                      }}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
-                    >
-                      <X className="h-3 w-3 text-destructive" />
-                    </button>
+                  {editMode && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            const newName = prompt("Nový název záložky:", tab.name);
+                            if (newName && newName.trim()) {
+                              setTabs(tabs.map(t => t.id === tab.id ? { ...t, name: newName.trim() } : t));
+                              toast({
+                                title: "Záložka upravena",
+                                description: `Záložka přejmenována na "${newName.trim()}".`,
+                              });
+                            }
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Upravit záložku
+                        </DropdownMenuItem>
+                        {tabs.length > 1 && (
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setTabs(tabs.filter(t => t.id !== tab.id));
+                              if (activeTab === tab.id) {
+                                setActiveTab(tabs[0].id);
+                              }
+                              toast({
+                                title: "Záložka smazána",
+                                description: `Záložka "${tab.name}" byla odstraněna.`,
+                              });
+                            }}
+                            className="cursor-pointer text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Smazat záložku
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               ))}
