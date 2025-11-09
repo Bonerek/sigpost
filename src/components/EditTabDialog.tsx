@@ -20,33 +20,26 @@ interface EditTabDialogProps {
   initialColor: ColorValue;
 }
 
-const colors: ColorValue[] = [
-  "blue", "green", "orange", "purple", "red", "cyan", "pink", "yellow",
-  "indigo", "teal", "amber", "lime", "emerald", "brown", "gray", "slate",
-  "zinc", "stone", "black"
+const colors: Array<{ value: ColorValue; label: string; class: string }> = [
+  { value: "blue", label: "Modrá", class: "bg-category-blue" },
+  { value: "indigo", label: "Indigo", class: "bg-category-indigo" },
+  { value: "purple", label: "Fialová", class: "bg-category-purple" },
+  { value: "pink", label: "Růžová", class: "bg-category-pink" },
+  { value: "red", label: "Červená", class: "bg-category-red" },
+  { value: "orange", label: "Oranžová", class: "bg-category-orange" },
+  { value: "amber", label: "Jantarová", class: "bg-category-amber" },
+  { value: "lime", label: "Limetková", class: "bg-category-lime" },
+  { value: "green", label: "Zelená", class: "bg-category-green" },
+  { value: "emerald", label: "Smaragdová", class: "bg-category-emerald" },
+  { value: "teal", label: "Tyrkysově modrá", class: "bg-category-teal" },
+  { value: "cyan", label: "Tyrkysová", class: "bg-category-cyan" },
+  { value: "brown", label: "Hnědá", class: "bg-category-brown" },
+  { value: "gray", label: "Šedá", class: "bg-category-gray" },
+  { value: "slate", label: "Břidlicová", class: "bg-category-slate" },
+  { value: "zinc", label: "Zinková", class: "bg-category-zinc" },
+  { value: "stone", label: "Kamenná", class: "bg-category-stone" },
+  { value: "black", label: "Černá", class: "bg-category-black" },
 ];
-
-const colorClasses: Record<ColorValue, string> = {
-  blue: "bg-category-blue",
-  green: "bg-category-green",
-  orange: "bg-category-orange",
-  purple: "bg-category-purple",
-  red: "bg-category-red",
-  cyan: "bg-category-cyan",
-  pink: "bg-category-pink",
-  yellow: "bg-category-yellow",
-  indigo: "bg-category-indigo",
-  teal: "bg-category-teal",
-  amber: "bg-category-amber",
-  lime: "bg-category-lime",
-  emerald: "bg-category-emerald",
-  brown: "bg-category-brown",
-  gray: "bg-category-gray",
-  slate: "bg-category-slate",
-  zinc: "bg-category-zinc",
-  stone: "bg-category-stone",
-  black: "bg-category-black",
-};
 
 export const EditTabDialog = ({
   open,
@@ -92,15 +85,13 @@ export const EditTabDialog = ({
               <div className="grid grid-cols-6 gap-2">
                 {colors.map((colorOption) => (
                   <button
-                    key={colorOption}
+                    key={colorOption.value}
                     type="button"
-                    onClick={() => setColor(colorOption)}
-                    className={`h-10 rounded-md transition-all ${colorClasses[colorOption]} ${
-                      color === colorOption
-                        ? "ring-2 ring-primary ring-offset-2"
-                        : "hover:scale-110"
+                    onClick={() => setColor(colorOption.value)}
+                    title={colorOption.label}
+                    className={`h-10 w-full rounded-lg hover:opacity-90 transition-all ${colorOption.class} ${
+                      color === colorOption.value ? "ring-4 ring-ring ring-offset-2 scale-110" : "hover:scale-110"
                     }`}
-                    title={colorOption}
                   />
                 ))}
               </div>
