@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          color: string
+          column_index: number
+          created_at: string
+          id: string
+          position: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color: string
+          column_index?: number
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          column_index?: number
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      links: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          position: number
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "links_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
