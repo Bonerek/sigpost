@@ -16,7 +16,7 @@ import {
   Github, Code, Book, Terminal, Users, Zap, Star, Briefcase, Lightbulb, Camera, Bookmark,
   Database, Folder, Rocket, Image, Heart, Video, Download, CheckSquare, Trophy, Flag,
   TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Music, Server, ChevronRight,
-  LucideIcon
+  LucideIcon, Wifi, Network, Radio, Cable
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -26,7 +26,7 @@ export type IconType =
   | "github" | "code" | "book" | "terminal" | "users" | "zap" | "star" | "briefcase" | "lightbulb" 
   | "camera" | "bookmark" | "database" | "folder" | "rocket" | "image" | "heart" | "video" | "download" 
   | "check-square" | "trophy" | "flag" | "trending-up" | "gift" | "linkedin" | "twitter" | "instagram" 
-  | "facebook" | "youtube" | "shopping-cart" | "music" | "server";
+  | "facebook" | "youtube" | "shopping-cart" | "music" | "server" | "wifi" | "network" | "radio" | "cable";
 
 interface IconOption {
   value: IconType;
@@ -45,9 +45,14 @@ const iconGroups: IconGroup[] = [
     icons: [
       { value: "github", Icon: Github, label: "GitHub" },
       { value: "code", Icon: Code, label: "Kód" },
-      { value: "terminal", Icon: Terminal, label: "Terminál" },
+      { value: "terminal", Icon: Terminal, label: "Terminál/SSH" },
       { value: "database", Icon: Database, label: "Databáze" },
       { value: "server", Icon: Server, label: "Server" },
+      { value: "monitor", Icon: Monitor, label: "Monitor/VNC/RDP" },
+      { value: "wifi", Icon: Wifi, label: "WiFi/Remote" },
+      { value: "network", Icon: Network, label: "Síť" },
+      { value: "radio", Icon: Radio, label: "Wireless" },
+      { value: "cable", Icon: Cable, label: "Kabel" },
       { value: "zap", Icon: Zap, label: "Rychlost" },
     ]
   },
@@ -105,7 +110,6 @@ const iconGroups: IconGroup[] = [
       { value: "download", Icon: Download, label: "Stažení" },
       { value: "trophy", Icon: Trophy, label: "Úspěch" },
       { value: "flag", Icon: Flag, label: "Vlajka" },
-      { value: "monitor", Icon: Monitor, label: "Monitor" },
       { value: "laptop", Icon: Laptop, label: "Laptop" },
       { value: "book", Icon: Book, label: "Kniha" },
     ]

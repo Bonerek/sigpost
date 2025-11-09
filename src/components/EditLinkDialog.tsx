@@ -19,7 +19,7 @@ import {
   Github, Code, Book, Terminal, Users, Zap, Star, Briefcase, Lightbulb, Camera, Bookmark,
   Database, Folder, Rocket, Image, Heart, Video, Download, CheckSquare, Trophy, Flag,
   TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Music, Server, ChevronRight,
-  LucideIcon
+  LucideIcon, Wifi, Network, Radio, Cable
 } from "lucide-react";
 
 interface IconOption {
@@ -39,9 +39,14 @@ const iconGroups: IconGroup[] = [
     icons: [
       { value: "github", Icon: Github, label: "GitHub" },
       { value: "code", Icon: Code, label: "Kód" },
-      { value: "terminal", Icon: Terminal, label: "Terminál" },
+      { value: "terminal", Icon: Terminal, label: "Terminál/SSH" },
       { value: "database", Icon: Database, label: "Databáze" },
       { value: "server", Icon: Server, label: "Server" },
+      { value: "monitor", Icon: Monitor, label: "Monitor/VNC/RDP" },
+      { value: "wifi", Icon: Wifi, label: "WiFi/Remote" },
+      { value: "network", Icon: Network, label: "Síť" },
+      { value: "radio", Icon: Radio, label: "Wireless" },
+      { value: "cable", Icon: Cable, label: "Kabel" },
       { value: "zap", Icon: Zap, label: "Rychlost" },
     ]
   },
@@ -99,7 +104,6 @@ const iconGroups: IconGroup[] = [
       { value: "download", Icon: Download, label: "Stažení" },
       { value: "trophy", Icon: Trophy, label: "Úspěch" },
       { value: "flag", Icon: Flag, label: "Vlajka" },
-      { value: "monitor", Icon: Monitor, label: "Monitor" },
       { value: "laptop", Icon: Laptop, label: "Laptop" },
       { value: "book", Icon: Book, label: "Kniha" },
     ]

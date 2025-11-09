@@ -3,7 +3,7 @@ import {
   Monitor, Laptop, DollarSign, ShoppingCart, Mail, FileText, Calendar, Settings, Home, Globe,
   Github, Code, Book, Terminal, Users, Zap, Star, Briefcase, Lightbulb, Camera, Bookmark,
   Database, Folder, Rocket, Image, Heart, Video, Download, CheckSquare, Trophy, Flag,
-  TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Music, Server
+  TrendingUp, Gift, Linkedin, Twitter, Instagram, Facebook, Music, Server, Wifi, Network, Radio, Cable
 } from "lucide-react";
 import type { IconType } from "./AddLinkDialog";
 import { Card } from "@/components/ui/card";
@@ -80,10 +80,14 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   twitter: Twitter,
   instagram: Instagram,
   facebook: Facebook,
-  youtube: Video, // YouTube ikona neexistuje v lucide-react, použijeme Video
+  youtube: Video,
   "shopping-cart": ShoppingCart,
   music: Music,
   server: Server,
+  wifi: Wifi,
+  network: Network,
+  radio: Radio,
+  cable: Cable,
 };
 
 interface LinkCategoryProps {
