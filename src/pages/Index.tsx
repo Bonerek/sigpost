@@ -237,12 +237,30 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Fetch categories and links from database
+  // Fetch categories, links, and user settings from database
   useEffect(() => {
     if (!user) return;
 
     const fetchData = async () => {
       setLoading(true);
+      
+      // Fetch user settings
+      const { data: settingsData, error: settingsError } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (settingsError) {
+        toast({
+          title: "Chyba při načítání nastavení",
+          description: settingsError.message,
+          variant: "destructive",
+        });
+      } else if (settingsData) {
+        setColumns(settingsData.column_count as 3 | 4 | 5);
+        setCustomText(settingsData.custom_text || "");
+      }
       
       // Fetch categories
       const { data: categoriesData, error: categoriesError } = await supabase
@@ -650,6 +668,63 @@ const Index = () => {
     });
   };
 
+  const handleColumnsChange = async (newColumns: 3 | 4 | 5) => {
+    setColumns(newColumns);
+    await saveUserSettings(newColumns, customText);
+  };
+
+  const handleCustomTextSave = async (text: string) => {
+    setCustomText(text);
+    await saveUserSettings(columns, text);
+  };
+
+  const saveUserSettings = async (columnCount: number, text: string) => {
+    if (!user) return;
+
+    // Check if settings exist
+    const { data: existingSettings } = await supabase
+      .from("user_settings")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existingSettings) {
+      // Update existing settings
+      const { error } = await supabase
+        .from("user_settings")
+        .update({
+          column_count: columnCount,
+          custom_text: text || null,
+        })
+        .eq("user_id", user.id);
+
+      if (error) {
+        toast({
+          title: "Chyba při ukládání nastavení",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Insert new settings
+      const { error } = await supabase
+        .from("user_settings")
+        .insert({
+          user_id: user.id,
+          column_count: columnCount,
+          custom_text: text || null,
+        });
+
+      if (error) {
+        toast({
+          title: "Chyba při ukládání nastavení",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const getCategoriesByColumn = (columnIndex: number) => {
     return categories.filter(cat => cat.columnIndex === columnIndex);
   };
@@ -728,15 +803,15 @@ const Index = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setColumns(3)}>
+                  <DropdownMenuItem onClick={() => handleColumnsChange(3)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
                     3 sloupce
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setColumns(4)}>
+                  <DropdownMenuItem onClick={() => handleColumnsChange(4)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
                     4 sloupce
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setColumns(5)}>
+                  <DropdownMenuItem onClick={() => handleColumnsChange(5)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
                     5 sloupců
                   </DropdownMenuItem>
@@ -829,7 +904,7 @@ const Index = () => {
       <CustomTextDialog
         open={customTextDialogOpen}
         onOpenChange={setCustomTextDialogOpen}
-        onSave={setCustomText}
+        onSave={handleCustomTextSave}
         currentText={customText}
       />
 

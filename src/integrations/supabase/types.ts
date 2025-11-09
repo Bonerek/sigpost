@@ -91,6 +91,33 @@ export type Database = {
           },
         ]
       }
+      user_settings: {
+        Row: {
+          column_count: number
+          created_at: string
+          custom_text: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          column_count?: number
+          created_at?: string
+          custom_text?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          column_count?: number
+          created_at?: string
+          custom_text?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
