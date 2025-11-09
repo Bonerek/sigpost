@@ -13,37 +13,11 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check registration settings
-  useState(() => {
-    const checkRegistration = async () => {
-      const { data } = await supabase
-        .from("system_settings")
-        .select("registration_enabled")
-        .maybeSingle();
-      
-      if (data) {
-        setRegistrationEnabled(data.registration_enabled);
-      }
-    };
-    
-    checkRegistration();
-  });
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!registrationEnabled) {
-      toast({
-        title: "Registrace zakázána",
-        description: "Samoregistrace je momentálně zakázána administrátorem.",
-        variant: "destructive",
-      });
-      return;
-    }
     
     setLoading(true);
 
@@ -58,9 +32,15 @@ const Auth = () => {
     setLoading(false);
 
     if (error) {
+      // Check if registration is disabled (enforced server-side)
+      const isRegistrationDisabled = error.message.toLowerCase().includes('signup') || 
+                                      error.message.toLowerCase().includes('registration');
+      
       toast({
         title: "Chyba při registraci",
-        description: error.message,
+        description: isRegistrationDisabled 
+          ? "Samoregistrace je momentálně zakázána administrátorem." 
+          : error.message,
         variant: "destructive",
       });
     } else {
@@ -109,9 +89,7 @@ const Auth = () => {
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Přihlášení</TabsTrigger>
-            <TabsTrigger value="signup" disabled={!registrationEnabled}>
-              Registrace {!registrationEnabled && "(zakázána)"}
-            </TabsTrigger>
+            <TabsTrigger value="signup">Registrace</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin">
