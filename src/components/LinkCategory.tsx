@@ -153,10 +153,10 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 hover:bg-secondary/80 opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0 absolute right-2"
+                className="h-8 w-8 hover:bg-primary/10 opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0 absolute right-2"
                 onClick={(e) => e.preventDefault()}
               >
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-4 w-4 text-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
