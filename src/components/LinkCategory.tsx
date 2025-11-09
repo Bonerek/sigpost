@@ -244,7 +244,7 @@ export const LinkCategory = ({
           </DropdownMenu>
         )}
       </div>
-      <div className="pl-0 pr-6 py-6 space-y-1">
+      <div className="px-6 py-6 space-y-1">
         {editMode ? (
           <DndContext
             sensors={sensors}
