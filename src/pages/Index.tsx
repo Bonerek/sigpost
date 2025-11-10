@@ -128,6 +128,84 @@ interface DroppableColumnProps {
   onDeleteCategory: (categoryId: string) => void;
 }
 
+interface SortableTabTriggerProps {
+  tab: { id: string; name: string; color: ColorValue };
+  colorClasses: Record<ColorValue, string>;
+  editMode: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  canDelete: boolean;
+}
+
+const SortableTabTrigger = ({ tab, colorClasses, editMode, onEdit, onDelete, canDelete }: SortableTabTriggerProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: tab.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group flex items-center">
+      {editMode && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute -top-1 -left-1 z-10 p-1 bg-primary text-primary-foreground rounded cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-md touch-none"
+        >
+          <GripVertical className="w-3 h-3 pointer-events-none" />
+        </div>
+      )}
+      <TabsTrigger 
+        value={tab.id} 
+        className={`pr-8 font-semibold shadow-md hover:shadow-lg transition-all ${colorClasses[tab.color]} ${isDragging ? 'opacity-50' : ''}`}
+      >
+        {tab.name}
+      </TabsTrigger>
+      {editMode && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
+            <DropdownMenuItem 
+              onClick={onEdit}
+              className="cursor-pointer"
+            >
+              <Pencil className="mr-2 h-4 w-4" />
+              Upravit záložku
+            </DropdownMenuItem>
+            {canDelete && (
+              <DropdownMenuItem 
+                onClick={onDelete}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Smazat záložku
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
+  );
+};
+
 const DroppableColumn = ({ 
   columnIndex, 
   categories, 
@@ -398,6 +476,24 @@ const Index = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const handleTabDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    setTabs((items) => {
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      
+      return arrayMove(items, oldIndex, newIndex);
+    });
+
+    toast({
+      title: "Záložky přesunuty",
+      description: "Pořadí záložek bylo změněno.",
+    });
+  };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -882,86 +978,66 @@ const Index = () => {
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <TabsList className="justify-start">
-              {tabs.map((tab) => {
-                const colorClasses: Record<ColorValue, string> = {
-                  blue: "bg-category-blue/70 text-category-blue-foreground data-[state=active]:bg-category-blue data-[state=active]:text-category-blue-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-blue/40 data-[state=active]:shadow-xl",
-                  green: "bg-category-green/70 text-category-green-foreground data-[state=active]:bg-category-green data-[state=active]:text-category-green-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-green/40 data-[state=active]:shadow-xl",
-                  orange: "bg-category-orange/70 text-category-orange-foreground data-[state=active]:bg-category-orange data-[state=active]:text-category-orange-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-orange/40 data-[state=active]:shadow-xl",
-                  purple: "bg-category-purple/70 text-category-purple-foreground data-[state=active]:bg-category-purple data-[state=active]:text-category-purple-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-purple/40 data-[state=active]:shadow-xl",
-                  red: "bg-category-red/70 text-category-red-foreground data-[state=active]:bg-category-red data-[state=active]:text-category-red-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-red/40 data-[state=active]:shadow-xl",
-                  cyan: "bg-category-cyan/70 text-category-cyan-foreground data-[state=active]:bg-category-cyan data-[state=active]:text-category-cyan-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-cyan/40 data-[state=active]:shadow-xl",
-                  pink: "bg-category-pink/70 text-category-pink-foreground data-[state=active]:bg-category-pink data-[state=active]:text-category-pink-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-pink/40 data-[state=active]:shadow-xl",
-                  yellow: "bg-category-yellow/70 text-category-yellow-foreground data-[state=active]:bg-category-yellow data-[state=active]:text-category-yellow-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-yellow/40 data-[state=active]:shadow-xl",
-                  indigo: "bg-category-indigo/70 text-category-indigo-foreground data-[state=active]:bg-category-indigo data-[state=active]:text-category-indigo-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-indigo/40 data-[state=active]:shadow-xl",
-                  teal: "bg-category-teal/70 text-category-teal-foreground data-[state=active]:bg-category-teal data-[state=active]:text-category-teal-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-teal/40 data-[state=active]:shadow-xl",
-                  amber: "bg-category-amber/70 text-category-amber-foreground data-[state=active]:bg-category-amber data-[state=active]:text-category-amber-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-amber/40 data-[state=active]:shadow-xl",
-                  lime: "bg-category-lime/70 text-category-lime-foreground data-[state=active]:bg-category-lime data-[state=active]:text-category-lime-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-lime/40 data-[state=active]:shadow-xl",
-                  emerald: "bg-category-emerald/70 text-category-emerald-foreground data-[state=active]:bg-category-emerald data-[state=active]:text-category-emerald-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-emerald/40 data-[state=active]:shadow-xl",
-                  brown: "bg-category-brown/70 text-category-brown-foreground data-[state=active]:bg-category-brown data-[state=active]:text-category-brown-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-brown/40 data-[state=active]:shadow-xl",
-                  gray: "bg-category-gray/70 text-category-gray-foreground data-[state=active]:bg-category-gray data-[state=active]:text-category-gray-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-gray/40 data-[state=active]:shadow-xl",
-                  slate: "bg-category-slate/70 text-category-slate-foreground data-[state=active]:bg-category-slate data-[state=active]:text-category-slate-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-slate/40 data-[state=active]:shadow-xl",
-                  zinc: "bg-category-zinc/70 text-category-zinc-foreground data-[state=active]:bg-category-zinc data-[state=active]:text-category-zinc-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-zinc/40 data-[state=active]:shadow-xl",
-                  stone: "bg-category-stone/70 text-category-stone-foreground data-[state=active]:bg-category-stone data-[state=active]:text-category-stone-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-stone/40 data-[state=active]:shadow-xl",
-                  black: "bg-category-black/70 text-category-black-foreground data-[state=active]:bg-category-black data-[state=active]:text-category-black-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-black/40 data-[state=active]:shadow-xl",
-                };
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleTabDragEnd}
+            >
+              <TabsList className="justify-start">
+                <SortableContext
+                  items={tabs.map((tab) => tab.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {tabs.map((tab) => {
+                    const colorClasses: Record<ColorValue, string> = {
+                      blue: "bg-category-blue/70 text-category-blue-foreground data-[state=active]:bg-category-blue data-[state=active]:text-category-blue-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-blue/40 data-[state=active]:shadow-xl",
+                      green: "bg-category-green/70 text-category-green-foreground data-[state=active]:bg-category-green data-[state=active]:text-category-green-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-green/40 data-[state=active]:shadow-xl",
+                      orange: "bg-category-orange/70 text-category-orange-foreground data-[state=active]:bg-category-orange data-[state=active]:text-category-orange-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-orange/40 data-[state=active]:shadow-xl",
+                      purple: "bg-category-purple/70 text-category-purple-foreground data-[state=active]:bg-category-purple data-[state=active]:text-category-purple-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-purple/40 data-[state=active]:shadow-xl",
+                      red: "bg-category-red/70 text-category-red-foreground data-[state=active]:bg-category-red data-[state=active]:text-category-red-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-red/40 data-[state=active]:shadow-xl",
+                      cyan: "bg-category-cyan/70 text-category-cyan-foreground data-[state=active]:bg-category-cyan data-[state=active]:text-category-cyan-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-cyan/40 data-[state=active]:shadow-xl",
+                      pink: "bg-category-pink/70 text-category-pink-foreground data-[state=active]:bg-category-pink data-[state=active]:text-category-pink-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-pink/40 data-[state=active]:shadow-xl",
+                      yellow: "bg-category-yellow/70 text-category-yellow-foreground data-[state=active]:bg-category-yellow data-[state=active]:text-category-yellow-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-yellow/40 data-[state=active]:shadow-xl",
+                      indigo: "bg-category-indigo/70 text-category-indigo-foreground data-[state=active]:bg-category-indigo data-[state=active]:text-category-indigo-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-indigo/40 data-[state=active]:shadow-xl",
+                      teal: "bg-category-teal/70 text-category-teal-foreground data-[state=active]:bg-category-teal data-[state=active]:text-category-teal-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-teal/40 data-[state=active]:shadow-xl",
+                      amber: "bg-category-amber/70 text-category-amber-foreground data-[state=active]:bg-category-amber data-[state=active]:text-category-amber-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-amber/40 data-[state=active]:shadow-xl",
+                      lime: "bg-category-lime/70 text-category-lime-foreground data-[state=active]:bg-category-lime data-[state=active]:text-category-lime-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-lime/40 data-[state=active]:shadow-xl",
+                      emerald: "bg-category-emerald/70 text-category-emerald-foreground data-[state=active]:bg-category-emerald data-[state=active]:text-category-emerald-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-emerald/40 data-[state=active]:shadow-xl",
+                      brown: "bg-category-brown/70 text-category-brown-foreground data-[state=active]:bg-category-brown data-[state=active]:text-category-brown-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-brown/40 data-[state=active]:shadow-xl",
+                      gray: "bg-category-gray/70 text-category-gray-foreground data-[state=active]:bg-category-gray data-[state=active]:text-category-gray-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-gray/40 data-[state=active]:shadow-xl",
+                      slate: "bg-category-slate/70 text-category-slate-foreground data-[state=active]:bg-category-slate data-[state=active]:text-category-slate-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-slate/40 data-[state=active]:shadow-xl",
+                      zinc: "bg-category-zinc/70 text-category-zinc-foreground data-[state=active]:bg-category-zinc data-[state=active]:text-category-zinc-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-zinc/40 data-[state=active]:shadow-xl",
+                      stone: "bg-category-stone/70 text-category-stone-foreground data-[state=active]:bg-category-stone data-[state=active]:text-category-stone-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-stone/40 data-[state=active]:shadow-xl",
+                      black: "bg-category-black/70 text-category-black-foreground data-[state=active]:bg-category-black data-[state=active]:text-category-black-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-black/40 data-[state=active]:shadow-xl",
+                    };
                 
-                return (
-                  <div key={tab.id} className="relative group flex items-center">
-                    <TabsTrigger 
-                      value={tab.id} 
-                      className={`pr-8 font-semibold shadow-md hover:shadow-lg transition-all ${colorClasses[tab.color]}`}
-                    >
-                      {tab.name}
-                    </TabsTrigger>
-                    {editMode && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setSelectedTabId(tab.id);
-                              setEditTabDialogOpen(true);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Upravit záložku
-                          </DropdownMenuItem>
-                          {tabs.length > 1 && (
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                setTabs(tabs.filter(t => t.id !== tab.id));
-                                if (activeTab === tab.id) {
-                                  setActiveTab(tabs[0].id);
-                                }
-                                toast({
-                                  title: "Záložka smazána",
-                                  description: `Záložka "${tab.name}" byla odstraněna.`,
-                                });
-                              }}
-                              className="cursor-pointer text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Smazat záložku
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-                );
-              })}
-            </TabsList>
+                    return (
+                      <SortableTabTrigger
+                        key={tab.id}
+                        tab={tab}
+                        colorClasses={colorClasses}
+                        editMode={editMode}
+                        onEdit={() => {
+                          setSelectedTabId(tab.id);
+                          setEditTabDialogOpen(true);
+                        }}
+                        onDelete={() => {
+                          setTabs(tabs.filter(t => t.id !== tab.id));
+                          if (activeTab === tab.id) {
+                            setActiveTab(tabs[0].id);
+                          }
+                          toast({
+                            title: "Záložka smazána",
+                            description: `Záložka "${tab.name}" byla odstraněna.`,
+                          });
+                        }}
+                        canDelete={tabs.length > 1}
+                      />
+                    );
+                  })}
+                </SortableContext>
+              </TabsList>
+            </DndContext>
             
             {editMode && (
               isAddingTab ? (
