@@ -166,7 +166,7 @@ const SortableTabTrigger = ({ tab, colorClasses, editMode, onEdit, onDelete, can
       )}
       <TabsTrigger 
         value={tab.id} 
-        className={`pr-8 font-semibold shadow-md hover:shadow-lg transition-all ${colorClasses[tab.color]} ${isDragging ? 'opacity-50' : ''}`}
+        className={`px-4 py-2 pr-8 text-2xl font-bold shadow-md hover:shadow-lg transition-all ${colorClasses[tab.color]} ${isDragging ? 'opacity-50' : ''}`}
       >
         {tab.name}
       </TabsTrigger>
