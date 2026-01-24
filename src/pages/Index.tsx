@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { LinkCategory } from "@/components/LinkCategory";
+import { IframeCategory } from "@/components/IframeCategory";
 import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
@@ -60,6 +61,8 @@ interface CategoryData {
   color: ColorValue;
   columnIndex: number;
   tabId: string | null;
+  iframeUrl?: string | null;
+  iframeRefreshInterval?: number | null;
   links: Array<{
     id: string;
     title: string;
@@ -95,6 +98,9 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Check if this is an iframe category
+  const isIframeCategory = !!category.iframeUrl;
+
   return (
     <div ref={setNodeRef} style={style} className="relative group">
       {editMode && (
@@ -107,18 +113,30 @@ const SortableCategory = ({ category, onAddLink, onChangeColor, onReorderLinks, 
         </div>
       )}
       <div className={isDragging ? "pointer-events-none" : ""}>
-        <LinkCategory
-          title={category.title}
-          color={category.color}
-          links={category.links}
-          onAddLink={onAddLink}
-          onChangeColor={onChangeColor}
-          onReorderLinks={onReorderLinks}
-          onEditLink={onEditLink}
-          onDeleteLink={onDeleteLink}
-          onDeleteCategory={onDeleteCategory}
-          editMode={editMode}
-        />
+        {isIframeCategory ? (
+          <IframeCategory
+            title={category.title}
+            color={category.color}
+            iframeUrl={category.iframeUrl!}
+            refreshInterval={category.iframeRefreshInterval || 0}
+            onChangeColor={onChangeColor}
+            onDeleteCategory={onDeleteCategory}
+            editMode={editMode}
+          />
+        ) : (
+          <LinkCategory
+            title={category.title}
+            color={category.color}
+            links={category.links}
+            onAddLink={onAddLink}
+            onChangeColor={onChangeColor}
+            onReorderLinks={onReorderLinks}
+            onEditLink={onEditLink}
+            onDeleteLink={onDeleteLink}
+            onDeleteCategory={onDeleteCategory}
+            editMode={editMode}
+          />
+        )}
       </div>
     </div>
   );
@@ -250,6 +268,17 @@ const DroppableColumn = ({
               onReorderLinks={(newLinks) => onReorderLinks(category.id, newLinks)}
               onEditLink={(linkId) => onEditLink(category.id, linkId)}
               onDeleteLink={(linkId) => onDeleteLink(category.id, linkId)}
+              onDeleteCategory={() => onDeleteCategory(category.id)}
+              editMode={editMode}
+            />
+          ) : category.iframeUrl ? (
+            <IframeCategory
+              key={category.id}
+              title={category.title}
+              color={category.color}
+              iframeUrl={category.iframeUrl}
+              refreshInterval={category.iframeRefreshInterval || 0}
+              onChangeColor={() => onChangeColor(category.id)}
               onDeleteCategory={() => onDeleteCategory(category.id)}
               editMode={editMode}
             />
@@ -486,6 +515,8 @@ const Index = () => {
         color: cat.color as ColorValue,
         columnIndex: cat.column_index,
         tabId: cat.tab_id || (loadedTabs.length > 0 ? loadedTabs[0].id : null),
+        iframeUrl: cat.iframe_url,
+        iframeRefreshInterval: cat.iframe_refresh_interval,
         links: linksData
           .filter(link => link.category_id === cat.id)
           .map(link => ({
@@ -849,11 +880,17 @@ const Index = () => {
     );
   };
 
-  const handleColorChange = async (color: ColorValue, title: string, tabId: string) => {
+  const handleColorChange = async (color: ColorValue, title: string, tabId: string, iframeUrl?: string, iframeRefreshInterval?: number) => {
     if (selectedCategoryId) {
       const { error } = await supabase
         .from("categories")
-        .update({ color, title, tab_id: tabId })
+        .update({ 
+          color, 
+          title, 
+          tab_id: tabId,
+          iframe_url: iframeUrl || null,
+          iframe_refresh_interval: iframeRefreshInterval || null,
+        })
         .eq("id", selectedCategoryId);
 
       if (error) {
@@ -867,7 +904,9 @@ const Index = () => {
 
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
-          cat.id === selectedCategoryId ? { ...cat, color, title, tabId } : cat
+          cat.id === selectedCategoryId 
+            ? { ...cat, color, title, tabId, iframeUrl: iframeUrl || null, iframeRefreshInterval: iframeRefreshInterval || null } 
+            : cat
         )
       );
       toast({
@@ -877,7 +916,7 @@ const Index = () => {
     }
   };
 
-  const handleAddCategory = async (category: { title: string; color: ColorValue; tabId: string }) => {
+  const handleAddCategory = async (category: { title: string; color: ColorValue; tabId: string; iframeUrl?: string; iframeRefreshInterval?: number }) => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -889,6 +928,8 @@ const Index = () => {
         column_index: 0,
         position: categories.filter(c => c.tabId === category.tabId).length,
         tab_id: category.tabId,
+        iframe_url: category.iframeUrl || null,
+        iframe_refresh_interval: category.iframeRefreshInterval || null,
       })
       .select()
       .single();
@@ -908,6 +949,8 @@ const Index = () => {
       color: data.color as ColorValue,
       columnIndex: data.column_index,
       tabId: data.tab_id,
+      iframeUrl: data.iframe_url,
+      iframeRefreshInterval: data.iframe_refresh_interval,
       links: [],
     };
     setCategories((prevCategories) => [...prevCategories, newCategory]);
@@ -1303,6 +1346,8 @@ const Index = () => {
         currentColor={selectedCategory?.color || "blue"}
         currentTabId={selectedCategory?.tabId || null}
         tabs={tabs}
+        currentIframeUrl={selectedCategory?.iframeUrl}
+        currentIframeRefreshInterval={selectedCategory?.iframeRefreshInterval}
       />
 
       <CustomTextDialog
