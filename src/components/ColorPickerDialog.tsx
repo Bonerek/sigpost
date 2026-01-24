@@ -10,15 +10,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ColorValue = "blue" | "green" | "orange" | "purple" | "red" | "cyan" | "pink" | "yellow" | "indigo" | "teal" | "amber" | "lime" | "emerald" | "brown" | "gray" | "slate" | "zinc" | "stone" | "black";
+
+interface TabData {
+  id: string;
+  name: string;
+  color: ColorValue;
+}
 
 interface ColorPickerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectColor: (color: ColorValue, title: string) => void;
+  onSelectColor: (color: ColorValue, title: string, tabId: string) => void;
   categoryTitle: string;
   currentColor: ColorValue;
+  currentTabId: string | null;
+  tabs: TabData[];
 }
 
 const colors: Array<{ value: ColorValue; label: string; class: string }> = [
@@ -42,18 +57,20 @@ const colors: Array<{ value: ColorValue; label: string; class: string }> = [
   { value: "black", label: "Černá", class: "bg-category-black" },
 ];
 
-export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryTitle, currentColor }: ColorPickerDialogProps) => {
+export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryTitle, currentColor, currentTabId, tabs }: ColorPickerDialogProps) => {
   const [title, setTitle] = useState(categoryTitle);
   const [selectedColor, setSelectedColor] = useState(currentColor);
+  const [selectedTabId, setSelectedTabId] = useState(currentTabId || "");
 
   useEffect(() => {
     setTitle(categoryTitle);
     setSelectedColor(currentColor);
-  }, [categoryTitle, currentColor, open]);
+    setSelectedTabId(currentTabId || "");
+  }, [categoryTitle, currentColor, currentTabId, open]);
 
   const handleSave = () => {
-    if (title.trim()) {
-      onSelectColor(selectedColor, title.trim());
+    if (title.trim() && selectedTabId) {
+      onSelectColor(selectedColor, title.trim(), selectedTabId);
       onOpenChange(false);
     }
   };
@@ -64,7 +81,7 @@ export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryT
         <DialogHeader>
           <DialogTitle>Upravit kategorii "{categoryTitle}"</DialogTitle>
           <DialogDescription>
-            Změň název nebo barvu kategorie
+            Změň název, barvu nebo záložku kategorie
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -76,6 +93,21 @@ export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryT
               onChange={(e) => setTitle(e.target.value)}
               placeholder="např. Technologie"
             />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="tab">Záložka</Label>
+            <Select value={selectedTabId} onValueChange={setSelectedTabId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Vyberte záložku" />
+              </SelectTrigger>
+              <SelectContent>
+                {tabs.map((tab) => (
+                  <SelectItem key={tab.id} value={tab.id}>
+                    {tab.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid gap-2">
             <Label>Barva</Label>
@@ -97,7 +129,7 @@ export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryT
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Zrušit
           </Button>
-          <Button onClick={handleSave} disabled={!title.trim()}>
+          <Button onClick={handleSave} disabled={!title.trim() || !selectedTabId}>
             Uložit změny
           </Button>
         </DialogFooter>

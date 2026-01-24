@@ -849,11 +849,11 @@ const Index = () => {
     );
   };
 
-  const handleColorChange = async (color: ColorValue, title: string) => {
+  const handleColorChange = async (color: ColorValue, title: string, tabId: string) => {
     if (selectedCategoryId) {
       const { error } = await supabase
         .from("categories")
-        .update({ color, title })
+        .update({ color, title, tab_id: tabId })
         .eq("id", selectedCategoryId);
 
       if (error) {
@@ -867,7 +867,7 @@ const Index = () => {
 
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
-          cat.id === selectedCategoryId ? { ...cat, color, title } : cat
+          cat.id === selectedCategoryId ? { ...cat, color, title, tabId } : cat
         )
       );
       toast({
@@ -1301,6 +1301,8 @@ const Index = () => {
         onSelectColor={handleColorChange}
         categoryTitle={selectedCategory?.title || ""}
         currentColor={selectedCategory?.color || "blue"}
+        currentTabId={selectedCategory?.tabId || null}
+        tabs={tabs}
       />
 
       <CustomTextDialog
