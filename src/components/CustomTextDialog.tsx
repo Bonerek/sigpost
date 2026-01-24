@@ -39,9 +39,9 @@ export const CustomTextDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Vlastní text</DialogTitle>
+          <DialogTitle>Custom text</DialogTitle>
           <DialogDescription>
-            Zadejte text, který se zobrazí v hlavičce.
+            Enter the text to display in the header.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -51,15 +51,15 @@ export const CustomTextDialog = ({
               id="custom-text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Zadejte text..."
+              placeholder="Enter text..."
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Zrušit
+            Cancel
           </Button>
-          <Button onClick={handleSave}>Uložit</Button>
+          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

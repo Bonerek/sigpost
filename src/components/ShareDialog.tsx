@@ -27,7 +27,7 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Uživatel není přihlášen");
+      if (!user) throw new Error("User is not logged in");
 
       const newToken = enabled && !shareToken ? generateToken() : shareToken;
 
@@ -41,11 +41,11 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
 
       if (error) throw error;
 
-      toast.success(enabled ? "Sdílení povoleno" : "Sdílení zakázáno");
+      toast.success(enabled ? "Sharing enabled" : "Sharing disabled");
       onUpdate();
     } catch (error) {
       console.error("Error toggling share:", error);
-      toast.error("Nepodařilo se změnit nastavení sdílení");
+      toast.error("Failed to change sharing settings");
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Uživatel není přihlášen");
+      if (!user) throw new Error("User is not logged in");
 
       const newToken = generateToken();
 
@@ -66,11 +66,11 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
 
       if (error) throw error;
 
-      toast.success("Nový odkaz vygenerován");
+      toast.success("New link generated");
       onUpdate();
     } catch (error) {
       console.error("Error regenerating token:", error);
-      toast.error("Nepodařilo se vygenerovat nový odkaz");
+      toast.error("Failed to generate new link");
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
   const handleCopyLink = () => {
     const shareUrl = `${window.location.origin}/share/${shareToken}`;
     navigator.clipboard.writeText(shareUrl);
-    toast.success("Odkaz zkopírován");
+    toast.success("Link copied");
   };
 
   const shareUrl = shareToken ? `${window.location.origin}/share/${shareToken}` : "";
@@ -90,12 +90,12 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
-            Sdílet stránku
+            Share page
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="share-enabled">Povolit veřejné sdílení</Label>
+            <Label htmlFor="share-enabled">Enable public sharing</Label>
             <Switch
               id="share-enabled"
               checked={shareEnabled}
@@ -107,7 +107,7 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
           {shareEnabled && shareToken && (
             <>
               <div className="space-y-2">
-                <Label>Veřejný odkaz</Label>
+                <Label>Public link</Label>
                 <div className="flex gap-2">
                   <Input value={shareUrl} readOnly />
                   <Button size="icon" variant="outline" onClick={handleCopyLink}>
@@ -123,11 +123,11 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
                 className="w-full"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Vygenerovat nový odkaz
+                Generate new link
               </Button>
 
               <p className="text-sm text-muted-foreground">
-                Kdokoliv s tímto odkazem může zobrazit vaši stránku bez přihlášení (pouze pro čtení).
+                Anyone with this link can view your page without signing in (read-only).
               </p>
             </>
           )}

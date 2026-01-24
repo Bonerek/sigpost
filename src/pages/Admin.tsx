@@ -62,8 +62,8 @@ export default function Admin() {
 
       if (!roleData) {
         toast({
-          title: "Přístup odepřen",
-          description: "Nemáte oprávnění k této stránce",
+          title: "Access denied",
+          description: "You do not have permission to access this page",
           variant: "destructive",
         });
         navigate("/");
@@ -94,7 +94,7 @@ export default function Admin() {
 
     if (profilesError) {
       toast({
-        title: "Chyba při načítání uživatelů",
+        title: "Error loading users",
         description: profilesError.message,
         variant: "destructive",
       });
@@ -139,8 +139,8 @@ export default function Admin() {
 
     if (error) {
       toast({
-        title: "Chyba",
-        description: "Nepodařilo se aktualizovat nastavení",
+        title: "Error",
+        description: "Failed to update settings",
         variant: "destructive",
       });
       return;
@@ -148,16 +148,16 @@ export default function Admin() {
 
     setRegistrationEnabled(enabled);
     toast({
-      title: "Nastavení uloženo",
-      description: enabled ? "Samoregistrace je povolena" : "Samoregistrace je zakázána",
+      title: "Settings saved",
+      description: enabled ? "Self-registration is enabled" : "Self-registration is disabled",
     });
   };
 
   const handleAddUser = async () => {
     if (!newUserEmail || !newUserPassword) {
       toast({
-        title: "Chyba",
-        description: "Vyplňte email a heslo",
+        title: "Error",
+        description: "Please fill in email and password",
         variant: "destructive",
       });
       return;
@@ -165,8 +165,8 @@ export default function Admin() {
 
     if (newUserPassword.length < 6) {
       toast({
-        title: "Chyba",
-        description: "Heslo musí mít alespoň 6 znaků",
+        title: "Error",
+        description: "Password must be at least 6 characters",
         variant: "destructive",
       });
       return;
@@ -177,8 +177,8 @@ export default function Admin() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast({
-        title: "Chyba",
-        description: "Nejste přihlášeni",
+        title: "Error",
+        description: "You are not logged in",
         variant: "destructive",
       });
       setLoading(false);
@@ -198,7 +198,7 @@ export default function Admin() {
 
     if (error) {
       toast({
-        title: "Chyba při vytváření uživatele",
+        title: "Error creating user",
         description: error.message,
         variant: "destructive",
       });
@@ -206,8 +206,8 @@ export default function Admin() {
     }
 
     toast({
-      title: "Úspěch",
-      description: "Uživatel byl úspěšně vytvořen",
+      title: "Success",
+      description: "User was successfully created",
     });
 
     setIsAddUserOpen(false);
@@ -221,8 +221,8 @@ export default function Admin() {
   const handleDeleteUser = async (user: UserWithRole) => {
     if (user.user_id === currentUser?.id) {
       toast({
-        title: "Chyba",
-        description: "Nemůžete smazat svůj vlastní účet",
+        title: "Error",
+        description: "You cannot delete your own account",
         variant: "destructive",
       });
       return;
@@ -230,8 +230,8 @@ export default function Admin() {
 
     if (user.email === 'admin@admin.local') {
       toast({
-        title: "Chyba",
-        description: "Nelze smazat hlavní administrátorský účet",
+        title: "Error",
+        description: "Cannot delete main administrator account",
         variant: "destructive",
       });
       return;
@@ -249,8 +249,8 @@ export default function Admin() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast({
-        title: "Chyba",
-        description: "Nejste přihlášeni",
+        title: "Error",
+        description: "You are not logged in",
         variant: "destructive",
       });
       setIsDeleting(false);
@@ -267,7 +267,7 @@ export default function Admin() {
 
     if (error) {
       toast({
-        title: "Chyba při mazání",
+        title: "Error deleting",
         description: error.message,
         variant: "destructive",
       });
@@ -275,8 +275,8 @@ export default function Admin() {
     }
 
     toast({
-      title: "Úspěch",
-      description: "Uživatel a všechna jeho data byla smazána",
+      title: "Success",
+      description: "User and all their data has been deleted",
     });
 
     setDeletingUser(null);
@@ -298,16 +298,16 @@ export default function Admin() {
 
     if (error) {
       toast({
-        title: "Chyba",
-        description: "Nepodařilo se uložit popis",
+        title: "Error",
+        description: "Failed to save description",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Uloženo",
-      description: "Popis účtu byl aktualizován",
+      title: "Saved",
+      description: "Account description was updated",
     });
 
     setEditingUser(null);
@@ -323,8 +323,8 @@ export default function Admin() {
   const handleSavePassword = async () => {
     if (!changingPasswordUser || !newPassword) {
       toast({
-        title: "Chyba",
-        description: "Zadejte nové heslo",
+        title: "Error",
+        description: "Enter a new password",
         variant: "destructive",
       });
       return;
@@ -332,8 +332,8 @@ export default function Admin() {
 
     if (newPassword.length < 6) {
       toast({
-        title: "Chyba",
-        description: "Heslo musí mít alespoň 6 znaků",
+        title: "Error",
+        description: "Password must be at least 6 characters",
         variant: "destructive",
       });
       return;
@@ -342,8 +342,8 @@ export default function Admin() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast({
-        title: "Chyba",
-        description: "Nejste přihlášeni",
+        title: "Error",
+        description: "You are not logged in",
         variant: "destructive",
       });
       return;
@@ -358,16 +358,16 @@ export default function Admin() {
 
     if (error) {
       toast({
-        title: "Chyba",
-        description: "Nepodařilo se změnit heslo: " + error.message,
+        title: "Error",
+        description: "Failed to change password: " + error.message,
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Úspěch",
-      description: "Heslo bylo změněno",
+      title: "Success",
+      description: "Password was changed",
     });
 
     setChangingPasswordUser(null);
@@ -377,8 +377,8 @@ export default function Admin() {
   const handleToggleUserAccess = async (user: UserWithRole) => {
     if (user.email === 'admin@admin.local' && user.is_active) {
       toast({
-        title: "Chyba",
-        description: "Nelze zakázat hlavní administrátorský účet",
+        title: "Error",
+        description: "Cannot disable main administrator account",
         variant: "destructive",
       });
       return;
@@ -387,8 +387,8 @@ export default function Admin() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast({
-        title: "Chyba",
-        description: "Nejste přihlášeni",
+        title: "Error",
+        description: "You are not logged in",
         variant: "destructive",
       });
       return;
@@ -403,16 +403,16 @@ export default function Admin() {
 
     if (error) {
       toast({
-        title: "Chyba",
-        description: "Nepodařilo se změnit přístup: " + error.message,
+        title: "Error",
+        description: "Failed to change access: " + error.message,
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Úspěch",
-      description: user.is_active ? "Přístup byl zakázán" : "Přístup byl povolen",
+      title: "Success",
+      description: user.is_active ? "Access was disabled" : "Access was enabled",
     });
 
     loadData();
@@ -433,16 +433,16 @@ export default function Admin() {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">Administrace</h1>
+          <h1 className="text-3xl font-bold">Administration</h1>
         </div>
 
         {/* Registration Toggle */}
         <div className="bg-card rounded-lg p-6 mb-8 border">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold mb-2">Samoregistrace</h2>
+              <h2 className="text-xl font-semibold mb-2">Self-registration</h2>
               <p className="text-sm text-muted-foreground">
-                Povolit nebo zakázat registraci nových uživatelů na přihlašovací stránce
+                Enable or disable new user registration on the login page
               </p>
             </div>
             <Switch
@@ -455,19 +455,19 @@ export default function Admin() {
         {/* Users Management */}
         <div className="bg-card rounded-lg p-6 border">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">Správa uživatelů</h2>
+            <h2 className="text-xl font-semibold">User Management</h2>
             <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <UserPlus className="h-4 w-4 mr-2" />
-                  Přidat uživatele
+                  Add User
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Přidat nového uživatele</DialogTitle>
+                  <DialogTitle>Add new user</DialogTitle>
                   <DialogDescription>
-                    Vytvořte nový uživatelský účet
+                    Create a new user account
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
@@ -482,7 +482,7 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="password">Heslo</Label>
+                    <Label htmlFor="password">Password</Label>
                     <Input
                       id="password"
                       type="password"
@@ -493,13 +493,13 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="description">Popis (volitelné)</Label>
+                    <Label htmlFor="description">Description (optional)</Label>
                     <Input
                       id="description"
                       type="text"
                       value={newUserDescription}
                       onChange={(e) => setNewUserDescription(e.target.value)}
-                      placeholder="např. Marketing manager"
+                      placeholder="e.g. Marketing manager"
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -508,7 +508,7 @@ export default function Admin() {
                       checked={newUserIsAdmin}
                       onCheckedChange={setNewUserIsAdmin}
                     />
-                    <Label htmlFor="admin">Administrátor</Label>
+                    <Label htmlFor="admin">Administrator</Label>
                   </div>
                 </div>
                 <DialogFooter>
@@ -519,10 +519,10 @@ export default function Admin() {
                     setNewUserDescription("");
                     setNewUserIsAdmin(false);
                   }}>
-                    Zrušit
+                    Cancel
                   </Button>
                   <Button onClick={handleAddUser} disabled={loading}>
-                    {loading ? "Vytváření..." : "Přidat"}
+                    {loading ? "Creating..." : "Add"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -533,10 +533,10 @@ export default function Admin() {
             <TableHeader>
               <TableRow>
                 <TableHead>Email</TableHead>
-                <TableHead>Popis</TableHead>
+                <TableHead>Description</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Stav</TableHead>
-                <TableHead className="text-right">Akce</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -545,7 +545,7 @@ export default function Admin() {
                   <TableCell className="font-medium">{user.email}</TableCell>
                   <TableCell className="max-w-xs">
                     {user.description || (
-                      <span className="text-muted-foreground italic">Bez popisu</span>
+                      <span className="text-muted-foreground italic">No description</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -555,7 +555,7 @@ export default function Admin() {
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                        Uživatel
+                        User
                       </span>
                     )}
                   </TableCell>
@@ -567,7 +567,7 @@ export default function Admin() {
                         disabled={user.email === 'admin@admin.local'}
                       />
                       <span className="text-sm text-muted-foreground">
-                        {user.is_active ? 'Aktivní' : 'Zakázán'}
+                        {user.is_active ? 'Active' : 'Disabled'}
                       </span>
                     </div>
                   </TableCell>
@@ -577,7 +577,7 @@ export default function Admin() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleChangePassword(user)}
-                        title="Změnit heslo"
+                        title="Change password"
                       >
                         <Key className="h-4 w-4" />
                       </Button>
@@ -585,7 +585,7 @@ export default function Admin() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditDescription(user)}
-                        title="Upravit popis"
+                        title="Edit description"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -596,10 +596,10 @@ export default function Admin() {
                         disabled={user.user_id === currentUser?.id || user.email === 'admin@admin.local'}
                         title={
                           user.user_id === currentUser?.id 
-                            ? "Nemůžete smazat svůj účet" 
+                            ? "You cannot delete your own account" 
                             : user.email === 'admin@admin.local'
-                            ? "Hlavní admin účet nelze smazat"
-                            : "Smazat uživatele"
+                            ? "Main admin account cannot be deleted"
+                            : "Delete user"
                         }
                       >
                         <Trash2 className="h-4 w-4" />
@@ -616,27 +616,27 @@ export default function Admin() {
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Upravit popis účtu</DialogTitle>
+              <DialogTitle>Edit account description</DialogTitle>
               <DialogDescription>
-                Upravte popis pro uživatele {editingUser?.email}
+                Edit description for user {editingUser?.email}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="description">Popis</Label>
+                <Label htmlFor="description">Description</Label>
                 <Input
                   id="description"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Zadejte popis účtu..."
+                  placeholder="Enter account description..."
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setEditingUser(null)}>
-                Zrušit
+                Cancel
               </Button>
-              <Button onClick={handleSaveDescription}>Uložit</Button>
+              <Button onClick={handleSaveDescription}>Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -645,29 +645,29 @@ export default function Admin() {
         <Dialog open={!!changingPasswordUser} onOpenChange={(open) => !open && setChangingPasswordUser(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Změnit heslo</DialogTitle>
+              <DialogTitle>Change password</DialogTitle>
               <DialogDescription>
-                Změnit heslo pro uživatele {changingPasswordUser?.email}
+                Change password for user {changingPasswordUser?.email}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="new-password">Nové heslo</Label>
+                <Label htmlFor="new-password">New password</Label>
                 <Input
                   id="new-password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Zadejte nové heslo (min. 6 znaků)"
+                  placeholder="Enter new password (min. 6 characters)"
                   minLength={6}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setChangingPasswordUser(null)}>
-                Zrušit
+                Cancel
               </Button>
-              <Button onClick={handleSavePassword}>Změnit heslo</Button>
+              <Button onClick={handleSavePassword}>Change password</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -676,21 +676,21 @@ export default function Admin() {
         <Dialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="text-destructive">Smazat uživatelský účet?</DialogTitle>
+              <DialogTitle className="text-destructive">Delete user account?</DialogTitle>
               <DialogDescription className="space-y-2 pt-4">
                 <p className="font-semibold">
-                  Opravdu chcete smazat účet uživatele <span className="text-foreground">{deletingUser?.email}</span>?
+                  Are you sure you want to delete the account for <span className="text-foreground">{deletingUser?.email}</span>?
                 </p>
                 <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4 mt-4">
-                  <p className="text-sm font-medium text-destructive mb-2">⚠️ Varování:</p>
+                  <p className="text-sm font-medium text-destructive mb-2">⚠️ Warning:</p>
                   <p className="text-sm text-muted-foreground">
-                    Tato akce je <strong>nevratná</strong> a smaže:
+                    This action is <strong>irreversible</strong> and will delete:
                   </p>
                   <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
-                    <li>Uživatelský účet</li>
-                    <li>Všechny kategorie</li>
-                    <li>Všechny odkazy ve všech kategoriích</li>
-                    <li>Uživatelské nastavení</li>
+                    <li>User account</li>
+                    <li>All categories</li>
+                    <li>All links in all categories</li>
+                    <li>User settings</li>
                   </ul>
                 </div>
               </DialogDescription>
@@ -701,14 +701,14 @@ export default function Admin() {
                 onClick={() => setDeletingUser(null)}
                 disabled={isDeleting}
               >
-                Zrušit
+                Cancel
               </Button>
               <Button 
                 variant="destructive" 
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? "Mazání..." : "Smazat vše"}
+                {isDeleting ? "Deleting..." : "Delete all"}
               </Button>
             </DialogFooter>
           </DialogContent>
