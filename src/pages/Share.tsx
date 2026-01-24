@@ -419,7 +419,7 @@ export default function Share() {
 
       <footer className="bg-card border-t border-border mt-auto">
         <div className="px-4 py-6 text-center text-muted-foreground">
-          <p>Hey hou!</p>
+          <p>Roman Sevcik 2026</p>
         </div>
       </footer>
 
