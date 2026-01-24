@@ -20,6 +20,8 @@ export type Database = {
           column_index: number
           created_at: string
           id: string
+          iframe_refresh_interval: number | null
+          iframe_url: string | null
           position: number
           tab_id: string | null
           title: string
@@ -31,6 +33,8 @@ export type Database = {
           column_index?: number
           created_at?: string
           id?: string
+          iframe_refresh_interval?: number | null
+          iframe_url?: string | null
           position?: number
           tab_id?: string | null
           title: string
@@ -42,6 +46,8 @@ export type Database = {
           column_index?: number
           created_at?: string
           id?: string
+          iframe_refresh_interval?: number | null
+          iframe_url?: string | null
           position?: number
           tab_id?: string | null
           title?: string

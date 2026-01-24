@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import type { ColorValue } from "./ColorPickerDialog";
 
 interface TabData {
@@ -28,7 +29,7 @@ interface TabData {
 interface AddCategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (category: { title: string; color: ColorValue; tabId: string }) => void;
+  onAdd: (category: { title: string; color: ColorValue; tabId: string; iframeUrl?: string; iframeRefreshInterval?: number }) => void;
   tabs: TabData[];
   activeTabId: string;
 }
@@ -58,19 +59,37 @@ export const AddCategoryDialog = ({ open, onOpenChange, onAdd, tabs, activeTabId
   const [title, setTitle] = useState("");
   const [selectedColor, setSelectedColor] = useState<ColorValue>("blue");
   const [selectedTabId, setSelectedTabId] = useState(activeTabId);
+  const [isIframeMode, setIsIframeMode] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState("");
+  const [iframeRefreshInterval, setIframeRefreshInterval] = useState<string>("");
 
   // Reset selected tab when dialog opens or activeTabId changes
   useEffect(() => {
     if (open) {
       setSelectedTabId(activeTabId);
+      setTitle("");
+      setSelectedColor("blue");
+      setIsIframeMode(false);
+      setIframeUrl("");
+      setIframeRefreshInterval("");
     }
   }, [open, activeTabId]);
 
   const handleAdd = () => {
     if (title.trim() && selectedTabId) {
-      onAdd({ title: title.trim(), color: selectedColor, tabId: selectedTabId });
+      const refreshInterval = iframeRefreshInterval ? parseInt(iframeRefreshInterval, 10) : undefined;
+      onAdd({ 
+        title: title.trim(), 
+        color: selectedColor, 
+        tabId: selectedTabId,
+        iframeUrl: isIframeMode && iframeUrl.trim() ? iframeUrl.trim() : undefined,
+        iframeRefreshInterval: isIframeMode && refreshInterval ? refreshInterval : undefined,
+      });
       setTitle("");
       setSelectedColor("blue");
+      setIsIframeMode(false);
+      setIframeUrl("");
+      setIframeRefreshInterval("");
       onOpenChange(false);
     }
   };
@@ -128,6 +147,51 @@ export const AddCategoryDialog = ({ open, onOpenChange, onAdd, tabs, activeTabId
               ))}
             </div>
           </div>
+          
+          {/* Iframe mode toggle */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="iframe-mode-add"
+              checked={isIframeMode}
+              onCheckedChange={setIsIframeMode}
+            />
+            <Label htmlFor="iframe-mode-add">Display external page (iframe)</Label>
+          </div>
+          
+          {isIframeMode && (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="iframe-url-add">Page URL</Label>
+                <Input
+                  id="iframe-url-add"
+                  value={iframeUrl}
+                  onChange={(e) => setIframeUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  type="url"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="iframe-refresh-add">Refresh interval (seconds, 1-3600)</Label>
+                <Input
+                  id="iframe-refresh-add"
+                  value={iframeRefreshInterval}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "" || (/^\d+$/.test(value) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 3600)) {
+                      setIframeRefreshInterval(value);
+                    }
+                  }}
+                  placeholder="60"
+                  type="number"
+                  min="1"
+                  max="3600"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty for no auto-refresh. Range: 1 second to 1 hour.
+                </p>
+              </div>
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

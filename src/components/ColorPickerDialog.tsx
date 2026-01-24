@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -29,11 +30,13 @@ interface TabData {
 interface ColorPickerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectColor: (color: ColorValue, title: string, tabId: string) => void;
+  onSelectColor: (color: ColorValue, title: string, tabId: string, iframeUrl?: string, iframeRefreshInterval?: number) => void;
   categoryTitle: string;
   currentColor: ColorValue;
   currentTabId: string | null;
   tabs: TabData[];
+  currentIframeUrl?: string | null;
+  currentIframeRefreshInterval?: number | null;
 }
 
 const colors: Array<{ value: ColorValue; label: string; class: string }> = [
@@ -57,20 +60,45 @@ const colors: Array<{ value: ColorValue; label: string; class: string }> = [
   { value: "black", label: "Black", class: "bg-category-black" },
 ];
 
-export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryTitle, currentColor, currentTabId, tabs }: ColorPickerDialogProps) => {
+export const ColorPickerDialog = ({ 
+  open, 
+  onOpenChange, 
+  onSelectColor, 
+  categoryTitle, 
+  currentColor, 
+  currentTabId, 
+  tabs,
+  currentIframeUrl,
+  currentIframeRefreshInterval 
+}: ColorPickerDialogProps) => {
   const [title, setTitle] = useState(categoryTitle);
   const [selectedColor, setSelectedColor] = useState(currentColor);
   const [selectedTabId, setSelectedTabId] = useState(currentTabId || "");
+  const [iframeUrl, setIframeUrl] = useState(currentIframeUrl || "");
+  const [iframeRefreshInterval, setIframeRefreshInterval] = useState<string>(
+    currentIframeRefreshInterval?.toString() || ""
+  );
+  const [isIframeMode, setIsIframeMode] = useState(!!currentIframeUrl);
 
   useEffect(() => {
     setTitle(categoryTitle);
     setSelectedColor(currentColor);
     setSelectedTabId(currentTabId || "");
-  }, [categoryTitle, currentColor, currentTabId, open]);
+    setIframeUrl(currentIframeUrl || "");
+    setIframeRefreshInterval(currentIframeRefreshInterval?.toString() || "");
+    setIsIframeMode(!!currentIframeUrl);
+  }, [categoryTitle, currentColor, currentTabId, currentIframeUrl, currentIframeRefreshInterval, open]);
 
   const handleSave = () => {
     if (title.trim() && selectedTabId) {
-      onSelectColor(selectedColor, title.trim(), selectedTabId);
+      const refreshInterval = iframeRefreshInterval ? parseInt(iframeRefreshInterval, 10) : undefined;
+      onSelectColor(
+        selectedColor, 
+        title.trim(), 
+        selectedTabId,
+        isIframeMode && iframeUrl.trim() ? iframeUrl.trim() : undefined,
+        isIframeMode && refreshInterval ? refreshInterval : undefined
+      );
       onOpenChange(false);
     }
   };
@@ -124,6 +152,51 @@ export const ColorPickerDialog = ({ open, onOpenChange, onSelectColor, categoryT
               ))}
             </div>
           </div>
+          
+          {/* Iframe mode toggle */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="iframe-mode"
+              checked={isIframeMode}
+              onCheckedChange={setIsIframeMode}
+            />
+            <Label htmlFor="iframe-mode">Display external page (iframe)</Label>
+          </div>
+          
+          {isIframeMode && (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="iframe-url">Page URL</Label>
+                <Input
+                  id="iframe-url"
+                  value={iframeUrl}
+                  onChange={(e) => setIframeUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  type="url"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="iframe-refresh">Refresh interval (seconds, 1-3600)</Label>
+                <Input
+                  id="iframe-refresh"
+                  value={iframeRefreshInterval}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "" || (/^\d+$/.test(value) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 3600)) {
+                      setIframeRefreshInterval(value);
+                    }
+                  }}
+                  placeholder="60"
+                  type="number"
+                  min="1"
+                  max="3600"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty for no auto-refresh. Range: 1 second to 1 hour.
+                </p>
+              </div>
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
