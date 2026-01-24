@@ -171,10 +171,10 @@ export const SettingsDialog = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success("Data byla úspěšně exportována");
+      toast.success("Data exported successfully");
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("Chyba při exportu dat");
+      toast.error("Error exporting data");
     } finally {
       setIsExporting(false);
     }
@@ -195,7 +195,7 @@ export const SettingsDialog = ({
 
       // Validate structure
       if (!data.version || !data.tabs || !data.categories || !data.links) {
-        throw new Error("Neplatný formát souboru");
+        throw new Error("Invalid file format");
       }
 
       // Create tabs first and build name to id mapping
@@ -272,14 +272,14 @@ export const SettingsDialog = ({
       }
 
       toast.success(
-        `Import dokončen: ${data.tabs.length} tabů, ${data.categories.length} kategorií, ${data.links.length} odkazů`
+        `Import complete: ${data.tabs.length} tabs, ${data.categories.length} categories, ${data.links.length} links`
       );
       onDataImported();
       onOpenChange(false);
     } catch (error) {
       console.error("Import error:", error);
       toast.error(
-        error instanceof Error ? error.message : "Chyba při importu dat"
+        error instanceof Error ? error.message : "Error importing data"
       );
     } finally {
       setIsImporting(false);
@@ -294,21 +294,21 @@ export const SettingsDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nastavení</DialogTitle>
+          <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Upravte text v hlavičce a spravujte zálohy.
+            Edit header text and manage backups.
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
           {/* Custom Text Section */}
           <div className="grid gap-2">
-            <Label htmlFor="custom-text">Text v hlavičce</Label>
+            <Label htmlFor="custom-text">Header text</Label>
             <Input
               id="custom-text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Zadejte text..."
+              placeholder="Enter text..."
             />
           </div>
 
@@ -316,9 +316,9 @@ export const SettingsDialog = ({
 
           {/* Backup Section */}
           <div className="grid gap-3">
-            <Label>Záloha dat</Label>
+            <Label>Data backup</Label>
             <p className="text-sm text-muted-foreground">
-              Exportujte všechny taby, kategorie a odkazy do JSON souboru nebo je importujte ze zálohy.
+              Export all tabs, categories, and links to a JSON file or import from a backup.
             </p>
             
             <div className="flex gap-2">
@@ -329,7 +329,7 @@ export const SettingsDialog = ({
                 className="flex-1"
               >
                 <Download className="w-4 h-4 mr-2" />
-                {isExporting ? "Exportuji..." : "Exportovat"}
+                {isExporting ? "Exporting..." : "Export"}
               </Button>
               
               <Button
@@ -339,7 +339,7 @@ export const SettingsDialog = ({
                 className="flex-1"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {isImporting ? "Importuji..." : "Importovat"}
+                {isImporting ? "Importing..." : "Import"}
               </Button>
               
               <input
@@ -354,7 +354,7 @@ export const SettingsDialog = ({
             <div className="flex items-start gap-2 p-3 rounded-md bg-muted/50 text-sm">
               <AlertCircle className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
               <span className="text-muted-foreground">
-                Import přidá data k existujícím. Pro nahrazení nejprve smažte stávající data.
+                Import adds data to existing. To replace, first delete existing data.
               </span>
             </div>
           </div>
@@ -362,9 +362,9 @@ export const SettingsDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Zrušit
+            Cancel
           </Button>
-          <Button onClick={handleSave}>Uložit</Button>
+          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
