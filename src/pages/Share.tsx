@@ -14,7 +14,8 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { LinkCategory } from "@/components/LinkCategory";
 import { IframeCategory } from "@/components/IframeCategory";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Compass, Info, Moon, Sun, Laptop, Menu } from "lucide-react";
+import { Info, Moon, Sun, Laptop, Menu } from "lucide-react";
+import headerIcon from "@/assets/header-icon.png";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -208,7 +209,7 @@ export default function Share() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Compass className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
+          <img src={headerIcon} alt="Loading" className="w-16 h-16 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -221,7 +222,7 @@ export default function Share() {
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Compass className="w-8 h-8 text-primary" />
+              <img src={headerIcon} alt="Signpost" className="w-8 h-8" />
               {customText && (
                 <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
               )}
