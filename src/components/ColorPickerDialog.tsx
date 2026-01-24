@@ -188,7 +188,7 @@ export const ColorPickerDialog = ({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="iframe-refresh">Refresh interval (seconds, 1-3600)</Label>
+                <Label htmlFor="iframe-refresh">Refresh interval (seconds, 0-3600)</Label>
                 <Input
                   id="iframe-refresh"
                   value={iframeRefreshInterval}
@@ -198,13 +198,13 @@ export const ColorPickerDialog = ({
                       setIframeRefreshInterval(value);
                     }
                   }}
-                  placeholder="60"
+                  placeholder="0"
                   type="number"
-                  min="1"
+                  min="0"
                   max="3600"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Leave empty for no auto-refresh. Range: 1 second to 1 hour.
+                  0 = no auto-refresh. Range: 0 to 3600 seconds (1 hour).
                 </p>
               </div>
             </>
