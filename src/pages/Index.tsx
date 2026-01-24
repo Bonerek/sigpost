@@ -8,13 +8,13 @@ import { AddLinkDialog } from "@/components/AddLinkDialog";
 import { EditLinkDialog } from "@/components/EditLinkDialog";
 import { DeleteLinkDialog } from "@/components/DeleteLinkDialog";
 import { DeleteCategoryDialog } from "@/components/DeleteCategoryDialog";
-import { CustomTextDialog } from "@/components/CustomTextDialog";
+import { SettingsDialog } from "@/components/SettingsDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { EditTabDialog } from "@/components/EditTabDialog";
-import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2, Settings } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -314,7 +314,7 @@ const Index = () => {
   const [deleteLinkDialogOpen, setDeleteLinkDialogOpen] = useState(false);
   const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
   const [colorPickerDialogOpen, setColorPickerDialogOpen] = useState(false);
-  const [customTextDialogOpen, setCustomTextDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -326,6 +326,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareEnabled, setShareEnabled] = useState(false);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
   
   // Tabs state from database
   const [tabs, setTabs] = useState<TabData[]>([]);
@@ -536,7 +537,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [user, toast]);
+  }, [user, toast, refetchTrigger]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -1153,7 +1154,12 @@ const Index = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleColumnsChange(5)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
-                    5 columns
+                  5 columns
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
@@ -1395,11 +1401,13 @@ const Index = () => {
         linkCount={selectedCategory?.links.length || 0}
       />
 
-      <CustomTextDialog
-        open={customTextDialogOpen}
-        onOpenChange={setCustomTextDialogOpen}
+      <SettingsDialog
+        open={settingsDialogOpen}
+        onOpenChange={setSettingsDialogOpen}
         onSave={handleCustomTextSave}
         currentText={customText}
+        userId={user?.id || ""}
+        onDataImported={() => setRefetchTrigger(prev => prev + 1)}
       />
 
       <AddCategoryDialog
