@@ -14,7 +14,8 @@ import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { EditTabDialog } from "@/components/EditTabDialog";
-import { Compass, GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import headerIcon from "@/assets/header-icon.png";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -1052,7 +1053,7 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Compass className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
+          <img src={headerIcon} alt="Loading" className="w-16 h-16 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -1065,7 +1066,7 @@ const Index = () => {
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Compass className="w-8 h-8 text-primary" />
+              <img src={headerIcon} alt="Signpost" className="w-8 h-8" />
               {isEditingTitle && editMode ? (
                 <input
                   type="text"
