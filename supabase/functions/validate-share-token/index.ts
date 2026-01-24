@@ -52,10 +52,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch categories for this user (including tab_id)
+    // Fetch categories for this user (including tab_id and iframe settings)
     const { data: categories, error: categoriesError } = await supabase
       .from("categories")
-      .select("id, title, color, column_index, position, tab_id")
+      .select("id, title, color, column_index, position, tab_id, iframe_url, iframe_refresh_interval")
       .eq("user_id", userId)
       .order("column_index")
       .order("position");

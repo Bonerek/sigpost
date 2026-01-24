@@ -12,6 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { LinkCategory } from "@/components/LinkCategory";
+import { IframeCategory } from "@/components/IframeCategory";
 import { InfoDialog } from "@/components/InfoDialog";
 import { Compass, Info, Moon, Sun, Laptop, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,8 @@ interface CategoryData {
   color: ColorValue;
   columnIndex: number;
   tabId: string | null;
+  iframeUrl?: string;
+  iframeRefreshInterval?: number;
   links: Array<{
     id: string;
     title: string;
@@ -148,6 +151,8 @@ export default function Share() {
           color: cat.color as ColorValue,
           columnIndex: cat.column_index,
           tabId: cat.tab_id || (loadedTabs.length > 0 ? loadedTabs[0].id : null),
+          iframeUrl: cat.iframe_url || undefined,
+          iframeRefreshInterval: cat.iframe_refresh_interval || 0,
           links: (data.links || [])
             .filter((link: any) => link.category_id === cat.id)
             .map((link: any) => ({
@@ -279,19 +284,32 @@ export default function Share() {
                       <div key={columnIndex} className="space-y-6">
                         <SortableContext items={columnCats.map((cat) => cat.id)}>
                           {columnCats.map((category) => (
-                            <LinkCategory
-                              key={category.id}
-                              title={category.title}
-                              color={category.color}
-                              links={category.links}
-                              editMode={false}
-                              onChangeColor={() => {}}
-                              onDeleteCategory={() => {}}
-                              onAddLink={() => {}}
-                              onEditLink={() => {}}
-                              onDeleteLink={() => {}}
-                              onReorderLinks={() => {}}
-                            />
+                            category.iframeUrl ? (
+                              <IframeCategory
+                                key={category.id}
+                                title={category.title}
+                                color={category.color}
+                                iframeUrl={category.iframeUrl}
+                                refreshInterval={category.iframeRefreshInterval || 0}
+                                editMode={false}
+                                onChangeColor={() => {}}
+                                onDeleteCategory={() => {}}
+                              />
+                            ) : (
+                              <LinkCategory
+                                key={category.id}
+                                title={category.title}
+                                color={category.color}
+                                links={category.links}
+                                editMode={false}
+                                onChangeColor={() => {}}
+                                onDeleteCategory={() => {}}
+                                onAddLink={() => {}}
+                                onEditLink={() => {}}
+                                onDeleteLink={() => {}}
+                                onReorderLinks={() => {}}
+                              />
+                            )
                           ))}
                         </SortableContext>
                       </div>
@@ -299,18 +317,30 @@ export default function Share() {
                   </div>
                   <DragOverlay>
                     {activeCategory && (
-                      <LinkCategory
-                        title={activeCategory.title}
-                        color={activeCategory.color}
-                        links={activeCategory.links}
-                        editMode={false}
-                        onChangeColor={() => {}}
-                        onDeleteCategory={() => {}}
-                        onAddLink={() => {}}
-                        onEditLink={() => {}}
-                        onDeleteLink={() => {}}
-                        onReorderLinks={() => {}}
-                      />
+                      activeCategory.iframeUrl ? (
+                        <IframeCategory
+                          title={activeCategory.title}
+                          color={activeCategory.color}
+                          iframeUrl={activeCategory.iframeUrl}
+                          refreshInterval={activeCategory.iframeRefreshInterval || 0}
+                          editMode={false}
+                          onChangeColor={() => {}}
+                          onDeleteCategory={() => {}}
+                        />
+                      ) : (
+                        <LinkCategory
+                          title={activeCategory.title}
+                          color={activeCategory.color}
+                          links={activeCategory.links}
+                          editMode={false}
+                          onChangeColor={() => {}}
+                          onDeleteCategory={() => {}}
+                          onAddLink={() => {}}
+                          onEditLink={() => {}}
+                          onDeleteLink={() => {}}
+                          onReorderLinks={() => {}}
+                        />
+                      )
                     )}
                   </DragOverlay>
                 </DndContext>
@@ -322,40 +352,65 @@ export default function Share() {
             <div className={`grid ${getGridCols()} gap-6`}>
               {columnCategories.map((columnCats, columnIndex) => (
                 <div key={columnIndex} className="space-y-6">
-                  <SortableContext items={columnCats.map((cat) => cat.id)}>
-                    {columnCats.map((category) => (
-                      <LinkCategory
-                        key={category.id}
-                        title={category.title}
-                        color={category.color}
-                        links={category.links}
-                        editMode={false}
-                        onChangeColor={() => {}}
-                        onDeleteCategory={() => {}}
-                        onAddLink={() => {}}
-                        onEditLink={() => {}}
-                        onDeleteLink={() => {}}
-                        onReorderLinks={() => {}}
-                      />
-                    ))}
-                  </SortableContext>
+                    <SortableContext items={columnCats.map((cat) => cat.id)}>
+                      {columnCats.map((category) => (
+                        category.iframeUrl ? (
+                          <IframeCategory
+                            key={category.id}
+                            title={category.title}
+                            color={category.color}
+                            iframeUrl={category.iframeUrl}
+                            refreshInterval={category.iframeRefreshInterval || 0}
+                            editMode={false}
+                            onChangeColor={() => {}}
+                            onDeleteCategory={() => {}}
+                          />
+                        ) : (
+                          <LinkCategory
+                            key={category.id}
+                            title={category.title}
+                            color={category.color}
+                            links={category.links}
+                            editMode={false}
+                            onChangeColor={() => {}}
+                            onDeleteCategory={() => {}}
+                            onAddLink={() => {}}
+                            onEditLink={() => {}}
+                            onDeleteLink={() => {}}
+                            onReorderLinks={() => {}}
+                          />
+                        )
+                      ))}
+                    </SortableContext>
                 </div>
               ))}
             </div>
             <DragOverlay>
               {activeCategory && (
-                <LinkCategory
-                  title={activeCategory.title}
-                  color={activeCategory.color}
-                  links={activeCategory.links}
-                  editMode={false}
-                  onChangeColor={() => {}}
-                  onDeleteCategory={() => {}}
-                  onAddLink={() => {}}
-                  onEditLink={() => {}}
-                  onDeleteLink={() => {}}
-                  onReorderLinks={() => {}}
-                />
+                activeCategory.iframeUrl ? (
+                  <IframeCategory
+                    title={activeCategory.title}
+                    color={activeCategory.color}
+                    iframeUrl={activeCategory.iframeUrl}
+                    refreshInterval={activeCategory.iframeRefreshInterval || 0}
+                    editMode={false}
+                    onChangeColor={() => {}}
+                    onDeleteCategory={() => {}}
+                  />
+                ) : (
+                  <LinkCategory
+                    title={activeCategory.title}
+                    color={activeCategory.color}
+                    links={activeCategory.links}
+                    editMode={false}
+                    onChangeColor={() => {}}
+                    onDeleteCategory={() => {}}
+                    onAddLink={() => {}}
+                    onEditLink={() => {}}
+                    onDeleteLink={() => {}}
+                    onReorderLinks={() => {}}
+                  />
+                )
               )}
             </DragOverlay>
           </DndContext>
