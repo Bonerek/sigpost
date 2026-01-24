@@ -877,8 +877,8 @@ const Index = () => {
     }
   };
 
-  const handleAddCategory = async (category: { title: string; color: ColorValue }) => {
-    if (!user || !activeTab) return;
+  const handleAddCategory = async (category: { title: string; color: ColorValue; tabId: string }) => {
+    if (!user) return;
 
     const { data, error } = await supabase
       .from("categories")
@@ -887,8 +887,8 @@ const Index = () => {
         title: category.title,
         color: category.color,
         column_index: 0,
-        position: categories.filter(c => c.tabId === activeTab).length,
-        tab_id: activeTab,
+        position: categories.filter(c => c.tabId === category.tabId).length,
+        tab_id: category.tabId,
       })
       .select()
       .single();
@@ -1314,6 +1314,8 @@ const Index = () => {
         open={addCategoryDialogOpen}
         onOpenChange={setAddCategoryDialogOpen}
         onAdd={handleAddCategory}
+        tabs={tabs}
+        activeTabId={activeTab}
       />
 
       <InfoDialog 
