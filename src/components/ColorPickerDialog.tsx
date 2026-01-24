@@ -37,6 +37,7 @@ interface ColorPickerDialogProps {
   tabs: TabData[];
   currentIframeUrl?: string | null;
   currentIframeRefreshInterval?: number | null;
+  linkCount?: number;
 }
 
 const colors: Array<{ value: ColorValue; label: string; class: string }> = [
@@ -69,7 +70,8 @@ export const ColorPickerDialog = ({
   currentTabId, 
   tabs,
   currentIframeUrl,
-  currentIframeRefreshInterval 
+  currentIframeRefreshInterval,
+  linkCount = 0
 }: ColorPickerDialogProps) => {
   const [title, setTitle] = useState(categoryTitle);
   const [selectedColor, setSelectedColor] = useState(currentColor);
@@ -153,15 +155,17 @@ export const ColorPickerDialog = ({
             </div>
           </div>
           
-          {/* Iframe mode toggle */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="iframe-mode"
-              checked={isIframeMode}
-              onCheckedChange={setIsIframeMode}
-            />
-            <Label htmlFor="iframe-mode">Display external page (iframe)</Label>
-          </div>
+          {/* Iframe mode toggle - only show when category has no links */}
+          {linkCount === 0 && (
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="iframe-mode"
+                checked={isIframeMode}
+                onCheckedChange={setIsIframeMode}
+              />
+              <Label htmlFor="iframe-mode">Display external page (iframe)</Label>
+            </div>
+          )}
           
           {isIframeMode && (
             <>

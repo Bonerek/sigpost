@@ -1348,6 +1348,7 @@ const Index = () => {
         tabs={tabs}
         currentIframeUrl={selectedCategory?.iframeUrl}
         currentIframeRefreshInterval={selectedCategory?.iframeRefreshInterval}
+        linkCount={selectedCategory?.links.length || 0}
       />
 
       <CustomTextDialog
