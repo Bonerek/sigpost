@@ -1066,7 +1066,7 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Compass className="w-8 h-8 text-primary" />
-              {isEditingTitle ? (
+              {isEditingTitle && editMode ? (
                 <input
                   type="text"
                   value={editingTitleText}
@@ -1085,10 +1085,12 @@ const Index = () => {
                 />
               ) : (
                 <h1 
-                  className="text-3xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors"
+                  className={`text-3xl font-bold text-foreground ${editMode ? 'cursor-pointer hover:text-primary transition-colors' : ''}`}
                   onClick={() => {
-                    setEditingTitleText(customText || "Signpost");
-                    setIsEditingTitle(true);
+                    if (editMode) {
+                      setEditingTitleText(customText || "Signpost");
+                      setIsEditingTitle(true);
+                    }
                   }}
                 >
                   {customText || "Signpost"}
