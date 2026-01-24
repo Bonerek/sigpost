@@ -166,6 +166,8 @@ export const IframeCategory = ({
           title={title}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           loading="lazy"
+          scrolling="no"
+          style={{ overflow: "hidden" }}
         />
       </div>
     </Card>
