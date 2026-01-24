@@ -420,7 +420,7 @@ export default function Share() {
 
       <footer className="bg-card border-t border-border mt-auto">
         <div className="px-4 py-6 text-center text-muted-foreground">
-          <p>Roman Sevcik 2026</p>
+          <p>© 2026 · Keeping it operational, with a hint of Tutti Frutti.</p>
         </div>
       </footer>
 
