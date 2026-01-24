@@ -65,51 +65,45 @@ export default function Share() {
           return;
         }
 
-        // Get user settings by share token
-        const { data: settings, error: settingsError } = await supabase
-          .from("user_settings")
-          .select("*")
-          .eq("share_token", token)
-          .eq("share_enabled", true)
-          .single();
+        // Use edge function to validate token and fetch data securely
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-share-token`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({ token }),
+          }
+        );
 
-        if (settingsError || !settings) {
+        if (!response.ok) {
           toast.error("Sdílená stránka nebyla nalezena");
           navigate("/");
           return;
         }
 
-        setColumnCount(settings.column_count || 3);
-        setCustomText(settings.custom_text || "Moje odkazy");
+        const data = await response.json();
 
-        // Fetch categories
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from("categories")
-          .select("*")
-          .eq("user_id", settings.user_id)
-          .order("column_index")
-          .order("position");
+        if (!data.valid) {
+          toast.error("Sdílená stránka nebyla nalezena");
+          navigate("/");
+          return;
+        }
 
-        if (categoriesError) throw categoriesError;
+        setColumnCount(data.settings.column_count || 3);
+        setCustomText(data.settings.custom_text || "Moje odkazy");
 
-        // Fetch links
-        const { data: linksData, error: linksError } = await supabase
-          .from("links")
-          .select("*")
-          .in("category_id", categoriesData?.map((c) => c.id) || [])
-          .order("position");
-
-        if (linksError) throw linksError;
-
-        // Organize data
-        const organizedCategories: CategoryData[] = (categoriesData || []).map((cat) => ({
+        // Organize data from edge function response
+        const organizedCategories: CategoryData[] = (data.categories || []).map((cat: any) => ({
           id: cat.id,
           title: cat.title,
           color: cat.color as ColorValue,
           columnIndex: cat.column_index,
-          links: (linksData || [])
-            .filter((link) => link.category_id === cat.id)
-            .map((link) => ({
+          links: (data.links || [])
+            .filter((link: any) => link.category_id === cat.id)
+            .map((link: any) => ({
               id: link.id,
               title: link.title,
               url: link.url,

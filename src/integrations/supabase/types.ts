@@ -251,7 +251,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_settings_public: {
+        Row: {
+          column_count: number | null
+          custom_text: string | null
+          id: string | null
+          share_enabled: boolean | null
+        }
+        Insert: {
+          column_count?: number | null
+          custom_text?: string | null
+          id?: string | null
+          share_enabled?: boolean | null
+        }
+        Update: {
+          column_count?: number | null
+          custom_text?: string | null
+          id?: string | null
+          share_enabled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -261,6 +281,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_share_token: { Args: { token_value: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
