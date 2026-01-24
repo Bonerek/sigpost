@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -24,15 +23,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTheme } from "next-themes";
 import type { IconType } from "@/components/AddLinkDialog";
 import type { ColorValue } from "@/components/ColorPickerDialog";
+
+interface TabData {
+  id: string;
+  name: string;
+  color: ColorValue;
+  position: number;
+}
 
 interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
   columnIndex: number;
+  tabId: string | null;
   links: Array<{
     id: string;
     title: string;
@@ -43,11 +51,35 @@ interface CategoryData {
   }>;
 }
 
+const colorClasses: Record<ColorValue, string> = {
+  blue: "bg-blue-500 text-white hover:bg-blue-600 data-[state=active]:bg-blue-600",
+  green: "bg-green-500 text-white hover:bg-green-600 data-[state=active]:bg-green-600",
+  red: "bg-red-500 text-white hover:bg-red-600 data-[state=active]:bg-red-600",
+  yellow: "bg-yellow-500 text-white hover:bg-yellow-600 data-[state=active]:bg-yellow-600",
+  purple: "bg-purple-500 text-white hover:bg-purple-600 data-[state=active]:bg-purple-600",
+  pink: "bg-pink-500 text-white hover:bg-pink-600 data-[state=active]:bg-pink-600",
+  orange: "bg-orange-500 text-white hover:bg-orange-600 data-[state=active]:bg-orange-600",
+  cyan: "bg-cyan-500 text-white hover:bg-cyan-600 data-[state=active]:bg-cyan-600",
+  indigo: "bg-indigo-500 text-white hover:bg-indigo-600 data-[state=active]:bg-indigo-600",
+  teal: "bg-teal-500 text-white hover:bg-teal-600 data-[state=active]:bg-teal-600",
+  amber: "bg-amber-500 text-white hover:bg-amber-600 data-[state=active]:bg-amber-600",
+  lime: "bg-lime-500 text-white hover:bg-lime-600 data-[state=active]:bg-lime-600",
+  emerald: "bg-emerald-500 text-white hover:bg-emerald-600 data-[state=active]:bg-emerald-600",
+  brown: "bg-amber-800 text-white hover:bg-amber-900 data-[state=active]:bg-amber-900",
+  gray: "bg-gray-500 text-white hover:bg-gray-600 data-[state=active]:bg-gray-600",
+  slate: "bg-slate-500 text-white hover:bg-slate-600 data-[state=active]:bg-slate-600",
+  zinc: "bg-zinc-500 text-white hover:bg-zinc-600 data-[state=active]:bg-zinc-600",
+  stone: "bg-stone-500 text-white hover:bg-stone-600 data-[state=active]:bg-stone-600",
+  black: "bg-black text-white hover:bg-gray-900 data-[state=active]:bg-gray-900",
+};
+
 export default function Share() {
   const { token } = useParams();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [tabs, setTabs] = useState<TabData[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [columnCount, setColumnCount] = useState(3);
   const [customText, setCustomText] = useState("Moje odkazy");
@@ -95,12 +127,27 @@ export default function Share() {
         setColumnCount(data.settings.column_count || 3);
         setCustomText(data.settings.custom_text || "Moje odkazy");
 
+        // Load tabs
+        const loadedTabs: TabData[] = (data.tabs || []).map((tab: any) => ({
+          id: tab.id,
+          name: tab.name,
+          color: tab.color as ColorValue,
+          position: tab.position,
+        }));
+        setTabs(loadedTabs);
+        
+        // Set initial active tab
+        if (loadedTabs.length > 0) {
+          setActiveTab(loadedTabs[0].id);
+        }
+
         // Organize data from edge function response
         const organizedCategories: CategoryData[] = (data.categories || []).map((cat: any) => ({
           id: cat.id,
           title: cat.title,
           color: cat.color as ColorValue,
           columnIndex: cat.column_index,
+          tabId: cat.tab_id || (loadedTabs.length > 0 ? loadedTabs[0].id : null),
           links: (data.links || [])
             .filter((link: any) => link.category_id === cat.id)
             .map((link: any) => ({
@@ -142,6 +189,14 @@ export default function Share() {
     return "grid-cols-1 md:grid-cols-5";
   };
 
+  // Filter categories by active tab
+  const filteredCategories = categories.filter((cat) => cat.tabId === activeTab);
+
+  // Organize categories into columns
+  const columnCategories = Array.from({ length: columnCount }, (_, i) =>
+    filteredCategories.filter((cat) => cat.columnIndex === i)
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -152,10 +207,6 @@ export default function Share() {
       </div>
     );
   }
-
-  const columnCategories = Array.from({ length: columnCount }, (_, i) =>
-    categories.filter((cat) => cat.columnIndex === i)
-  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -204,47 +255,111 @@ export default function Share() {
       </header>
 
       <main className="flex-1 px-4 py-4">
-        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className={`grid ${getGridCols()} gap-6`}>
-            {columnCategories.map((columnCats, columnIndex) => (
-              <div key={columnIndex} className="space-y-6">
-                <SortableContext items={columnCats.map((cat) => cat.id)}>
-                  {columnCats.map((category) => (
-                    <LinkCategory
-                      key={category.id}
-                      title={category.title}
-                      color={category.color}
-                      links={category.links}
-                      editMode={false}
-                      onChangeColor={() => {}}
-                      onDeleteCategory={() => {}}
-                      onAddLink={() => {}}
-                      onEditLink={() => {}}
-                      onDeleteLink={() => {}}
-                      onReorderLinks={() => {}}
-                    />
-                  ))}
-                </SortableContext>
-              </div>
+        {tabs.length > 0 ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="mb-6">
+              <TabsList className="h-auto flex-wrap gap-2 bg-transparent p-0">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className={`px-4 py-2 text-2xl font-bold shadow-md hover:shadow-lg transition-all ${colorClasses[tab.color]}`}
+                  >
+                    {tab.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+
+            {tabs.map((tab) => (
+              <TabsContent key={tab.id} value={tab.id} className="mt-0">
+                <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                  <div className={`grid ${getGridCols()} gap-6`}>
+                    {columnCategories.map((columnCats, columnIndex) => (
+                      <div key={columnIndex} className="space-y-6">
+                        <SortableContext items={columnCats.map((cat) => cat.id)}>
+                          {columnCats.map((category) => (
+                            <LinkCategory
+                              key={category.id}
+                              title={category.title}
+                              color={category.color}
+                              links={category.links}
+                              editMode={false}
+                              onChangeColor={() => {}}
+                              onDeleteCategory={() => {}}
+                              onAddLink={() => {}}
+                              onEditLink={() => {}}
+                              onDeleteLink={() => {}}
+                              onReorderLinks={() => {}}
+                            />
+                          ))}
+                        </SortableContext>
+                      </div>
+                    ))}
+                  </div>
+                  <DragOverlay>
+                    {activeCategory && (
+                      <LinkCategory
+                        title={activeCategory.title}
+                        color={activeCategory.color}
+                        links={activeCategory.links}
+                        editMode={false}
+                        onChangeColor={() => {}}
+                        onDeleteCategory={() => {}}
+                        onAddLink={() => {}}
+                        onEditLink={() => {}}
+                        onDeleteLink={() => {}}
+                        onReorderLinks={() => {}}
+                      />
+                    )}
+                  </DragOverlay>
+                </DndContext>
+              </TabsContent>
             ))}
-          </div>
-          <DragOverlay>
-            {activeCategory && (
-              <LinkCategory
-                title={activeCategory.title}
-                color={activeCategory.color}
-                links={activeCategory.links}
-                editMode={false}
-                onChangeColor={() => {}}
-                onDeleteCategory={() => {}}
-                onAddLink={() => {}}
-                onEditLink={() => {}}
-                onDeleteLink={() => {}}
-                onReorderLinks={() => {}}
-              />
-            )}
-          </DragOverlay>
-        </DndContext>
+          </Tabs>
+        ) : (
+          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div className={`grid ${getGridCols()} gap-6`}>
+              {columnCategories.map((columnCats, columnIndex) => (
+                <div key={columnIndex} className="space-y-6">
+                  <SortableContext items={columnCats.map((cat) => cat.id)}>
+                    {columnCats.map((category) => (
+                      <LinkCategory
+                        key={category.id}
+                        title={category.title}
+                        color={category.color}
+                        links={category.links}
+                        editMode={false}
+                        onChangeColor={() => {}}
+                        onDeleteCategory={() => {}}
+                        onAddLink={() => {}}
+                        onEditLink={() => {}}
+                        onDeleteLink={() => {}}
+                        onReorderLinks={() => {}}
+                      />
+                    ))}
+                  </SortableContext>
+                </div>
+              ))}
+            </div>
+            <DragOverlay>
+              {activeCategory && (
+                <LinkCategory
+                  title={activeCategory.title}
+                  color={activeCategory.color}
+                  links={activeCategory.links}
+                  editMode={false}
+                  onChangeColor={() => {}}
+                  onDeleteCategory={() => {}}
+                  onAddLink={() => {}}
+                  onEditLink={() => {}}
+                  onDeleteLink={() => {}}
+                  onReorderLinks={() => {}}
+                />
+              )}
+            </DragOverlay>
+          </DndContext>
+        )}
       </main>
 
       <footer className="bg-card border-t border-border mt-auto">
