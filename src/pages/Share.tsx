@@ -128,7 +128,9 @@ export default function Share() {
         }
 
         setColumnCount(data.settings.column_count || 3);
-        setCustomText(data.settings.custom_text || "My Links");
+        const text = data.settings.custom_text || "My Links";
+        setCustomText(text);
+        document.title = text;
 
         // Load tabs
         const loadedTabs: TabData[] = (data.tabs || []).map((tab: any) => ({
