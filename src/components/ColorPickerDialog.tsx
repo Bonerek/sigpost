@@ -155,17 +155,25 @@ export const ColorPickerDialog = ({
             </div>
           </div>
           
-          {/* Iframe mode toggle - only show when category has no links */}
-          {linkCount === 0 && (
+          {/* Iframe mode toggle */}
+          <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <Switch
                 id="iframe-mode"
                 checked={isIframeMode}
                 onCheckedChange={setIsIframeMode}
+                disabled={linkCount > 0}
               />
-              <Label htmlFor="iframe-mode">Display external page (iframe)</Label>
+              <Label htmlFor="iframe-mode" className={linkCount > 0 ? "text-muted-foreground" : ""}>
+                Display external page (iframe)
+              </Label>
             </div>
-          )}
+            {linkCount > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Available only for categories without links.
+              </p>
+            )}
+          </div>
           
           {isIframeMode && (
             <>
