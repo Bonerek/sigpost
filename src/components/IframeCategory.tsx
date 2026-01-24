@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Palette, Trash2, RefreshCw, ExternalLink } from "lucide-react";
+import { MoreVertical, Palette, Trash2, RefreshCw } from "lucide-react";
 import type { ColorValue } from "@/components/ColorPickerDialog";
 import {
   DropdownMenu,
@@ -119,15 +119,6 @@ export const IframeCategory = ({
             title="Refresh now"
           >
             <RefreshCw className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-white/20 text-current"
-            onClick={handleOpenExternal}
-            title="Open in new tab"
-          >
-            <ExternalLink className="h-4 w-4" />
           </Button>
           {editMode && (
             <DropdownMenu>
