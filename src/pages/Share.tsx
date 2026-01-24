@@ -82,7 +82,7 @@ export default function Share() {
   const [activeTab, setActiveTab] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [columnCount, setColumnCount] = useState(3);
-  const [customText, setCustomText] = useState("Moje odkazy");
+  const [customText, setCustomText] = useState("My Links");
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
@@ -92,7 +92,7 @@ export default function Share() {
     const fetchSharedData = async () => {
       try {
         if (!token) {
-          toast.error("Neplatný odkaz");
+          toast.error("Invalid link");
           navigate("/");
           return;
         }
@@ -111,7 +111,7 @@ export default function Share() {
         );
 
         if (!response.ok) {
-          toast.error("Sdílená stránka nebyla nalezena");
+          toast.error("Shared page not found");
           navigate("/");
           return;
         }
@@ -119,13 +119,13 @@ export default function Share() {
         const data = await response.json();
 
         if (!data.valid) {
-          toast.error("Sdílená stránka nebyla nalezena");
+          toast.error("Shared page not found");
           navigate("/");
           return;
         }
 
         setColumnCount(data.settings.column_count || 3);
-        setCustomText(data.settings.custom_text || "Moje odkazy");
+        setCustomText(data.settings.custom_text || "My Links");
 
         // Load tabs
         const loadedTabs: TabData[] = (data.tabs || []).map((tab: any) => ({
@@ -163,7 +163,7 @@ export default function Share() {
         setCategories(organizedCategories);
       } catch (error) {
         console.error("Error fetching shared data:", error);
-        toast.error("Nepodařilo se načíst sdílenou stránku");
+        toast.error("Failed to load shared page");
         navigate("/");
       } finally {
         setLoading(false);
@@ -202,7 +202,7 @@ export default function Share() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Compass className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Načítání...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -229,18 +229,18 @@ export default function Share() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card">
-                  <DropdownMenuLabel>Motiv</DropdownMenuLabel>
+                  <DropdownMenuLabel>Theme</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => setTheme("light")}>
                     <Sun className="mr-2 h-4 w-4" />
-                    Světlý
+                    Light
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme("dark")}>
                     <Moon className="mr-2 h-4 w-4" />
-                    Tmavý
+                    Dark
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme("system")}>
                     <Laptop className="mr-2 h-4 w-4" />
-                    Systémový
+                    System
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>

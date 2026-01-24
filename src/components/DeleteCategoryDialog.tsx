@@ -33,23 +33,23 @@ export const DeleteCategoryDialog = ({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Smazat kategorii?</AlertDialogTitle>
+          <AlertDialogTitle>Delete category?</AlertDialogTitle>
           <AlertDialogDescription>
-            Opravdu chcete smazat kategorii <strong>"{categoryTitle}"</strong>?
+            Are you sure you want to delete the category <strong>"{categoryTitle}"</strong>?
             {linkCount > 0 && (
               <span className="block mt-2 text-destructive">
-                Tato akce smaže také všech {linkCount} {linkCount === 1 ? 'odkaz' : linkCount < 5 ? 'odkazy' : 'odkazů'} v této kategorii.
+                This action will also delete all {linkCount} {linkCount === 1 ? 'link' : 'links'} in this category.
               </span>
             )}
             <span className="block mt-2">
-              Tuto akci nelze vrátit zpět.
+              This action cannot be undone.
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Zrušit</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleConfirm} className="bg-destructive hover:bg-destructive/90">
-            Smazat
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

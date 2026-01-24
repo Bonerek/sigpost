@@ -60,16 +60,16 @@ const Auth = () => {
                                       error.message.toLowerCase().includes('registration');
       
       toast({
-        title: "Chyba při registraci",
+        title: "Registration error",
         description: isRegistrationDisabled 
-          ? "Samoregistrace je momentálně zakázána administrátorem." 
+          ? "Self-registration is currently disabled by the administrator." 
           : error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Registrace úspěšná",
-        description: "Byli jste úspěšně zaregistrováni.",
+        title: "Registration successful",
+        description: "You have been successfully registered.",
       });
       navigate("/");
     }
@@ -88,14 +88,14 @@ const Auth = () => {
 
     if (error) {
       toast({
-        title: "Chyba při přihlášení",
+        title: "Sign in error",
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Přihlášení úspěšné",
-        description: "Byli jste úspěšně přihlášeni.",
+        title: "Sign in successful",
+        description: "You have been successfully signed in.",
       });
       navigate("/");
     }
@@ -111,33 +111,33 @@ const Auth = () => {
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className={`grid w-full ${registrationEnabled ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <TabsTrigger value="signin">Přihlášení</TabsTrigger>
-            {registrationEnabled && <TabsTrigger value="signup">Registrace</TabsTrigger>}
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            {registrationEnabled && <TabsTrigger value="signup">Sign Up</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="signin">
             <Card>
               <CardHeader>
-                <CardTitle>Přihlášení</CardTitle>
+                <CardTitle>Sign In</CardTitle>
                 <CardDescription>
-                  Přihlaste se ke svému účtu
+                  Sign in to your account
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">E-mail</Label>
+                    <Label htmlFor="signin-email">Email</Label>
                     <Input
                       id="signin-email"
                       type="email"
-                      placeholder="vas@email.cz"
+                      placeholder="your@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Heslo</Label>
+                    <Label htmlFor="signin-password">Password</Label>
                     <Input
                       id="signin-password"
                       type="password"
@@ -149,7 +149,7 @@ const Auth = () => {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Přihlašování..." : "Přihlásit se"}
+                    {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </CardFooter>
               </form>
@@ -159,26 +159,26 @@ const Auth = () => {
           {registrationEnabled && <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>Registrace</CardTitle>
+                <CardTitle>Sign Up</CardTitle>
                 <CardDescription>
-                  Vytvořte si nový účet
+                  Create a new account
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleSignUp}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-mail</Label>
+                    <Label htmlFor="signup-email">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder="vas@email.cz"
+                      placeholder="your@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Heslo</Label>
+                    <Label htmlFor="signup-password">Password</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -191,7 +191,7 @@ const Auth = () => {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Registrace..." : "Zaregistrovat se"}
+                    {loading ? "Signing up..." : "Sign Up"}
                   </Button>
                 </CardFooter>
               </form>

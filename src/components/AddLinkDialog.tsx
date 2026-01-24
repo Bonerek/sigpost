@@ -41,77 +41,77 @@ interface IconGroup {
 
 const iconGroups: IconGroup[] = [
   {
-    name: "IT & Programování",
+    name: "IT & Programming",
     icons: [
       { value: "github", Icon: Github, label: "GitHub" },
-      { value: "code", Icon: Code, label: "Kód" },
-      { value: "terminal", Icon: Terminal, label: "Terminál/SSH" },
-      { value: "database", Icon: Database, label: "Databáze" },
+      { value: "code", Icon: Code, label: "Code" },
+      { value: "terminal", Icon: Terminal, label: "Terminal/SSH" },
+      { value: "database", Icon: Database, label: "Database" },
       { value: "server", Icon: Server, label: "Server" },
       { value: "monitor", Icon: Monitor, label: "Monitor/VNC/RDP" },
       { value: "wifi", Icon: Wifi, label: "WiFi/Remote" },
-      { value: "network", Icon: Network, label: "Síť" },
+      { value: "network", Icon: Network, label: "Network" },
       { value: "radio", Icon: Radio, label: "Wireless" },
-      { value: "cable", Icon: Cable, label: "Kabel" },
-      { value: "zap", Icon: Zap, label: "Rychlost" },
+      { value: "cable", Icon: Cable, label: "Cable" },
+      { value: "zap", Icon: Zap, label: "Speed" },
     ]
   },
   {
-    name: "Sociální sítě",
+    name: "Social Media",
     icons: [
       { value: "linkedin", Icon: Linkedin, label: "LinkedIn" },
       { value: "twitter", Icon: Twitter, label: "Twitter" },
       { value: "instagram", Icon: Instagram, label: "Instagram" },
       { value: "facebook", Icon: Facebook, label: "Facebook" },
       { value: "youtube", Icon: Video, label: "YouTube" },
-      { value: "users", Icon: Users, label: "Komunita" },
+      { value: "users", Icon: Users, label: "Community" },
     ]
   },
   {
     name: "Multimedia",
     icons: [
-      { value: "camera", Icon: Camera, label: "Fotografie" },
+      { value: "camera", Icon: Camera, label: "Photography" },
       { value: "video", Icon: Video, label: "Video" },
-      { value: "music", Icon: Music, label: "Hudba" },
-      { value: "image", Icon: Image, label: "Obrázek" },
+      { value: "music", Icon: Music, label: "Music" },
+      { value: "image", Icon: Image, label: "Image" },
     ]
   },
   {
     name: "E-commerce & Finance",
     icons: [
-      { value: "shopping-cart", Icon: ShoppingCart, label: "Nákupy" },
+      { value: "shopping-cart", Icon: ShoppingCart, label: "Shopping" },
       { value: "dollar", Icon: DollarSign, label: "Finance" },
-      { value: "trending-up", Icon: TrendingUp, label: "Růst" },
-      { value: "gift", Icon: Gift, label: "Dárek" },
+      { value: "trending-up", Icon: TrendingUp, label: "Growth" },
+      { value: "gift", Icon: Gift, label: "Gift" },
     ]
   },
   {
-    name: "Kancelář & Produktivita",
+    name: "Office & Productivity",
     icons: [
-      { value: "briefcase", Icon: Briefcase, label: "Práce" },
-      { value: "file", Icon: FileText, label: "Soubor" },
-      { value: "folder", Icon: Folder, label: "Složka" },
-      { value: "calendar", Icon: Calendar, label: "Kalendář" },
-      { value: "mail", Icon: Mail, label: "E-mail" },
-      { value: "check-square", Icon: CheckSquare, label: "Úkoly" },
+      { value: "briefcase", Icon: Briefcase, label: "Work" },
+      { value: "file", Icon: FileText, label: "File" },
+      { value: "folder", Icon: Folder, label: "Folder" },
+      { value: "calendar", Icon: Calendar, label: "Calendar" },
+      { value: "mail", Icon: Mail, label: "Email" },
+      { value: "check-square", Icon: CheckSquare, label: "Tasks" },
     ]
   },
   {
-    name: "Ostatní",
+    name: "Other",
     icons: [
-      { value: "home", Icon: Home, label: "Domů" },
+      { value: "home", Icon: Home, label: "Home" },
       { value: "globe", Icon: Globe, label: "Web" },
-      { value: "settings", Icon: Settings, label: "Nastavení" },
-      { value: "star", Icon: Star, label: "Hvězda" },
-      { value: "lightbulb", Icon: Lightbulb, label: "Nápad" },
-      { value: "bookmark", Icon: Bookmark, label: "Záložka" },
-      { value: "rocket", Icon: Rocket, label: "Start" },
-      { value: "heart", Icon: Heart, label: "Oblíbené" },
-      { value: "download", Icon: Download, label: "Stažení" },
-      { value: "trophy", Icon: Trophy, label: "Úspěch" },
-      { value: "flag", Icon: Flag, label: "Vlajka" },
+      { value: "settings", Icon: Settings, label: "Settings" },
+      { value: "star", Icon: Star, label: "Star" },
+      { value: "lightbulb", Icon: Lightbulb, label: "Idea" },
+      { value: "bookmark", Icon: Bookmark, label: "Bookmark" },
+      { value: "rocket", Icon: Rocket, label: "Launch" },
+      { value: "heart", Icon: Heart, label: "Favorites" },
+      { value: "download", Icon: Download, label: "Download" },
+      { value: "trophy", Icon: Trophy, label: "Achievement" },
+      { value: "flag", Icon: Flag, label: "Flag" },
       { value: "laptop", Icon: Laptop, label: "Laptop" },
-      { value: "book", Icon: Book, label: "Kniha" },
+      { value: "book", Icon: Book, label: "Book" },
     ]
   },
 ];
@@ -150,24 +150,24 @@ export const AddLinkDialog = ({ open, onOpenChange, onAdd, categoryTitle }: AddL
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-card">
         <DialogHeader>
-          <DialogTitle>Přidat odkaz do kategorie "{categoryTitle}"</DialogTitle>
+          <DialogTitle>Add link to "{categoryTitle}"</DialogTitle>
           <DialogDescription>
-            Vyplň informace o novém odkazu
+            Fill in the new link information
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="title">Název odkazu *</Label>
+            <Label htmlFor="title">Link name *</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="např. Google"
+              placeholder="e.g. Google"
               maxLength={100}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="url">URL adresa *</Label>
+            <Label htmlFor="url">URL address *</Label>
             <Input
               id="url"
               type="url"
@@ -178,18 +178,18 @@ export const AddLinkDialog = ({ open, onOpenChange, onAdd, categoryTitle }: AddL
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description">Popis (volitelné)</Label>
+            <Label htmlFor="description">Description (optional)</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Stručný popis odkazu"
+              placeholder="Brief description of the link"
               maxLength={200}
               rows={3}
             />
           </div>
           <div className="grid gap-2">
-            <Label>Ikona (volitelné)</Label>
+            <Label>Icon (optional)</Label>
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
               {iconGroups.map((group) => (
                 <Collapsible key={group.name}>
@@ -230,10 +230,10 @@ export const AddLinkDialog = ({ open, onOpenChange, onAdd, categoryTitle }: AddL
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Zrušit
+            Cancel
           </Button>
           <Button onClick={handleAdd} disabled={!title.trim() || !url.trim()}>
-            Přidat
+            Add
           </Button>
         </DialogFooter>
       </DialogContent>

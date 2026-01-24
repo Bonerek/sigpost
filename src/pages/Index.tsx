@@ -58,8 +58,8 @@ interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
-  columnIndex: number; // Track which column this category belongs to
-  tabId: string | null; // Track which tab this category belongs to
+  columnIndex: number;
+  tabId: string | null;
   links: Array<{
     id: string;
     title: string;
@@ -196,7 +196,7 @@ const SortableTabTrigger = ({ tab, colorClasses, editMode, onEdit, onDelete, can
               className="cursor-pointer"
             >
               <Pencil className="mr-2 h-4 w-4" />
-              Upravit záložku
+              Edit tab
             </DropdownMenuItem>
             {canDelete && (
               <DropdownMenuItem 
@@ -204,7 +204,7 @@ const SortableTabTrigger = ({ tab, colorClasses, editMode, onEdit, onDelete, can
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Smazat záložku
+                Delete tab
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
@@ -366,7 +366,7 @@ const Index = () => {
 
       if (settingsError) {
         toast({
-          title: "Chyba při načítání nastavení",
+          title: "Error loading settings",
           description: settingsError.message,
           variant: "destructive",
         });
@@ -386,7 +386,7 @@ const Index = () => {
 
       if (tabsError) {
         toast({
-          title: "Chyba při načítání záložek",
+          title: "Error loading tabs",
           description: tabsError.message,
           variant: "destructive",
         });
@@ -407,7 +407,7 @@ const Index = () => {
 
         if (createTabError) {
           toast({
-            title: "Chyba při vytváření výchozí záložky",
+            title: "Error creating default tab",
             description: createTabError.message,
             variant: "destructive",
           });
@@ -437,7 +437,7 @@ const Index = () => {
 
       if (categoriesError) {
         toast({
-          title: "Chyba při načítání kategorií",
+          title: "Error loading categories",
           description: categoriesError.message,
           variant: "destructive",
         });
@@ -469,7 +469,7 @@ const Index = () => {
 
         if (linksError) {
           toast({
-            title: "Chyba při načítání odkazů",
+            title: "Error loading links",
             description: linksError.message,
             variant: "destructive",
           });
@@ -525,7 +525,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při mazání kategorie",
+          title: "Error deleting category",
           description: error.message,
           variant: "destructive",
         });
@@ -536,8 +536,8 @@ const Index = () => {
         prevCategories.filter((cat) => cat.id !== selectedCategoryId)
       );
       toast({
-        title: "Kategorie smazána",
-        description: `Kategorie "${category?.title}" byla úspěšně smazána.`,
+        title: "Category deleted",
+        description: `Category "${category?.title}" was successfully deleted.`,
       });
     }
   };
@@ -570,8 +570,8 @@ const Index = () => {
     }
 
     toast({
-      title: "Záložky přesunuty",
-      description: "Pořadí záložek bylo změněno.",
+      title: "Tabs moved",
+      description: "Tab order was changed.",
     });
   };
 
@@ -580,8 +580,8 @@ const Index = () => {
     
     if (categoriesInTab > 0) {
       toast({
-        title: "Nelze smazat záložku",
-        description: `Záložka "${tabName}" obsahuje ${categoriesInTab} ${categoriesInTab === 1 ? 'kategorii' : categoriesInTab < 5 ? 'kategorie' : 'kategorií'}. Nejdříve je smažte.`,
+        title: "Cannot delete tab",
+        description: `Tab "${tabName}" contains ${categoriesInTab} ${categoriesInTab === 1 ? 'category' : 'categories'}. Delete them first.`,
         variant: "destructive",
       });
       return;
@@ -594,7 +594,7 @@ const Index = () => {
 
     if (error) {
       toast({
-        title: "Chyba při mazání záložky",
+        title: "Error deleting tab",
         description: error.message,
         variant: "destructive",
       });
@@ -609,8 +609,8 @@ const Index = () => {
       }
     }
     toast({
-      title: "Záložka smazána",
-      description: `Záložka "${tabName}" byla odstraněna.`,
+      title: "Tab deleted",
+      description: `Tab "${tabName}" was removed.`,
     });
   };
 
@@ -633,7 +633,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při přesouvání kategorie",
+          title: "Error moving category",
           description: error.message,
           variant: "destructive",
         });
@@ -676,7 +676,7 @@ const Index = () => {
           .then(({ error }) => {
             if (error) {
               toast({
-                title: "Chyba při přesouvání kategorie",
+                title: "Error moving category",
                 description: error.message,
                 variant: "destructive",
               });
@@ -714,7 +714,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při přidávání odkazu",
+          title: "Error adding link",
           description: error.message,
           variant: "destructive",
         });
@@ -737,8 +737,8 @@ const Index = () => {
         )
       );
       toast({
-        title: "Odkaz přidán",
-        description: `"${link.title}" byl úspěšně přidán.`,
+        title: "Link added",
+        description: `"${link.title}" was successfully added.`,
       });
     }
   };
@@ -762,7 +762,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při upravování odkazu",
+          title: "Error editing link",
           description: error.message,
           variant: "destructive",
         });
@@ -782,8 +782,8 @@ const Index = () => {
         )
       );
       toast({
-        title: "Odkaz upraven",
-        description: `"${link.title}" byl úspěšně upraven.`,
+        title: "Link edited",
+        description: `"${link.title}" was successfully edited.`,
       });
     }
   };
@@ -807,7 +807,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při mazání odkazu",
+          title: "Error deleting link",
           description: error.message,
           variant: "destructive",
         });
@@ -825,8 +825,8 @@ const Index = () => {
         )
       );
       toast({
-        title: "Odkaz smazán",
-        description: `"${link?.title}" byl úspěšně smazán.`,
+        title: "Link deleted",
+        description: `"${link?.title}" was successfully deleted.`,
       });
     }
   };
@@ -858,7 +858,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při upravování kategorie",
+          title: "Error editing category",
           description: error.message,
           variant: "destructive",
         });
@@ -871,8 +871,8 @@ const Index = () => {
         )
       );
       toast({
-        title: "Kategorie upravena",
-        description: "Kategorie byla úspěšně aktualizována.",
+        title: "Category edited",
+        description: "Category was successfully updated.",
       });
     }
   };
@@ -895,7 +895,7 @@ const Index = () => {
 
     if (error) {
       toast({
-        title: "Chyba při přidávání kategorie",
+        title: "Error adding category",
         description: error.message,
         variant: "destructive",
       });
@@ -912,8 +912,8 @@ const Index = () => {
     };
     setCategories((prevCategories) => [...prevCategories, newCategory]);
     toast({
-      title: "Kategorie přidána",
-      description: `Kategorie "${category.title}" byla úspěšně vytvořena.`,
+      title: "Category added",
+      description: `Category "${category.title}" was successfully created.`,
     });
   };
 
@@ -949,7 +949,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při ukládání nastavení",
+          title: "Error saving settings",
           description: error.message,
           variant: "destructive",
         });
@@ -966,7 +966,7 @@ const Index = () => {
 
       if (error) {
         toast({
-          title: "Chyba při ukládání nastavení",
+          title: "Error saving settings",
           description: error.message,
           variant: "destructive",
         });
@@ -993,7 +993,7 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Compass className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Načítání...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -1019,7 +1019,7 @@ const Index = () => {
                   className="gap-2"
                 >
                   <Plus className="h-5 w-5" />
-                  Přidat kategorii
+                  Add category
                 </Button>
               )}
 
@@ -1030,7 +1030,7 @@ const Index = () => {
                   onCheckedChange={setEditMode}
                 />
                 <Label htmlFor="edit-mode" className="cursor-pointer">
-                  Režim úprav
+                  Edit mode
                 </Label>
               </div>
               
@@ -1041,37 +1041,37 @@ const Index = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card">
-                  <DropdownMenuLabel>Motiv</DropdownMenuLabel>
+                  <DropdownMenuLabel>Theme</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => setTheme("light")}>
                     <Sun className="mr-2 h-4 w-4" />
-                    Světlý
+                    Light
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme("dark")}>
                     <Moon className="mr-2 h-4 w-4" />
-                    Tmavý
+                    Dark
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme("system")}>
                     <Laptop className="mr-2 h-4 w-4" />
-                    Systémový
+                    System
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Počet sloupců</DropdownMenuLabel>
+                  <DropdownMenuLabel>Columns</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => handleColumnsChange(3)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
-                    3 sloupce
+                    3 columns
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleColumnsChange(4)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
-                    4 sloupce
+                    4 columns
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleColumnsChange(5)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
-                    5 sloupců
+                    5 columns
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
                     <Share2 className="mr-2 h-4 w-4" />
-                    Sdílet stránku
+                    Share page
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
@@ -1083,14 +1083,14 @@ const Index = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
                         <Shield className="mr-2 h-4 w-4" />
-                        Administrace
+                        Administration
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    Odhlásit se
+                    Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1162,7 +1162,7 @@ const Index = () => {
                     type="text"
                     value={newTabName}
                     onChange={(e) => setNewTabName(e.target.value)}
-                    placeholder="Název záložky..."
+                    placeholder="Tab name..."
                     className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     autoFocus
                     onKeyDown={async (e) => {
@@ -1183,7 +1183,7 @@ const Index = () => {
                         
                         if (error) {
                           toast({
-                            title: "Chyba při přidávání záložky",
+                            title: "Error adding tab",
                             description: error.message,
                             variant: "destructive",
                           });
@@ -1201,8 +1201,8 @@ const Index = () => {
                         setIsAddingTab(false);
                         setActiveTab(newTab.id);
                         toast({
-                          title: "Záložka přidána",
-                          description: `Záložka "${newTab.name}" byla vytvořena.`,
+                          title: "Tab added",
+                          description: `Tab "${newTab.name}" was created.`,
                         });
                       } else if (e.key === 'Escape') {
                         setIsAddingTab(false);
@@ -1218,7 +1218,7 @@ const Index = () => {
                       setNewTabName("");
                     }}
                   >
-                    Zrušit
+                    Cancel
                   </Button>
                 </div>
               ) : (
@@ -1229,7 +1229,7 @@ const Index = () => {
                   className="gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  Přidat záložku
+                  Add tab
                 </Button>
               )
             )}
@@ -1356,7 +1356,7 @@ const Index = () => {
 
             if (error) {
               toast({
-                title: "Chyba při upravování záložky",
+                title: "Error editing tab",
                 description: error.message,
                 variant: "destructive",
               });
@@ -1365,8 +1365,8 @@ const Index = () => {
 
             setTabs(tabs.map(t => t.id === selectedTabId ? { ...t, name: data.name, color: data.color } : t));
             toast({
-              title: "Záložka upravena",
-              description: `Záložka byla úspěšně aktualizována.`,
+              title: "Tab edited",
+              description: `Tab was successfully updated.`,
             });
           }
         }}

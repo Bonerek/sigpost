@@ -21,18 +21,18 @@ export const DeleteLinkDialog = ({ open, onOpenChange, onConfirm, linkTitle }: D
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle>Smazat odkaz?</AlertDialogTitle>
+          <AlertDialogTitle>Delete link?</AlertDialogTitle>
           <AlertDialogDescription>
-            Opravdu chceš smazat odkaz "{linkTitle}"? Tuto akci nelze vrátit zpět.
+            Are you sure you want to delete the link "{linkTitle}"? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Zrušit</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Smazat
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

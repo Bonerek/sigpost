@@ -203,14 +203,14 @@ const SortableLink = ({ link, onEdit, onDelete, editMode }: SortableLinkProps) =
             <DropdownMenuContent align="end" className="w-40 bg-popover z-50">
               <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
                 <Pencil className="mr-2 h-4 w-4" />
-                Upravit
+                Edit
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onDelete} 
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Smazat
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -268,18 +268,18 @@ export const LinkCategory = ({
             <DropdownMenuContent align="end" className="w-48 bg-popover z-50">
               <DropdownMenuItem onClick={onAddLink} className="cursor-pointer">
                 <Plus className="mr-2 h-4 w-4" />
-                Přidat odkaz
+                Add link
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onChangeColor} className="cursor-pointer">
                 <Palette className="mr-2 h-4 w-4" />
-                Upravit kategorii
+                Edit category
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onDeleteCategory} 
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Smazat kategorii
+                Delete category
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

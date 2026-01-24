@@ -44,9 +44,9 @@ export const GridPositionDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Pozice v mřížce</DialogTitle>
+          <DialogTitle>Grid position</DialogTitle>
           <DialogDescription>
-            Nastavte umístění kategorie v mřížce.
+            Set the category placement in the grid.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -58,28 +58,28 @@ export const GridPositionDialog = ({
               onChange={(e) => setNewRow(e.target.checked)}
               className="h-4 w-4"
             />
-            <Label htmlFor="new-row">Začít na novém řádku (sloupec 1)</Label>
+            <Label htmlFor="new-row">Start on new row (column 1)</Label>
           </div>
           
           {!newRow && (
             <div className="grid gap-2">
-              <Label>Pozice sloupce</Label>
+              <Label>Column position</Label>
               <RadioGroup value={columnStart} onValueChange={setColumnStart}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="auto" id="auto" />
-                  <Label htmlFor="auto">Automaticky</Label>
+                  <Label htmlFor="auto">Automatic</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="1" id="col1" />
-                  <Label htmlFor="col1">Sloupec 1</Label>
+                  <Label htmlFor="col1">Column 1</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="2" id="col2" />
-                  <Label htmlFor="col2">Sloupec 2</Label>
+                  <Label htmlFor="col2">Column 2</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="3" id="col3" />
-                  <Label htmlFor="col3">Sloupec 3</Label>
+                  <Label htmlFor="col3">Column 3</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -87,9 +87,9 @@ export const GridPositionDialog = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Zrušit
+            Cancel
           </Button>
-          <Button onClick={handleSave}>Uložit</Button>
+          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
