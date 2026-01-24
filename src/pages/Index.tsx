@@ -334,6 +334,8 @@ const Index = () => {
   const [editTabDialogOpen, setEditTabDialogOpen] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
   const [deleteTabDialogOpen, setDeleteTabDialogOpen] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitleText, setEditingTitleText] = useState("");
   
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -1031,6 +1033,21 @@ const Index = () => {
     return "grid-cols-1 md:grid-cols-5";
   };
 
+  const handleSaveTitle = async () => {
+    setIsEditingTitle(false);
+    const newText = editingTitleText.trim() || "";
+    if (newText !== customText) {
+      setCustomText(newText);
+      document.title = newText || "Signpost";
+      await saveUserSettings(columns, newText);
+    }
+  };
+
+  // Update document title when customText changes
+  useEffect(() => {
+    document.title = customText || "Signpost";
+  }, [customText]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -1049,10 +1066,34 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Compass className="w-8 h-8 text-primary" />
-              {customText && (
-                <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
+              {isEditingTitle ? (
+                <input
+                  type="text"
+                  value={editingTitleText}
+                  onChange={(e) => setEditingTitleText(e.target.value)}
+                  onBlur={() => handleSaveTitle()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSaveTitle();
+                    } else if (e.key === 'Escape') {
+                      setIsEditingTitle(false);
+                      setEditingTitleText(customText);
+                    }
+                  }}
+                  className="text-3xl font-bold text-foreground bg-transparent border-b-2 border-primary focus:outline-none"
+                  autoFocus
+                />
+              ) : (
+                <h1 
+                  className="text-3xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => {
+                    setEditingTitleText(customText || "Signpost");
+                    setIsEditingTitle(true);
+                  }}
+                >
+                  {customText || "Signpost"}
+                </h1>
               )}
-              <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
             </div>
 
             <div className="flex items-center gap-4">
