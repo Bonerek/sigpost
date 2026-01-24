@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { ColorValue } from "./ColorPickerDialog";
+
+interface TabData {
+  id: string;
+  name: string;
+  color: ColorValue;
+}
 
 interface AddCategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (category: { title: string; color: ColorValue }) => void;
+  onAdd: (category: { title: string; color: ColorValue; tabId: string }) => void;
+  tabs: TabData[];
+  activeTabId: string;
 }
 
 const colors: Array<{ value: ColorValue; label: string; class: string }> = [
@@ -39,13 +54,21 @@ const colors: Array<{ value: ColorValue; label: string; class: string }> = [
   { value: "black", label: "Černá", class: "bg-category-black" },
 ];
 
-export const AddCategoryDialog = ({ open, onOpenChange, onAdd }: AddCategoryDialogProps) => {
+export const AddCategoryDialog = ({ open, onOpenChange, onAdd, tabs, activeTabId }: AddCategoryDialogProps) => {
   const [title, setTitle] = useState("");
   const [selectedColor, setSelectedColor] = useState<ColorValue>("blue");
+  const [selectedTabId, setSelectedTabId] = useState(activeTabId);
+
+  // Reset selected tab when dialog opens or activeTabId changes
+  useEffect(() => {
+    if (open) {
+      setSelectedTabId(activeTabId);
+    }
+  }, [open, activeTabId]);
 
   const handleAdd = () => {
-    if (title.trim()) {
-      onAdd({ title: title.trim(), color: selectedColor });
+    if (title.trim() && selectedTabId) {
+      onAdd({ title: title.trim(), color: selectedColor, tabId: selectedTabId });
       setTitle("");
       setSelectedColor("blue");
       onOpenChange(false);
@@ -73,6 +96,21 @@ export const AddCategoryDialog = ({ open, onOpenChange, onAdd }: AddCategoryDial
             />
           </div>
           <div className="grid gap-2">
+            <Label htmlFor="tab">Záložka</Label>
+            <Select value={selectedTabId} onValueChange={setSelectedTabId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Vyberte záložku" />
+              </SelectTrigger>
+              <SelectContent>
+                {tabs.map((tab) => (
+                  <SelectItem key={tab.id} value={tab.id}>
+                    {tab.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
             <Label>Barva</Label>
             <div className="grid grid-cols-6 gap-2">
               {colors.map((color) => (
@@ -95,7 +133,7 @@ export const AddCategoryDialog = ({ open, onOpenChange, onAdd }: AddCategoryDial
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Zrušit
           </Button>
-          <Button onClick={handleAdd} disabled={!title.trim()}>
+          <Button onClick={handleAdd} disabled={!title.trim() || !selectedTabId}>
             Přidat kategorii
           </Button>
         </DialogFooter>
