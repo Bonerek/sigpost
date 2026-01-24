@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           id: string
           position: number
+          tab_id: string | null
           title: string
           updated_at: string
           user_id: string
@@ -31,6 +32,7 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
+          tab_id?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -41,11 +43,19 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
+          tab_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "categories_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "tabs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "categories_user_id_fkey"
             columns: ["user_id"]
@@ -144,6 +154,36 @@ export type Database = {
           id?: string
           registration_enabled?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tabs: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

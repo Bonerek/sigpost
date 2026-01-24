@@ -47,11 +47,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+interface TabData {
+  id: string;
+  name: string;
+  color: ColorValue;
+  position: number;
+}
+
 interface CategoryData {
   id: string;
   title: string;
   color: ColorValue;
   columnIndex: number; // Track which column this category belongs to
+  tabId: string | null; // Track which tab this category belongs to
   links: Array<{
     id: string;
     title: string;
@@ -289,17 +297,14 @@ const Index = () => {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareEnabled, setShareEnabled] = useState(false);
   
-  // Tabs state - mockdata for demonstration
-  const [tabs, setTabs] = useState<Array<{ id: string; name: string; color: ColorValue }>>([
-    { id: "tab-1", name: "IP", color: "blue" },
-    { id: "tab-2", name: "Kultura", color: "purple" },
-    { id: "tab-3", name: "Práce", color: "green" },
-  ]);
-  const [activeTab, setActiveTab] = useState("tab-1");
+  // Tabs state from database
+  const [tabs, setTabs] = useState<TabData[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("");
   const [newTabName, setNewTabName] = useState("");
   const [isAddingTab, setIsAddingTab] = useState(false);
   const [editTabDialogOpen, setEditTabDialogOpen] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
+  const [deleteTabDialogOpen, setDeleteTabDialogOpen] = useState(false);
   
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -335,7 +340,7 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Fetch categories, links, and user settings from database
+  // Fetch tabs, categories, links, and user settings from database
   useEffect(() => {
     if (!user) return;
 
@@ -372,6 +377,57 @@ const Index = () => {
         setShareEnabled(settingsData.share_enabled || false);
       }
       
+      // Fetch tabs
+      let { data: tabsData, error: tabsError } = await supabase
+        .from("tabs")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("position");
+
+      if (tabsError) {
+        toast({
+          title: "Chyba při načítání záložek",
+          description: tabsError.message,
+          variant: "destructive",
+        });
+      }
+
+      // If no tabs exist, create a default "IP" tab
+      if (!tabsData || tabsData.length === 0) {
+        const { data: newTab, error: createTabError } = await supabase
+          .from("tabs")
+          .insert({
+            user_id: user.id,
+            name: "IP",
+            color: "blue",
+            position: 0,
+          })
+          .select()
+          .single();
+
+        if (createTabError) {
+          toast({
+            title: "Chyba při vytváření výchozí záložky",
+            description: createTabError.message,
+            variant: "destructive",
+          });
+        } else {
+          tabsData = [newTab];
+        }
+      }
+
+      const loadedTabs: TabData[] = (tabsData || []).map(tab => ({
+        id: tab.id,
+        name: tab.name,
+        color: tab.color as ColorValue,
+        position: tab.position,
+      }));
+      
+      setTabs(loadedTabs);
+      if (loadedTabs.length > 0 && !activeTab) {
+        setActiveTab(loadedTabs[0].id);
+      }
+      
       // Fetch categories
       const { data: categoriesData, error: categoriesError } = await supabase
         .from("categories")
@@ -389,22 +445,38 @@ const Index = () => {
         return;
       }
 
+      // If there are categories without tab_id, assign them to the first tab
+      const categoriesWithoutTab = (categoriesData || []).filter(cat => !cat.tab_id);
+      if (categoriesWithoutTab.length > 0 && loadedTabs.length > 0) {
+        const firstTabId = loadedTabs[0].id;
+        for (const cat of categoriesWithoutTab) {
+          await supabase
+            .from("categories")
+            .update({ tab_id: firstTabId })
+            .eq("id", cat.id);
+        }
+      }
+
       // Fetch all links
       const categoryIds = categoriesData?.map(c => c.id) || [];
-      const { data: linksData, error: linksError } = await supabase
-        .from("links")
-        .select("*")
-        .in("category_id", categoryIds)
-        .order("position");
+      let linksData: any[] = [];
+      if (categoryIds.length > 0) {
+        const { data: links, error: linksError } = await supabase
+          .from("links")
+          .select("*")
+          .in("category_id", categoryIds)
+          .order("position");
 
-      if (linksError) {
-        toast({
-          title: "Chyba při načítání odkazů",
-          description: linksError.message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
+        if (linksError) {
+          toast({
+            title: "Chyba při načítání odkazů",
+            description: linksError.message,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        linksData = links || [];
       }
 
       // Combine categories with their links
@@ -413,7 +485,8 @@ const Index = () => {
         title: cat.title,
         color: cat.color as ColorValue,
         columnIndex: cat.column_index,
-        links: (linksData || [])
+        tabId: cat.tab_id || (loadedTabs.length > 0 ? loadedTabs[0].id : null),
+        links: linksData
           .filter(link => link.category_id === cat.id)
           .map(link => ({
             id: link.id,
@@ -477,21 +550,67 @@ const Index = () => {
     })
   );
 
-  const handleTabDragEnd = (event: DragEndEvent) => {
+  const handleTabDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
 
-    setTabs((items) => {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      
-      return arrayMove(items, oldIndex, newIndex);
-    });
+    const oldIndex = tabs.findIndex((item) => item.id === active.id);
+    const newIndex = tabs.findIndex((item) => item.id === over.id);
+    
+    const reorderedTabs = arrayMove(tabs, oldIndex, newIndex);
+    setTabs(reorderedTabs);
+
+    // Update positions in database
+    for (let i = 0; i < reorderedTabs.length; i++) {
+      await supabase
+        .from("tabs")
+        .update({ position: i })
+        .eq("id", reorderedTabs[i].id);
+    }
 
     toast({
       title: "Záložky přesunuty",
       description: "Pořadí záložek bylo změněno.",
+    });
+  };
+
+  const handleDeleteTab = async (tabId: string, tabName: string) => {
+    const categoriesInTab = getCategoriesCountForTab(tabId);
+    
+    if (categoriesInTab > 0) {
+      toast({
+        title: "Nelze smazat záložku",
+        description: `Záložka "${tabName}" obsahuje ${categoriesInTab} ${categoriesInTab === 1 ? 'kategorii' : categoriesInTab < 5 ? 'kategorie' : 'kategorií'}. Nejdříve je smažte.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("tabs")
+      .delete()
+      .eq("id", tabId);
+
+    if (error) {
+      toast({
+        title: "Chyba při mazání záložky",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTabs(tabs.filter(t => t.id !== tabId));
+    if (activeTab === tabId) {
+      const remainingTabs = tabs.filter(t => t.id !== tabId);
+      if (remainingTabs.length > 0) {
+        setActiveTab(remainingTabs[0].id);
+      }
+    }
+    toast({
+      title: "Záložka smazána",
+      description: `Záložka "${tabName}" byla odstraněna.`,
     });
   };
 
@@ -759,7 +878,7 @@ const Index = () => {
   };
 
   const handleAddCategory = async (category: { title: string; color: ColorValue }) => {
-    if (!user) return;
+    if (!user || !activeTab) return;
 
     const { data, error } = await supabase
       .from("categories")
@@ -768,7 +887,8 @@ const Index = () => {
         title: category.title,
         color: category.color,
         column_index: 0,
-        position: categories.length,
+        position: categories.filter(c => c.tabId === activeTab).length,
+        tab_id: activeTab,
       })
       .select()
       .single();
@@ -787,6 +907,7 @@ const Index = () => {
       title: data.title,
       color: data.color as ColorValue,
       columnIndex: data.column_index,
+      tabId: data.tab_id,
       links: [],
     };
     setCategories((prevCategories) => [...prevCategories, newCategory]);
@@ -853,8 +974,12 @@ const Index = () => {
     }
   };
 
-  const getCategoriesByColumn = (columnIndex: number) => {
-    return categories.filter(cat => cat.columnIndex === columnIndex);
+  const getCategoriesByColumn = (columnIndex: number, tabId: string) => {
+    return categories.filter(cat => cat.columnIndex === columnIndex && cat.tabId === tabId);
+  };
+
+  const getCategoriesCountForTab = (tabId: string) => {
+    return categories.filter(cat => cat.tabId === tabId).length;
   };
 
   const getGridCols = () => {
@@ -1021,17 +1146,8 @@ const Index = () => {
                           setSelectedTabId(tab.id);
                           setEditTabDialogOpen(true);
                         }}
-                        onDelete={() => {
-                          setTabs(tabs.filter(t => t.id !== tab.id));
-                          if (activeTab === tab.id) {
-                            setActiveTab(tabs[0].id);
-                          }
-                          toast({
-                            title: "Záložka smazána",
-                            description: `Záložka "${tab.name}" byla odstraněna.`,
-                          });
-                        }}
-                        canDelete={tabs.length > 1}
+                        onDelete={() => handleDeleteTab(tab.id, tab.name)}
+                        canDelete={tabs.length > 1 && getCategoriesCountForTab(tab.id) === 0}
                       />
                     );
                   })}
@@ -1049,14 +1165,36 @@ const Index = () => {
                     placeholder="Název záložky..."
                     className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && newTabName.trim()) {
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter' && newTabName.trim() && user) {
                         const availableColors: ColorValue[] = ["blue", "green", "orange", "purple", "red", "cyan", "pink", "yellow", "indigo", "teal"];
                         const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)];
-                        const newTab = {
-                          id: `tab-${Date.now()}`,
-                          name: newTabName.trim(),
-                          color: randomColor,
+                        
+                        const { data: newTabData, error } = await supabase
+                          .from("tabs")
+                          .insert({
+                            user_id: user.id,
+                            name: newTabName.trim(),
+                            color: randomColor,
+                            position: tabs.length,
+                          })
+                          .select()
+                          .single();
+                        
+                        if (error) {
+                          toast({
+                            title: "Chyba při přidávání záložky",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        const newTab: TabData = {
+                          id: newTabData.id,
+                          name: newTabData.name,
+                          color: newTabData.color as ColorValue,
+                          position: newTabData.position,
                         };
                         setTabs([...tabs, newTab]);
                         setNewTabName("");
@@ -1110,7 +1248,7 @@ const Index = () => {
                     <DroppableColumn
                       key={colIndex}
                       columnIndex={colIndex}
-                      categories={getCategoriesByColumn(colIndex)}
+                      categories={getCategoriesByColumn(colIndex, tab.id)}
                       editMode={editMode}
                       onAddLink={handleAddLink}
                       onChangeColor={handleChangeColor}
@@ -1205,8 +1343,22 @@ const Index = () => {
       <EditTabDialog
         open={editTabDialogOpen}
         onOpenChange={setEditTabDialogOpen}
-        onSubmit={(data) => {
+        onSubmit={async (data) => {
           if (selectedTabId) {
+            const { error } = await supabase
+              .from("tabs")
+              .update({ name: data.name, color: data.color })
+              .eq("id", selectedTabId);
+
+            if (error) {
+              toast({
+                title: "Chyba při upravování záložky",
+                description: error.message,
+                variant: "destructive",
+              });
+              return;
+            }
+
             setTabs(tabs.map(t => t.id === selectedTabId ? { ...t, name: data.name, color: data.color } : t));
             toast({
               title: "Záložka upravena",
