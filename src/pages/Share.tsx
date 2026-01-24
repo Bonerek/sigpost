@@ -223,7 +223,6 @@ export default function Share() {
               {customText && (
                 <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
               )}
-              <h1 className="text-3xl font-bold text-foreground">Signpost</h1>
             </div>
 
             <div className="flex items-center gap-4">
