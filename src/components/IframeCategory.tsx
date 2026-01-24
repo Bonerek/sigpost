@@ -106,11 +106,6 @@ export const IframeCategory = ({
       <div className={`${colorClasses[color]} px-4 py-2 flex items-center justify-between`}>
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex items-center gap-2">
-          {refreshInterval > 0 && (
-            <span className="text-sm opacity-80 font-mono">
-              {formatTime(countdown)}
-            </span>
-          )}
           <Button
             variant="ghost"
             size="icon"
