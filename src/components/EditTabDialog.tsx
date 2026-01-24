@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +50,13 @@ export const EditTabDialog = ({
 }: EditTabDialogProps) => {
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState<ColorValue>(initialColor);
+
+  useEffect(() => {
+    if (open) {
+      setName(initialName);
+      setColor(initialColor);
+    }
+  }, [open, initialName, initialColor]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
