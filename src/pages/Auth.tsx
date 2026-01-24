@@ -110,10 +110,12 @@ const Auth = () => {
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className={`grid w-full ${registrationEnabled ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            {registrationEnabled && <TabsTrigger value="signup">Registration</TabsTrigger>}
-          </TabsList>
+          {registrationEnabled && (
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Registration</TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="signin">
             <Card>
