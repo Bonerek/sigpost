@@ -197,6 +197,14 @@ export default function Admin() {
     setLoading(false);
 
     if (error) {
+      if (isLocalDev) {
+        toast({
+          title: "Edge Functions unavailable",
+          description: "For local dev, create users via Supabase Studio (localhost:54323) → Authentication → Add User",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Error creating user",
         description: error.message,
@@ -266,6 +274,16 @@ export default function Admin() {
     setIsDeleting(false);
 
     if (error) {
+      if (isLocalDev) {
+        const sqlCommand = `DELETE FROM auth.users WHERE id = '${deletingUser.user_id}';`;
+        toast({
+          title: "Edge Functions unavailable",
+          description: "Run this SQL in Supabase Studio (localhost:54323): " + sqlCommand,
+          variant: "destructive",
+        });
+        navigator.clipboard.writeText(sqlCommand);
+        return;
+      }
       toast({
         title: "Error deleting",
         description: error.message,
@@ -320,6 +338,8 @@ export default function Admin() {
     setNewPassword("");
   };
 
+  const isLocalDev = import.meta.env.VITE_SUPABASE_PROJECT_ID === "local";
+
   const handleSavePassword = async () => {
     if (!changingPasswordUser || !newPassword) {
       toast({
@@ -357,6 +377,17 @@ export default function Admin() {
     });
 
     if (error) {
+      // For local development, show SQL command as fallback
+      if (isLocalDev) {
+        const sqlCommand = `UPDATE auth.users SET encrypted_password = crypt('${newPassword}', gen_salt('bf')) WHERE id = '${changingPasswordUser.user_id}';`;
+        toast({
+          title: "Edge Functions unavailable",
+          description: "Run this SQL in Supabase Studio (localhost:54323): " + sqlCommand,
+          variant: "destructive",
+        });
+        navigator.clipboard.writeText(sqlCommand);
+        return;
+      }
       toast({
         title: "Error",
         description: "Failed to change password: " + error.message,
@@ -402,6 +433,17 @@ export default function Admin() {
     });
 
     if (error) {
+      if (isLocalDev) {
+        const newStatus = !user.is_active;
+        const sqlCommand = `UPDATE public.profiles SET is_active = ${newStatus} WHERE user_id = '${user.user_id}';`;
+        toast({
+          title: "Edge Functions unavailable",
+          description: "Run this SQL in Supabase Studio (localhost:54323): " + sqlCommand,
+          variant: "destructive",
+        });
+        navigator.clipboard.writeText(sqlCommand);
+        return;
+      }
       toast({
         title: "Error",
         description: "Failed to change access: " + error.message,
