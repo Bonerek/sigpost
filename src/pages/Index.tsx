@@ -1316,11 +1316,6 @@ const Index = () => {
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete page
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
-                    <Info className="mr-2 h-4 w-4" />
-                    Info
-                  </DropdownMenuItem>
                   {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
@@ -1331,6 +1326,10 @@ const Index = () => {
                     </>
                   )}
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
+                    <Info className="mr-2 h-4 w-4" />
+                    Info
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
