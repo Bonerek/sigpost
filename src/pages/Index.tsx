@@ -1158,9 +1158,11 @@ const Index = () => {
     }
 
     const remaining = pages.filter(p => p.id !== activePage);
+    const remainingTabs = tabs.filter(t => t.pageId !== activePage);
     setPages(remaining);
+    setTabs(remainingTabs);
     setActivePage(remaining[0]?.id || "");
-    const newPageTabs = tabs.filter(t => t.pageId === remaining[0]?.id);
+    const newPageTabs = remainingTabs.filter(t => t.pageId === remaining[0]?.id);
     setActiveTab(newPageTabs[0]?.id || "");
     toast({ title: "Page deleted", description: `"${currentPage?.name}" was deleted.` });
   };
