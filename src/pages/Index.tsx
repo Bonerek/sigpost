@@ -1222,11 +1222,15 @@ const Index = () => {
                       {page.name}
                     </DropdownMenuItem>
                   ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleAddPage} className="cursor-pointer">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add new page
-                  </DropdownMenuItem>
+                  {editMode && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleAddPage} className="cursor-pointer">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add new page
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
