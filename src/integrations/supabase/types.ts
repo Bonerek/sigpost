@@ -115,6 +115,33 @@ export type Database = {
           },
         ]
       }
+      pages: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -169,6 +196,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          page_id: string | null
           position: number
           updated_at: string
           user_id: string
@@ -178,6 +206,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          page_id?: string | null
           position?: number
           updated_at?: string
           user_id: string
@@ -187,11 +216,20 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          page_id?: string | null
           position?: number
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tabs_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
