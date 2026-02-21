@@ -180,16 +180,19 @@ export type Database = {
       }
       system_settings: {
         Row: {
+          default_redirect_token: string | null
           id: string
           registration_enabled: boolean
           updated_at: string
         }
         Insert: {
+          default_redirect_token?: string | null
           id?: string
           registration_enabled?: boolean
           updated_at?: string
         }
         Update: {
+          default_redirect_token?: string | null
           id?: string
           registration_enabled?: boolean
           updated_at?: string

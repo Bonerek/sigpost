@@ -28,6 +28,7 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [registrationEnabled, setRegistrationEnabled] = useState(true);
+  const [defaultRedirectToken, setDefaultRedirectToken] = useState("");
   const [loading, setLoading] = useState(true);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
@@ -121,11 +122,12 @@ export default function Admin() {
     // Load system settings
     const { data: settingsData } = await supabase
       .from("system_settings")
-      .select("registration_enabled")
+      .select("registration_enabled, default_redirect_token")
       .single();
 
     if (settingsData) {
       setRegistrationEnabled(settingsData.registration_enabled);
+      setDefaultRedirectToken((settingsData as any).default_redirect_token || "");
     }
 
     setLoading(false);
@@ -150,6 +152,29 @@ export default function Admin() {
     toast({
       title: "Settings saved",
       description: enabled ? "Self-registration is enabled" : "Self-registration is disabled",
+    });
+  };
+
+  const handleSaveRedirectToken = async (tokenOverride?: string) => {
+    const token = tokenOverride !== undefined ? tokenOverride : defaultRedirectToken;
+    const { error } = await supabase
+      .from("system_settings")
+      .update({ default_redirect_token: token || null } as any)
+      .eq("id", (await supabase.from("system_settings").select("id").single()).data?.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save redirect token",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (tokenOverride === "") setDefaultRedirectToken("");
+    toast({
+      title: "Saved",
+      description: token ? "Default redirect is set" : "Default redirect was cleared",
     });
   };
 
@@ -449,6 +474,32 @@ export default function Admin() {
               checked={registrationEnabled}
               onCheckedChange={handleToggleRegistration}
             />
+          </div>
+        </div>
+
+        {/* Default Redirect */}
+        <div className="bg-card rounded-lg p-6 mb-8 border">
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Default page redirect</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Redirect unauthenticated users to a shared page instead of the login screen. Paste the share token from a shared page URL (the part after /share/).
+            </p>
+            <div className="flex items-center gap-3">
+              <Input
+                value={defaultRedirectToken}
+                onChange={(e) => setDefaultRedirectToken(e.target.value)}
+                placeholder="e.g. abc123-def456..."
+                className="max-w-md"
+              />
+              <Button onClick={() => handleSaveRedirectToken()}>
+                Save
+              </Button>
+              {defaultRedirectToken && (
+                <Button variant="outline" onClick={() => handleSaveRedirectToken("")}>
+                  Clear
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 

@@ -17,19 +17,22 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase
       .from('system_settings')
-      .select('registration_enabled')
+      .select('registration_enabled, default_redirect_token')
       .limit(1)
       .single()
 
     if (error) {
       return new Response(
-        JSON.stringify({ registration_enabled: true }), // Default to true if settings don't exist
+        JSON.stringify({ registration_enabled: true, default_redirect_token: null }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     return new Response(
-      JSON.stringify({ registration_enabled: data.registration_enabled }),
+      JSON.stringify({ 
+        registration_enabled: data.registration_enabled,
+        default_redirect_token: data.default_redirect_token || null,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
