@@ -1269,10 +1269,6 @@ const Index = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card z-50">
-                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
                     <Share2 className="mr-2 h-4 w-4" />
                     Share page
@@ -1325,6 +1321,10 @@ const Index = () => {
                     5 columns
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
                     <Info className="mr-2 h-4 w-4" />
                     Info
