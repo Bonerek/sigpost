@@ -1,0 +1,1 @@
+ALTER TABLE public.system_settings ADD COLUMN default_redirect_token text DEFAULT NULL;

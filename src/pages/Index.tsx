@@ -359,6 +359,26 @@ const Index = () => {
 
   // Auth check and session management
   useEffect(() => {
+    const checkRedirectAndAuth = async (session: Session | null) => {
+      if (!session) {
+        // Check if there's a default redirect token
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
+            { headers: { 'Content-Type': 'application/json' } }
+          );
+          const data = await response.json();
+          if (data.default_redirect_token) {
+            navigate(`/share/${data.default_redirect_token}`);
+            return;
+          }
+        } catch (e) {
+          // ignore, fall through to auth
+        }
+        navigate("/auth");
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -366,7 +386,7 @@ const Index = () => {
         setUser(session?.user ?? null);
         
         if (!session) {
-          navigate("/auth");
+          checkRedirectAndAuth(null);
         }
       }
     );
@@ -377,7 +397,7 @@ const Index = () => {
       setUser(session?.user ?? null);
       
       if (!session) {
-        navigate("/auth");
+        checkRedirectAndAuth(null);
       }
     });
 
