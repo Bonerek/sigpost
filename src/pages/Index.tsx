@@ -416,8 +416,6 @@ const Index = () => {
         });
       } else if (settingsData) {
         setColumns(settingsData.column_count as 3 | 4 | 5);
-        setShareToken(settingsData.share_token);
-        setShareEnabled(settingsData.share_enabled || false);
       }
       
       // Fetch pages
@@ -651,6 +649,25 @@ const Index = () => {
     }
   };
 
+  // Load share state from active page
+  useEffect(() => {
+    if (!activePage) return;
+    const loadPageShareState = async () => {
+      const { data } = await supabase
+        .from("pages")
+        .select("share_token, share_enabled")
+        .eq("id", activePage)
+        .maybeSingle();
+      if (data) {
+        setShareToken(data.share_token);
+        setShareEnabled(data.share_enabled || false);
+      } else {
+        setShareToken(null);
+        setShareEnabled(false);
+      }
+    };
+    loadPageShareState();
+  }, [activePage]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -1564,14 +1581,16 @@ const Index = () => {
       <ShareDialog
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
+        pageId={activePage}
+        pageName={pages.find(p => p.id === activePage)?.name || ""}
         shareToken={shareToken}
         shareEnabled={shareEnabled}
         onUpdate={async () => {
-          if (!user) return;
+          if (!activePage) return;
           const { data } = await supabase
-            .from("user_settings")
+            .from("pages")
             .select("share_token, share_enabled")
-            .eq("user_id", user.id)
+            .eq("id", activePage)
             .maybeSingle();
           if (data) {
             setShareToken(data.share_token);

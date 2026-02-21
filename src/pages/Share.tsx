@@ -14,7 +14,7 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { LinkCategory } from "@/components/LinkCategory";
 import { IframeCategory } from "@/components/IframeCategory";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Info, Moon, Sun, Laptop, Menu, ChevronDown, FileText } from "lucide-react";
+import { Info, Moon, Sun, Laptop, Menu } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,18 +30,11 @@ import { useTheme } from "next-themes";
 import type { IconType } from "@/components/AddLinkDialog";
 import type { ColorValue } from "@/components/ColorPickerDialog";
 
-interface PageData {
-  id: string;
-  name: string;
-  position: number;
-}
-
 interface TabData {
   id: string;
   name: string;
   color: ColorValue;
   position: number;
-  pageId: string | null;
 }
 
 interface CategoryData {
@@ -90,12 +83,10 @@ export default function Share() {
   const { theme, setTheme } = useTheme();
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [tabs, setTabs] = useState<TabData[]>([]);
-  const [pages, setPages] = useState<PageData[]>([]);
-  const [activePage, setActivePage] = useState<string>("");
+  const [pageName, setPageName] = useState("Shared Page");
   const [activeTab, setActiveTab] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [columnCount, setColumnCount] = useState(3);
-  const [customText, setCustomText] = useState("My Links");
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
@@ -110,7 +101,6 @@ export default function Share() {
           return;
         }
 
-        // Use edge function to validate token and fetch data securely
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-share-token`,
           {
@@ -138,19 +128,10 @@ export default function Share() {
         }
 
         setColumnCount(data.settings.column_count || 3);
-        const text = data.settings.custom_text || "My Links";
-        setCustomText(text);
-        document.title = text;
-
-        // Load pages
-        const loadedPages: PageData[] = (data.pages || []).map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          position: p.position,
-        }));
-        setPages(loadedPages);
-        const firstPageId = loadedPages.length > 0 ? loadedPages[0].id : "";
-        setActivePage(firstPageId);
+        
+        const name = data.page?.name || "Shared Page";
+        setPageName(name);
+        document.title = name;
 
         // Load tabs
         const loadedTabs: TabData[] = (data.tabs || []).map((tab: any) => ({
@@ -158,21 +139,14 @@ export default function Share() {
           name: tab.name,
           color: tab.color as ColorValue,
           position: tab.position,
-          pageId: tab.page_id || null,
         }));
         setTabs(loadedTabs);
         
-        // Set initial active tab to first tab of first page
-        const firstPageTabs = loadedTabs.filter(t => t.pageId === firstPageId);
-        if (firstPageTabs.length > 0) {
-          setActiveTab(firstPageTabs[0].id);
+        if (loadedTabs.length > 0) {
+          setActiveTab(loadedTabs[0].id);
         }
 
-        // Set document title to first page name
-        const pageTitle = loadedPages.length > 0 ? loadedPages[0].name : (text || "Shared Page");
-        document.title = pageTitle;
-
-        // Organize data from edge function response
+        // Organize categories
         const organizedCategories: CategoryData[] = (data.categories || []).map((cat: any) => ({
           id: cat.id,
           title: cat.title,
@@ -222,17 +196,8 @@ export default function Share() {
     return "grid-cols-1 md:grid-cols-5";
   };
 
-  // Filter tabs and categories by active page
-  const currentPageTabs = tabs.filter(t => t.pageId === activePage);
   const filteredCategories = categories.filter((cat) => cat.tabId === activeTab);
 
-  const handlePageChange = (pageId: string) => {
-    setActivePage(pageId);
-    const pageTabs = tabs.filter(t => t.pageId === pageId);
-    setActiveTab(pageTabs[0]?.id || "");
-  };
-
-  // Organize categories into columns
   const columnCategories = Array.from({ length: columnCount }, (_, i) =>
     filteredCategories.filter((cat) => cat.columnIndex === i)
   );
@@ -248,6 +213,75 @@ export default function Share() {
     );
   }
 
+  const renderCategories = () => (
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className={`grid ${getGridCols()} gap-6`}>
+        {columnCategories.map((columnCats, columnIndex) => (
+          <div key={columnIndex} className="space-y-6">
+            <SortableContext items={columnCats.map((cat) => cat.id)}>
+              {columnCats.map((category) => (
+                category.iframeUrl ? (
+                  <IframeCategory
+                    key={category.id}
+                    title={category.title}
+                    color={category.color}
+                    iframeUrl={category.iframeUrl}
+                    refreshInterval={category.iframeRefreshInterval || 0}
+                    editMode={false}
+                    onChangeColor={() => {}}
+                    onDeleteCategory={() => {}}
+                  />
+                ) : (
+                  <LinkCategory
+                    key={category.id}
+                    title={category.title}
+                    color={category.color}
+                    links={category.links}
+                    editMode={false}
+                    onChangeColor={() => {}}
+                    onDeleteCategory={() => {}}
+                    onAddLink={() => {}}
+                    onEditLink={() => {}}
+                    onDeleteLink={() => {}}
+                    onReorderLinks={() => {}}
+                  />
+                )
+              ))}
+            </SortableContext>
+          </div>
+        ))}
+      </div>
+      <DragOverlay>
+        {activeCategory && (
+          activeCategory.iframeUrl ? (
+            <IframeCategory
+              title={activeCategory.title}
+              color={activeCategory.color}
+              iframeUrl={activeCategory.iframeUrl}
+              refreshInterval={activeCategory.iframeRefreshInterval || 0}
+              editMode={false}
+              onChangeColor={() => {}}
+              onDeleteCategory={() => {}}
+            />
+          ) : (
+            <LinkCategory
+              title={activeCategory.title}
+              color={activeCategory.color}
+              links={activeCategory.links}
+              editMode={false}
+              onChangeColor={() => {}}
+              onDeleteCategory={() => {}}
+              onAddLink={() => {}}
+              onEditLink={() => {}}
+              onDeleteLink={() => {}}
+              onReorderLinks={() => {}}
+            />
+          )
+        )}
+      </DragOverlay>
+    </DndContext>
+  );
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-card border-b border-border">
@@ -255,33 +289,7 @@ export default function Share() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <img src={headerIcon} alt="Signpost" className="w-8 h-8" />
-              {pages.length > 1 ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="gap-2 text-3xl font-bold text-foreground hover:bg-transparent hover:text-primary p-0 h-auto">
-                      {pages.find(p => p.id === activePage)?.name || "Shared Page"}
-                      <ChevronDown className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56 bg-card z-50">
-                    <DropdownMenuLabel>Pages</DropdownMenuLabel>
-                    {pages.map(page => (
-                      <DropdownMenuItem 
-                        key={page.id} 
-                        onClick={() => handlePageChange(page.id)}
-                        className={`cursor-pointer ${page.id === activePage ? 'bg-accent' : ''}`}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        {page.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <h1 className="text-3xl font-bold text-foreground">
-                  {pages[0]?.name || customText}
-                </h1>
-              )}
+              <h1 className="text-3xl font-bold text-foreground">{pageName}</h1>
             </div>
 
             <div className="flex items-center gap-4">
@@ -318,11 +326,11 @@ export default function Share() {
       </header>
 
       <main className="flex-1 px-4 py-4">
-        {currentPageTabs.length > 0 ? (
+        {tabs.length > 0 ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="mb-6">
               <TabsList className="h-auto flex-wrap gap-2 bg-transparent p-0">
-                {currentPageTabs.map((tab) => (
+                {tabs.map((tab) => (
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
@@ -334,152 +342,16 @@ export default function Share() {
               </TabsList>
             </div>
 
-            {currentPageTabs.map((tab) => (
+            {tabs.map((tab) => (
               <TabsContent key={tab.id} value={tab.id} className="mt-0">
-                <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                  <div className={`grid ${getGridCols()} gap-6`}>
-                    {columnCategories.map((columnCats, columnIndex) => (
-                      <div key={columnIndex} className="space-y-6">
-                        <SortableContext items={columnCats.map((cat) => cat.id)}>
-                          {columnCats.map((category) => (
-                            category.iframeUrl ? (
-                              <IframeCategory
-                                key={category.id}
-                                title={category.title}
-                                color={category.color}
-                                iframeUrl={category.iframeUrl}
-                                refreshInterval={category.iframeRefreshInterval || 0}
-                                editMode={false}
-                                onChangeColor={() => {}}
-                                onDeleteCategory={() => {}}
-                              />
-                            ) : (
-                              <LinkCategory
-                                key={category.id}
-                                title={category.title}
-                                color={category.color}
-                                links={category.links}
-                                editMode={false}
-                                onChangeColor={() => {}}
-                                onDeleteCategory={() => {}}
-                                onAddLink={() => {}}
-                                onEditLink={() => {}}
-                                onDeleteLink={() => {}}
-                                onReorderLinks={() => {}}
-                              />
-                            )
-                          ))}
-                        </SortableContext>
-                      </div>
-                    ))}
-                  </div>
-                  <DragOverlay>
-                    {activeCategory && (
-                      activeCategory.iframeUrl ? (
-                        <IframeCategory
-                          title={activeCategory.title}
-                          color={activeCategory.color}
-                          iframeUrl={activeCategory.iframeUrl}
-                          refreshInterval={activeCategory.iframeRefreshInterval || 0}
-                          editMode={false}
-                          onChangeColor={() => {}}
-                          onDeleteCategory={() => {}}
-                        />
-                      ) : (
-                        <LinkCategory
-                          title={activeCategory.title}
-                          color={activeCategory.color}
-                          links={activeCategory.links}
-                          editMode={false}
-                          onChangeColor={() => {}}
-                          onDeleteCategory={() => {}}
-                          onAddLink={() => {}}
-                          onEditLink={() => {}}
-                          onDeleteLink={() => {}}
-                          onReorderLinks={() => {}}
-                        />
-                      )
-                    )}
-                  </DragOverlay>
-                </DndContext>
+                {renderCategories()}
               </TabsContent>
             ))}
           </Tabs>
         ) : (
-          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div className={`grid ${getGridCols()} gap-6`}>
-              {columnCategories.map((columnCats, columnIndex) => (
-                <div key={columnIndex} className="space-y-6">
-                    <SortableContext items={columnCats.map((cat) => cat.id)}>
-                      {columnCats.map((category) => (
-                        category.iframeUrl ? (
-                          <IframeCategory
-                            key={category.id}
-                            title={category.title}
-                            color={category.color}
-                            iframeUrl={category.iframeUrl}
-                            refreshInterval={category.iframeRefreshInterval || 0}
-                            editMode={false}
-                            onChangeColor={() => {}}
-                            onDeleteCategory={() => {}}
-                          />
-                        ) : (
-                          <LinkCategory
-                            key={category.id}
-                            title={category.title}
-                            color={category.color}
-                            links={category.links}
-                            editMode={false}
-                            onChangeColor={() => {}}
-                            onDeleteCategory={() => {}}
-                            onAddLink={() => {}}
-                            onEditLink={() => {}}
-                            onDeleteLink={() => {}}
-                            onReorderLinks={() => {}}
-                          />
-                        )
-                      ))}
-                    </SortableContext>
-                </div>
-              ))}
-            </div>
-            <DragOverlay>
-              {activeCategory && (
-                activeCategory.iframeUrl ? (
-                  <IframeCategory
-                    title={activeCategory.title}
-                    color={activeCategory.color}
-                    iframeUrl={activeCategory.iframeUrl}
-                    refreshInterval={activeCategory.iframeRefreshInterval || 0}
-                    editMode={false}
-                    onChangeColor={() => {}}
-                    onDeleteCategory={() => {}}
-                  />
-                ) : (
-                  <LinkCategory
-                    title={activeCategory.title}
-                    color={activeCategory.color}
-                    links={activeCategory.links}
-                    editMode={false}
-                    onChangeColor={() => {}}
-                    onDeleteCategory={() => {}}
-                    onAddLink={() => {}}
-                    onEditLink={() => {}}
-                    onDeleteLink={() => {}}
-                    onReorderLinks={() => {}}
-                  />
-                )
-              )}
-            </DragOverlay>
-          </DndContext>
+          renderCategories()
         )}
       </main>
-
-      <footer className="bg-card border-t border-border mt-auto">
-        <div className="px-4 py-6 text-center text-muted-foreground">
-          <p>© 2026 · Keeping it operational, with a hint of Tutti Frutti.</p>
-        </div>
-      </footer>
 
       <InfoDialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen} />
     </div>

@@ -121,6 +121,8 @@ export type Database = {
           id: string
           name: string
           position: number
+          share_enabled: boolean | null
+          share_token: string | null
           updated_at: string
           user_id: string
         }
@@ -129,6 +131,8 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          share_enabled?: boolean | null
+          share_token?: string | null
           updated_at?: string
           user_id: string
         }
@@ -137,6 +141,8 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          share_enabled?: boolean | null
+          share_token?: string | null
           updated_at?: string
           user_id?: string
         }

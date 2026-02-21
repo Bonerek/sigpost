@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -23,97 +22,90 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Use the secure function to validate token and get user_id
-    const { data: userId, error: validateError } = await supabase
+    // validate_share_token now returns page_id
+    const { data: pageId, error: validateError } = await supabase
       .rpc("validate_share_token", { token_value: token });
 
-    if (validateError || !userId) {
+    if (validateError || !pageId) {
       return new Response(
         JSON.stringify({ valid: false, error: "Invalid or expired share token" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Fetch user settings (only non-sensitive fields)
-    const { data: settings, error: settingsError } = await supabase
-      .from("user_settings")
-      .select("column_count, custom_text")
-      .eq("user_id", userId)
-      .eq("share_enabled", true)
+    // Fetch the page
+    const { data: page, error: pageError } = await supabase
+      .from("pages")
+      .select("id, name, position, user_id")
+      .eq("id", pageId)
       .single();
 
-    if (settingsError || !settings) {
+    if (pageError || !page) {
       return new Response(
-        JSON.stringify({ valid: false, error: "Settings not found" }),
+        JSON.stringify({ valid: false, error: "Page not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Fetch categories for this user (including tab_id and iframe settings)
-    const { data: categories, error: categoriesError } = await supabase
-      .from("categories")
-      .select("id, title, color, column_index, position, tab_id, iframe_url, iframe_refresh_interval")
+    const userId = page.user_id;
+
+    // Fetch user settings (only non-sensitive fields)
+    const { data: settings } = await supabase
+      .from("user_settings")
+      .select("column_count")
       .eq("user_id", userId)
-      .order("column_index")
-      .order("position");
+      .single();
 
-    if (categoriesError) {
-      throw categoriesError;
-    }
-
-    // Fetch links for these categories
-    const categoryIds = categories?.map((c) => c.id) || [];
-    let links: any[] = [];
-    
-    if (categoryIds.length > 0) {
-      const { data: linksData, error: linksError } = await supabase
-        .from("links")
-        .select("id, category_id, title, url, description, icon, position")
-        .in("category_id", categoryIds)
-        .order("position");
-
-      if (linksError) {
-        throw linksError;
-      }
-      links = linksData || [];
-    }
-
-    // Fetch tabs for this user
+    // Fetch tabs for this page
     const { data: tabs, error: tabsError } = await supabase
       .from("tabs")
       .select("id, name, color, position, page_id")
       .eq("user_id", userId)
+      .eq("page_id", pageId)
       .order("position");
 
-    if (tabsError) {
-      throw tabsError;
-    }
+    if (tabsError) throw tabsError;
 
-    // Fetch pages for this user
-    const { data: pages, error: pagesError } = await supabase
-      .from("pages")
-      .select("id, name, position")
-      .eq("user_id", userId)
-      .order("position");
+    // Fetch categories for these tabs
+    const tabIds = (tabs || []).map((t: any) => t.id);
+    let categories: any[] = [];
+    let links: any[] = [];
 
-    if (pagesError) {
-      throw pagesError;
+    if (tabIds.length > 0) {
+      const { data: catsData, error: catsError } = await supabase
+        .from("categories")
+        .select("id, title, color, column_index, position, tab_id, iframe_url, iframe_refresh_interval")
+        .eq("user_id", userId)
+        .in("tab_id", tabIds)
+        .order("column_index")
+        .order("position");
+
+      if (catsError) throw catsError;
+      categories = catsData || [];
+
+      const categoryIds = categories.map((c: any) => c.id);
+      if (categoryIds.length > 0) {
+        const { data: linksData, error: linksError } = await supabase
+          .from("links")
+          .select("id, category_id, title, url, description, icon, position")
+          .in("category_id", categoryIds)
+          .order("position");
+
+        if (linksError) throw linksError;
+        links = linksData || [];
+      }
     }
 
     return new Response(
       JSON.stringify({
         valid: true,
-        settings: {
-          column_count: settings.column_count,
-          custom_text: settings.custom_text,
-        },
-        categories: categories || [],
-        links: links,
+        page: { id: page.id, name: page.name },
+        settings: { column_count: settings?.column_count || 3 },
+        categories,
+        links,
         tabs: tabs || [],
-        pages: pages || [],
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
