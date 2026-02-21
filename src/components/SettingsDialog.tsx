@@ -54,8 +54,6 @@ interface ExportData {
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (text: string) => void;
-  currentText: string;
   userId: string;
   onDataImported: () => void;
   pageName: string;
@@ -65,26 +63,21 @@ interface SettingsDialogProps {
 export const SettingsDialog = ({
   open,
   onOpenChange,
-  onSave,
-  currentText,
   userId,
   onDataImported,
   pageName,
   onPageNameSave,
 }: SettingsDialogProps) => {
-  const [text, setText] = useState(currentText);
   const [pageNameText, setPageNameText] = useState(pageName);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setText(currentText);
     setPageNameText(pageName);
-  }, [currentText, pageName, open]);
+  }, [pageName, open]);
 
   const handleSave = () => {
-    onSave(text);
     onPageNameSave(pageNameText.trim() || "New page");
     onOpenChange(false);
   };
@@ -303,7 +296,7 @@ export const SettingsDialog = ({
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Edit header text and manage backups.
+            Edit page name and manage backups.
           </DialogDescription>
         </DialogHeader>
         
@@ -316,17 +309,6 @@ export const SettingsDialog = ({
               value={pageNameText}
               onChange={(e) => setPageNameText(e.target.value)}
               placeholder="Enter page name..."
-            />
-          </div>
-
-          {/* Custom Text Section */}
-          <div className="grid gap-2">
-            <Label htmlFor="custom-text">Header text</Label>
-            <Input
-              id="custom-text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Enter text..."
             />
           </div>
 

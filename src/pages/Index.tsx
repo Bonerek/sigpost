@@ -330,7 +330,7 @@ const Index = () => {
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
   const [editMode, setEditMode] = useState(false);
-  const [customText, setCustomText] = useState("");
+  
   const [isAdmin, setIsAdmin] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareEnabled, setShareEnabled] = useState(false);
@@ -348,8 +348,6 @@ const Index = () => {
   const [editTabDialogOpen, setEditTabDialogOpen] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
   const [deleteTabDialogOpen, setDeleteTabDialogOpen] = useState(false);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editingTitleText, setEditingTitleText] = useState("");
   const [deletePageDialogOpen, setDeletePageDialogOpen] = useState(false);
   
   const { toast } = useToast();
@@ -418,7 +416,6 @@ const Index = () => {
         });
       } else if (settingsData) {
         setColumns(settingsData.column_count as 3 | 4 | 5);
-        setCustomText(settingsData.custom_text || "");
         setShareToken(settingsData.share_token);
         setShareEnabled(settingsData.share_enabled || false);
       }
@@ -1043,18 +1040,12 @@ const Index = () => {
 
   const handleColumnsChange = async (newColumns: 3 | 4 | 5) => {
     setColumns(newColumns);
-    await saveUserSettings(newColumns, customText);
+    await saveUserSettings(newColumns);
   };
 
-  const handleCustomTextSave = async (text: string) => {
-    setCustomText(text);
-    await saveUserSettings(columns, text);
-  };
-
-  const saveUserSettings = async (columnCount: number, text: string) => {
+  const saveUserSettings = async (columnCount: number) => {
     if (!user) return;
 
-    // Check if settings exist
     const { data: existingSettings } = await supabase
       .from("user_settings")
       .select("id")
@@ -1062,38 +1053,21 @@ const Index = () => {
       .maybeSingle();
 
     if (existingSettings) {
-      // Update existing settings
       const { error } = await supabase
         .from("user_settings")
-        .update({
-          column_count: columnCount,
-          custom_text: text || null,
-        })
+        .update({ column_count: columnCount })
         .eq("user_id", user.id);
 
       if (error) {
-        toast({
-          title: "Error saving settings",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error saving settings", description: error.message, variant: "destructive" });
       }
     } else {
-      // Insert new settings
       const { error } = await supabase
         .from("user_settings")
-        .insert({
-          user_id: user.id,
-          column_count: columnCount,
-          custom_text: text || null,
-        });
+        .insert({ user_id: user.id, column_count: columnCount });
 
       if (error) {
-        toast({
-          title: "Error saving settings",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error saving settings", description: error.message, variant: "destructive" });
       }
     }
   };
@@ -1169,20 +1143,12 @@ const Index = () => {
     return "grid-cols-1 md:grid-cols-5";
   };
 
-  const handleSaveTitle = async () => {
-    setIsEditingTitle(false);
-    const newText = editingTitleText.trim() || "";
-    if (newText !== customText) {
-      setCustomText(newText);
-      document.title = newText || "Signpost";
-      await saveUserSettings(columns, newText);
-    }
-  };
 
   // Update document title when customText changes
   useEffect(() => {
-    document.title = customText || "Signpost";
-  }, [customText]);
+    const currentPageName = pages.find(p => p.id === activePage)?.name;
+    document.title = currentPageName || "Signpost";
+  }, [activePage, pages]);
 
   if (loading) {
     return (
@@ -1566,8 +1532,6 @@ const Index = () => {
       <SettingsDialog
         open={settingsDialogOpen}
         onOpenChange={setSettingsDialogOpen}
-        onSave={handleCustomTextSave}
-        currentText={customText}
         userId={user?.id || ""}
         onDataImported={() => setRefetchTrigger(prev => prev + 1)}
         pageName={pages.find(p => p.id === activePage)?.name || ""}
@@ -1579,6 +1543,7 @@ const Index = () => {
             return;
           }
           setPages(pages.map(p => p.id === activePage ? { ...p, name } : p));
+          document.title = name || "Signpost";
           toast({ title: "Page renamed", description: `Page renamed to "${name}".` });
         }}
       />
