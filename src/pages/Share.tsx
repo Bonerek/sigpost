@@ -14,7 +14,7 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { LinkCategory } from "@/components/LinkCategory";
 import { IframeCategory } from "@/components/IframeCategory";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Info, Moon, Sun, Laptop, Menu } from "lucide-react";
+import { Info, Moon, Sun, Laptop, Menu, LogIn } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -317,6 +317,11 @@ export default function Share() {
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
                     <Info className="mr-2 h-4 w-4" />
                     Info
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/auth")}>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Sign in
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
