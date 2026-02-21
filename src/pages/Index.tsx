@@ -688,16 +688,6 @@ const Index = () => {
   };
 
   const handleDeleteTab = async (tabId: string, tabName: string) => {
-    const pageTabCount = tabs.filter(t => t.pageId === tabs.find(t2 => t2.id === tabId)?.pageId).length;
-    if (pageTabCount <= 1) {
-      toast({
-        title: "Cannot delete tab",
-        description: "Each page must have at least one tab.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const categoriesInTab = getCategoriesCountForTab(tabId);
     
     if (categoriesInTab > 0) {
@@ -1393,7 +1383,7 @@ const Index = () => {
                           setEditTabDialogOpen(true);
                         }}
                         onDelete={() => handleDeleteTab(tab.id, tab.name)}
-                        canDelete={currentPageTabs.length > 1 && getCategoriesCountForTab(tab.id) === 0}
+                        canDelete={getCategoriesCountForTab(tab.id) === 0}
                       />
                     );
                   })}
