@@ -14,6 +14,7 @@ import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { EditTabDialog } from "@/components/EditTabDialog";
+import { DeletePageDialog } from "@/components/DeletePageDialog";
 import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2, Settings, ChevronDown, FileText } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Switch } from "@/components/ui/switch";
@@ -349,6 +350,7 @@ const Index = () => {
   const [deleteTabDialogOpen, setDeleteTabDialogOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitleText, setEditingTitleText] = useState("");
+  const [deletePageDialogOpen, setDeletePageDialogOpen] = useState(false);
   
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -1138,16 +1140,6 @@ const Index = () => {
     }
 
     const currentPage = pages.find(p => p.id === activePage);
-    const pageTabs = tabs.filter(t => t.pageId === activePage);
-    
-    if (pageTabs.length > 0) {
-      toast({ 
-        title: "Cannot delete page", 
-        description: `Page "${currentPage?.name}" contains ${pageTabs.length} tab(s). Delete them first.`, 
-        variant: "destructive" 
-      });
-      return;
-    }
 
     const { error } = await supabase.from("pages").delete().eq("id", activePage);
     if (error) {
@@ -1309,7 +1301,7 @@ const Index = () => {
                     Share page
                   </DropdownMenuItem>
                   <DropdownMenuItem 
-                    onClick={handleDeletePage} 
+                    onClick={() => setDeletePageDialogOpen(true)} 
                     className="cursor-pointer text-destructive focus:text-destructive"
                     disabled={pages.length <= 1}
                   >
@@ -1632,6 +1624,14 @@ const Index = () => {
         }}
         initialName={tabs.find(t => t.id === selectedTabId)?.name || ""}
         initialColor={tabs.find(t => t.id === selectedTabId)?.color || "blue"}
+      />
+
+      <DeletePageDialog
+        open={deletePageDialogOpen}
+        onOpenChange={setDeletePageDialogOpen}
+        onConfirm={handleDeletePage}
+        pageName={pages.find(p => p.id === activePage)?.name || ""}
+        tabCount={tabs.filter(t => t.pageId === activePage).length}
       />
 
       <footer className="bg-card border-t border-border mt-auto">
