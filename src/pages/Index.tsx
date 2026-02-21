@@ -1202,7 +1202,7 @@ const Index = () => {
                       className={`cursor-pointer ${page.id === activePage ? 'bg-accent' : ''}`}
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      {page.name}
+                      <span className="truncate max-w-[180px]">{page.name}</span>
                     </DropdownMenuItem>
                   ))}
                   {editMode && (
