@@ -326,7 +326,8 @@ export const SettingsDialog = ({
             <Input
               id="page-name"
               value={pageNameText}
-              onChange={(e) => setPageNameText(e.target.value)}
+              onChange={(e) => setPageNameText(e.target.value.slice(0, 60))}
+              maxLength={60}
               placeholder="Enter page name..."
             />
           </div>
