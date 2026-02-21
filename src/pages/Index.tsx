@@ -1208,36 +1208,33 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <img src={headerIcon} alt="Signpost" className="w-8 h-8" />
-              {isEditingTitle && editMode ? (
-                <input
-                  type="text"
-                  value={editingTitleText}
-                  onChange={(e) => setEditingTitleText(e.target.value)}
-                  onBlur={() => handleSaveTitle()}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveTitle();
-                    } else if (e.key === 'Escape') {
-                      setIsEditingTitle(false);
-                      setEditingTitleText(customText);
-                    }
-                  }}
-                  className="text-3xl font-bold text-foreground bg-transparent border-b-2 border-primary focus:outline-none"
-                  autoFocus
-                />
-              ) : (
-                <h1 
-                  className={`text-3xl font-bold text-foreground ${editMode ? 'cursor-pointer hover:text-primary transition-colors' : ''}`}
-                  onClick={() => {
-                    if (editMode) {
-                      setEditingTitleText(customText || "Signpost");
-                      setIsEditingTitle(true);
-                    }
-                  }}
-                >
-                  {customText || "Signpost"}
-                </h1>
-              )}
+              {/* Page selector dropdown as page title */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-2 text-3xl font-bold text-foreground hover:bg-transparent hover:text-primary p-0 h-auto">
+                    {pages.find(p => p.id === activePage)?.name || "Signpost"}
+                    <ChevronDown className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-card z-50">
+                  <DropdownMenuLabel>Pages</DropdownMenuLabel>
+                  {pages.map(page => (
+                    <DropdownMenuItem 
+                      key={page.id} 
+                      onClick={() => handlePageChange(page.id)}
+                      className={`cursor-pointer ${page.id === activePage ? 'bg-accent' : ''}`}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      {page.name}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleAddPage} className="cursor-pointer">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add new page
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="flex items-center gap-4">
@@ -1262,34 +1259,7 @@ const Index = () => {
                 </Label>
               </div>
 
-              {/* Page selector dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <FileText className="h-4 w-4" />
-                    {pages.find(p => p.id === activePage)?.name || "Select page"}
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card z-50">
-                  <DropdownMenuLabel>Pages</DropdownMenuLabel>
-                  {pages.map(page => (
-                    <DropdownMenuItem 
-                      key={page.id} 
-                      onClick={() => handlePageChange(page.id)}
-                      className={`cursor-pointer ${page.id === activePage ? 'bg-accent' : ''}`}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      {page.name}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleAddPage} className="cursor-pointer">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add new page
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
 
               {/* Page actions menu */}
               <DropdownMenu>
