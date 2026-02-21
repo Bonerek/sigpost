@@ -1201,7 +1201,7 @@ const Index = () => {
               collisionDetection={closestCenter}
               onDragEnd={handleTabDragEnd}
             >
-              <TabsList className="justify-start">
+              <TabsList className="justify-start gap-1">
                 <SortableContext
                   items={tabs.map((tab) => tab.id)}
                   strategy={verticalListSortingStrategy}
