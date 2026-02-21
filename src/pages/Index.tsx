@@ -359,9 +359,11 @@ const Index = () => {
 
   // Auth check and session management
   useEffect(() => {
-    const checkRedirectAndAuth = async (session: Session | null) => {
-      if (!session) {
-        // Check if there's a default redirect token
+    let isInitialCheck = true;
+
+    const redirectToDefaultOrAuth = async () => {
+      // Only check for shared page redirect on initial load, not on logout
+      if (isInitialCheck) {
         try {
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
@@ -375,8 +377,8 @@ const Index = () => {
         } catch (e) {
           // ignore, fall through to auth
         }
-        navigate("/auth");
       }
+      navigate("/auth");
     };
 
     // Set up auth state listener
@@ -386,7 +388,7 @@ const Index = () => {
         setUser(session?.user ?? null);
         
         if (!session) {
-          checkRedirectAndAuth(null);
+          navigate("/auth");
         }
       }
     );
@@ -397,8 +399,9 @@ const Index = () => {
       setUser(session?.user ?? null);
       
       if (!session) {
-        checkRedirectAndAuth(null);
+        redirectToDefaultOrAuth();
       }
+      isInitialCheck = false;
     });
 
     return () => subscription.unsubscribe();
