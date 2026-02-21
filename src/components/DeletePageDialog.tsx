@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,6 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface DeletePageDialogProps {
   open: boolean;
@@ -24,6 +27,12 @@ export const DeletePageDialog = ({
   pageName,
   tabCount,
 }: DeletePageDialogProps) => {
+  const [confirmText, setConfirmText] = useState("");
+
+  useEffect(() => {
+    if (open) setConfirmText("");
+  }, [open]);
+
   const handleConfirm = () => {
     onConfirm();
     onOpenChange(false);
@@ -46,11 +55,24 @@ export const DeletePageDialog = ({
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="grid gap-2 py-2">
+          <Label htmlFor="confirm-delete">
+            Type <strong>DELETE</strong> to confirm
+          </Label>
+          <Input
+            id="confirm-delete"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="DELETE"
+            autoComplete="off"
+          />
+        </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             className="bg-destructive hover:bg-destructive/90"
+            disabled={confirmText !== "DELETE"}
           >
             Delete
           </AlertDialogAction>
