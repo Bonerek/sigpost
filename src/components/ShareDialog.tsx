@@ -11,12 +11,14 @@ import { Label } from "@/components/ui/label";
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  pageId: string;
+  pageName: string;
   shareToken: string | null;
   shareEnabled: boolean;
   onUpdate: () => void;
 }
 
-export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUpdate }: ShareDialogProps) {
+export function ShareDialog({ open, onOpenChange, pageId, pageName, shareToken, shareEnabled, onUpdate }: ShareDialogProps) {
   const [loading, setLoading] = useState(false);
 
   const generateToken = () => {
@@ -26,18 +28,15 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
   const handleToggleShare = async (enabled: boolean) => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User is not logged in");
-
       const newToken = enabled && !shareToken ? generateToken() : shareToken;
 
       const { error } = await supabase
-        .from("user_settings")
+        .from("pages")
         .update({
           share_enabled: enabled,
           share_token: newToken
         })
-        .eq("user_id", user.id);
+        .eq("id", pageId);
 
       if (error) throw error;
 
@@ -54,15 +53,12 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
   const handleRegenerateToken = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User is not logged in");
-
       const newToken = generateToken();
 
       const { error } = await supabase
-        .from("user_settings")
+        .from("pages")
         .update({ share_token: newToken })
-        .eq("user_id", user.id);
+        .eq("id", pageId);
 
       if (error) throw error;
 
@@ -90,7 +86,7 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
-            Share page
+            Share "{pageName}"
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
@@ -127,7 +123,7 @@ export function ShareDialog({ open, onOpenChange, shareToken, shareEnabled, onUp
               </Button>
 
               <p className="text-sm text-muted-foreground">
-                Anyone with this link can view your page without signing in (read-only).
+                Anyone with this link can view this page without signing in (read-only).
               </p>
             </>
           )}
