@@ -37,8 +37,8 @@ export const DeletePageDialog = ({
           <AlertDialogDescription>
             Are you sure you want to delete the page <strong>"{pageName}"</strong>?
             {tabCount > 0 && (
-              <span className="block mt-2 text-destructive">
-                This page contains {tabCount} {tabCount === 1 ? 'tab' : 'tabs'}. Delete them first.
+              <span className="block mt-2">
+                This will also delete {tabCount} {tabCount === 1 ? 'tab' : 'tabs'} and all their categories and links.
               </span>
             )}
             <span className="block mt-2">
@@ -51,7 +51,6 @@ export const DeletePageDialog = ({
           <AlertDialogAction
             onClick={handleConfirm}
             className="bg-destructive hover:bg-destructive/90"
-            disabled={tabCount > 0}
           >
             Delete
           </AlertDialogAction>
