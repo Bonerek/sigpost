@@ -1234,33 +1234,35 @@ const Index = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Page actions menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 bg-card z-50">
-                  <DropdownMenuLabel>Page</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share page
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => setDeletePageDialogOpen(true)} 
-                    className="cursor-pointer text-destructive focus:text-destructive"
-                    disabled={pages.length <= 1}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete page
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Page actions menu - edit mode only */}
+              {editMode && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 bg-card z-50">
+                    <DropdownMenuLabel>Page</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share page
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setDeletePageDialogOpen(true)} 
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                      disabled={pages.length <= 1}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete page
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             <div className="flex items-center gap-4">
