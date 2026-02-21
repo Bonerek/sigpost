@@ -12,10 +12,10 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import { ColorPickerDialog, type ColorValue } from "@/components/ColorPickerDialog";
 import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
-import { ShareDialog } from "@/components/ShareDialog";
+
 import { EditTabDialog } from "@/components/EditTabDialog";
 import { DeletePageDialog } from "@/components/DeletePageDialog";
-import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2, Settings, ChevronDown, FileText } from "lucide-react";
+import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, X, MoreVertical, Pencil, Trash2, ChevronDown, FileText } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -325,7 +325,7 @@ const Index = () => {
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [columns, setColumns] = useState<3 | 4 | 5>(3);
@@ -1228,12 +1228,8 @@ const Index = () => {
                   <DropdownMenuContent align="start" className="w-56 bg-card z-50">
                     <DropdownMenuLabel>Page</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
-                      <Share2 className="mr-2 h-4 w-4" />
-                      Share page
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => setDeletePageDialogOpen(true)} 
@@ -1563,6 +1559,21 @@ const Index = () => {
           document.title = name || "Signpost";
           toast({ title: "Page renamed", description: `Page renamed to "${name}".` });
         }}
+        pageId={activePage}
+        shareToken={shareToken}
+        shareEnabled={shareEnabled}
+        onShareUpdate={async () => {
+          if (!activePage) return;
+          const { data } = await supabase
+            .from("pages")
+            .select("share_token, share_enabled")
+            .eq("id", activePage)
+            .maybeSingle();
+          if (data) {
+            setShareToken(data.share_token);
+            setShareEnabled(data.share_enabled || false);
+          }
+        }}
       />
 
       <AddCategoryDialog
@@ -1578,26 +1589,6 @@ const Index = () => {
         onOpenChange={setInfoDialogOpen}
       />
 
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        pageId={activePage}
-        pageName={pages.find(p => p.id === activePage)?.name || ""}
-        shareToken={shareToken}
-        shareEnabled={shareEnabled}
-        onUpdate={async () => {
-          if (!activePage) return;
-          const { data } = await supabase
-            .from("pages")
-            .select("share_token, share_enabled")
-            .eq("id", activePage)
-            .maybeSingle();
-          if (data) {
-            setShareToken(data.share_token);
-            setShareEnabled(data.share_enabled || false);
-          }
-        }}
-      />
 
       <EditTabDialog
         open={editTabDialogOpen}

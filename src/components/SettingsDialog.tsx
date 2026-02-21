@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Download, Upload, AlertCircle } from "lucide-react";
+import { Download, Upload, AlertCircle, Copy, RefreshCw, Pencil } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -58,6 +59,10 @@ interface SettingsDialogProps {
   onDataImported: () => void;
   pageName: string;
   onPageNameSave: (name: string) => void;
+  pageId: string;
+  shareToken: string | null;
+  shareEnabled: boolean;
+  onShareUpdate: () => void;
 }
 
 export const SettingsDialog = ({
@@ -67,10 +72,15 @@ export const SettingsDialog = ({
   onDataImported,
   pageName,
   onPageNameSave,
+  pageId,
+  shareToken,
+  shareEnabled,
+  onShareUpdate,
 }: SettingsDialogProps) => {
   const [pageNameText, setPageNameText] = useState(pageName);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,51 +92,92 @@ export const SettingsDialog = ({
     onOpenChange(false);
   };
 
+  // Share functionality
+  const generateToken = () => {
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+  };
+
+  const handleToggleShare = async (enabled: boolean) => {
+    setShareLoading(true);
+    try {
+      const newToken = enabled && !shareToken ? generateToken() : shareToken;
+      const { error } = await supabase
+        .from("pages")
+        .update({ share_enabled: enabled, share_token: newToken })
+        .eq("id", pageId);
+      if (error) throw error;
+      toast.success(enabled ? "Sharing enabled" : "Sharing disabled");
+      onShareUpdate();
+    } catch (error) {
+      console.error("Error toggling share:", error);
+      toast.error("Failed to change sharing settings");
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const handleRegenerateToken = async () => {
+    setShareLoading(true);
+    try {
+      const newToken = generateToken();
+      const { error } = await supabase
+        .from("pages")
+        .update({ share_token: newToken })
+        .eq("id", pageId);
+      if (error) throw error;
+      toast.success("New link generated");
+      onShareUpdate();
+    } catch (error) {
+      console.error("Error regenerating token:", error);
+      toast.error("Failed to generate new link");
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    const shareUrl = `${window.location.origin}/share/${shareToken}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Link copied");
+  };
+
+  const shareUrl = shareToken ? `${window.location.origin}/share/${shareToken}` : "";
+
+  // Export/Import functionality
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      // Fetch all tabs
       const { data: tabs, error: tabsError } = await supabase
         .from("tabs")
         .select("*")
         .eq("user_id", userId)
         .order("position");
-
       if (tabsError) throw tabsError;
 
-      // Fetch all categories
       const { data: categories, error: categoriesError } = await supabase
         .from("categories")
         .select("*")
         .eq("user_id", userId)
         .order("position");
-
       if (categoriesError) throw categoriesError;
 
-      // Fetch all links
       const categoryIds = categories?.map((c) => c.id) || [];
       let links: any[] = [];
-      
       if (categoryIds.length > 0) {
         const { data: linksData, error: linksError } = await supabase
           .from("links")
           .select("*")
           .in("category_id", categoryIds)
           .order("position");
-
         if (linksError) throw linksError;
         links = linksData || [];
       }
 
-      // Create tab id to name mapping
       const tabIdToName = new Map(tabs?.map((t) => [t.id, t.name]) || []);
-      
-      // Create category id to info mapping
       const categoryIdToInfo = new Map(
         categories?.map((c) => [c.id, { title: c.title, tab_id: c.tab_id }]) || []
       );
 
-      // Build export data
       const exportData: ExportData = {
         version: "1.0",
         exported_at: new Date().toISOString(),
@@ -158,10 +209,7 @@ export const SettingsDialog = ({
         }),
       };
 
-      // Download as JSON file
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: "application/json",
-      });
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -170,7 +218,6 @@ export const SettingsDialog = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
       toast.success("Data exported successfully");
     } catch (error) {
       console.error("Export error:", error);
@@ -193,40 +240,25 @@ export const SettingsDialog = ({
       const text = await file.text();
       const data: ExportData = JSON.parse(text);
 
-      // Validate structure
       if (!data.version || !data.tabs || !data.categories || !data.links) {
         throw new Error("Invalid file format");
       }
 
-      // Create tabs first and build name to id mapping
       const tabNameToId = new Map<string, string>();
-      
       for (const tab of data.tabs) {
         const { data: newTab, error } = await supabase
           .from("tabs")
-          .insert({
-            user_id: userId,
-            name: tab.name,
-            color: tab.color,
-            position: tab.position,
-          })
+          .insert({ user_id: userId, name: tab.name, color: tab.color, position: tab.position })
           .select()
           .single();
-
         if (error) throw error;
-        if (newTab) {
-          tabNameToId.set(tab.name, newTab.id);
-        }
+        if (newTab) tabNameToId.set(tab.name, newTab.id);
       }
 
-      // Create categories and build title+tab to id mapping
-      const categoryKey = (title: string, tabName: string | null) => 
-        `${title}::${tabName || ""}`;
+      const categoryKey = (title: string, tabName: string | null) => `${title}::${tabName || ""}`;
       const categoryToId = new Map<string, string>();
-
       for (const category of data.categories) {
         const tabId = category.tab_name ? tabNameToId.get(category.tab_name) : null;
-        
         const { data: newCategory, error } = await supabase
           .from("categories")
           .insert({
@@ -241,24 +273,16 @@ export const SettingsDialog = ({
           })
           .select()
           .single();
-
         if (error) throw error;
-        if (newCategory) {
-          categoryToId.set(categoryKey(category.title, category.tab_name), newCategory.id);
-        }
+        if (newCategory) categoryToId.set(categoryKey(category.title, category.tab_name), newCategory.id);
       }
 
-      // Create links
       for (const link of data.links) {
-        const categoryId = categoryToId.get(
-          categoryKey(link.category_title, link.tab_name)
-        );
-        
+        const categoryId = categoryToId.get(categoryKey(link.category_title, link.tab_name));
         if (!categoryId) {
           console.warn(`Category not found for link: ${link.title}`);
           continue;
         }
-
         const { error } = await supabase.from("links").insert({
           category_id: categoryId,
           title: link.title,
@@ -267,26 +291,18 @@ export const SettingsDialog = ({
           icon: link.icon,
           position: link.position,
         });
-
         if (error) throw error;
       }
 
-      toast.success(
-        `Import complete: ${data.tabs.length} tabs, ${data.categories.length} categories, ${data.links.length} links`
-      );
+      toast.success(`Import complete: ${data.tabs.length} tabs, ${data.categories.length} categories, ${data.links.length} links`);
       onDataImported();
       onOpenChange(false);
     } catch (error) {
       console.error("Import error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Error importing data"
-      );
+      toast.error(error instanceof Error ? error.message : "Error importing data");
     } finally {
       setIsImporting(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -294,9 +310,12 @@ export const SettingsDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="h-5 w-5" />
+            Edit page
+          </DialogTitle>
           <DialogDescription>
-            Edit page name and manage backups.
+            Edit page name, sharing, and manage backups.
           </DialogDescription>
         </DialogHeader>
         
@@ -310,6 +329,46 @@ export const SettingsDialog = ({
               onChange={(e) => setPageNameText(e.target.value)}
               placeholder="Enter page name..."
             />
+          </div>
+
+          <Separator className="my-2" />
+
+          {/* Share Section */}
+          <div className="grid gap-3">
+            <Label>Sharing</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="share-enabled" className="text-sm font-normal text-muted-foreground">Enable public sharing</Label>
+              <Switch
+                id="share-enabled"
+                checked={shareEnabled}
+                onCheckedChange={handleToggleShare}
+                disabled={shareLoading}
+              />
+            </div>
+
+            {shareEnabled && shareToken && (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input value={shareUrl} readOnly className="text-xs" />
+                  <Button size="icon" variant="outline" onClick={handleCopyLink}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleRegenerateToken}
+                  disabled={shareLoading}
+                  className="w-full"
+                  size="sm"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Generate new link
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Anyone with this link can view this page without signing in (read-only).
+                </p>
+              </div>
+            )}
           </div>
 
           <Separator className="my-2" />
