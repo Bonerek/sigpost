@@ -1237,7 +1237,7 @@ const Index = () => {
                       disabled={pages.length <= 1}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete page
+                      Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
