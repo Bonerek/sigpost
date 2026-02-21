@@ -359,31 +359,40 @@ const Index = () => {
 
   // Auth check and session management
   useEffect(() => {
-    let isInitialCheck = true;
+    let initialCheckDone = false;
 
     const redirectToDefaultOrAuth = async () => {
-      // Only check for shared page redirect on initial load, not on logout
-      if (isInitialCheck) {
-        try {
-          const response = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
-            { headers: { 'Content-Type': 'application/json' } }
-          );
-          const data = await response.json();
-          if (data.default_redirect_token) {
-            navigate(`/share/${data.default_redirect_token}`);
-            return;
-          }
-        } catch (e) {
-          // ignore, fall through to auth
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        const data = await response.json();
+        if (data.default_redirect_token) {
+          navigate(`/share/${data.default_redirect_token}`);
+          return;
         }
+      } catch (e) {
+        // ignore, fall through to auth
       }
       navigate("/auth");
     };
 
-    // Set up auth state listener
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (!session) {
+        redirectToDefaultOrAuth();
+      }
+      initialCheckDone = true;
+    });
+
+    // Set up auth state listener for subsequent changes (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!initialCheckDone) return; // Skip events during initial check
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -392,17 +401,6 @@ const Index = () => {
         }
       }
     );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (!session) {
-        redirectToDefaultOrAuth();
-      }
-      isInitialCheck = false;
-    });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
