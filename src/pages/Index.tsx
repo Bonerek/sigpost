@@ -1559,6 +1559,17 @@ const Index = () => {
         currentText={customText}
         userId={user?.id || ""}
         onDataImported={() => setRefetchTrigger(prev => prev + 1)}
+        pageName={pages.find(p => p.id === activePage)?.name || ""}
+        onPageNameSave={async (name: string) => {
+          if (!activePage) return;
+          const { error } = await supabase.from("pages").update({ name }).eq("id", activePage);
+          if (error) {
+            toast({ title: "Error renaming page", description: error.message, variant: "destructive" });
+            return;
+          }
+          setPages(pages.map(p => p.id === activePage ? { ...p, name } : p));
+          toast({ title: "Page renamed", description: `Page renamed to "${name}".` });
+        }}
       />
 
       <AddCategoryDialog
