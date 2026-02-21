@@ -1299,6 +1299,7 @@ const Index = () => {
                     5 columns
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Page</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
@@ -1307,11 +1308,6 @@ const Index = () => {
                     <Share2 className="mr-2 h-4 w-4" />
                     Share page
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
-                    <Info className="mr-2 h-4 w-4" />
-                    Info
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={handleDeletePage} 
                     className="cursor-pointer text-destructive focus:text-destructive"
@@ -1319,6 +1315,11 @@ const Index = () => {
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete page
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
+                    <Info className="mr-2 h-4 w-4" />
+                    Info
                   </DropdownMenuItem>
                   {isAdmin && (
                     <>
