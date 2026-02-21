@@ -824,7 +824,7 @@ const Index = () => {
     setColorPickerDialogOpen(true);
   };
 
-  const handleAddLinkSubmit = async (link: { title: string; url: string; description?: string }) => {
+  const handleAddLinkSubmit = async (link: { title: string; url: string; description?: string; icon?: string }) => {
     if (selectedCategoryId) {
       const { data, error } = await supabase
         .from("links")
@@ -833,6 +833,7 @@ const Index = () => {
           title: link.title,
           url: link.url,
           description: link.description || null,
+          icon: link.icon || null,
           position: selectedCategory?.links.length || 0,
         })
         .select()
