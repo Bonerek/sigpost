@@ -14,7 +14,7 @@ import { AddCategoryDialog } from "@/components/AddCategoryDialog";
 import { InfoDialog } from "@/components/InfoDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { EditTabDialog } from "@/components/EditTabDialog";
-import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2, Settings } from "lucide-react";
+import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, Share2, X, MoreVertical, Pencil, Trash2, Settings, ChevronDown, FileText } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -49,11 +49,18 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+interface PageData {
+  id: string;
+  name: string;
+  position: number;
+}
+
 interface TabData {
   id: string;
   name: string;
   color: ColorValue;
   position: number;
+  pageId: string | null;
 }
 
 interface CategoryData {
@@ -328,6 +335,10 @@ const Index = () => {
   const [shareEnabled, setShareEnabled] = useState(false);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   
+  // Pages state
+  const [pages, setPages] = useState<PageData[]>([]);
+  const [activePage, setActivePage] = useState<string>("");
+
   // Tabs state from database
   const [tabs, setTabs] = useState<TabData[]>([]);
   const [activeTab, setActiveTab] = useState<string>("");
@@ -410,6 +421,54 @@ const Index = () => {
         setShareEnabled(settingsData.share_enabled || false);
       }
       
+      // Fetch pages
+      let { data: pagesData, error: pagesError } = await supabase
+        .from("pages")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("position");
+
+      if (pagesError) {
+        toast({
+          title: "Error loading pages",
+          description: pagesError.message,
+          variant: "destructive",
+        });
+      }
+
+      // If no pages exist, create a default page
+      if (!pagesData || pagesData.length === 0) {
+        const { data: newPage, error: createPageError } = await supabase
+          .from("pages")
+          .insert({
+            user_id: user.id,
+            name: "New page 1",
+            position: 0,
+          })
+          .select()
+          .single();
+
+        if (createPageError) {
+          toast({
+            title: "Error creating default page",
+            description: createPageError.message,
+            variant: "destructive",
+          });
+        } else {
+          pagesData = [newPage];
+        }
+      }
+
+      const loadedPages: PageData[] = (pagesData || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        position: p.position,
+      }));
+      setPages(loadedPages);
+      if (loadedPages.length > 0 && !activePage) {
+        setActivePage(loadedPages[0].id);
+      }
+
       // Fetch tabs
       let { data: tabsData, error: tabsError } = await supabase
         .from("tabs")
@@ -425,6 +484,8 @@ const Index = () => {
         });
       }
 
+      const currentPageId = loadedPages.length > 0 ? (activePage || loadedPages[0].id) : null;
+
       // If no tabs exist, create a default "IP" tab
       if (!tabsData || tabsData.length === 0) {
         const { data: newTab, error: createTabError } = await supabase
@@ -434,6 +495,7 @@ const Index = () => {
             name: "IP",
             color: "blue",
             position: 0,
+            page_id: currentPageId,
           })
           .select()
           .single();
@@ -449,16 +511,29 @@ const Index = () => {
         }
       }
 
+      // Assign tabs without page_id to the first page
+      if (currentPageId && tabsData) {
+        for (const tab of tabsData) {
+          if (!tab.page_id) {
+            await supabase.from("tabs").update({ page_id: currentPageId }).eq("id", tab.id);
+            tab.page_id = currentPageId;
+          }
+        }
+      }
+
       const loadedTabs: TabData[] = (tabsData || []).map(tab => ({
         id: tab.id,
         name: tab.name,
         color: tab.color as ColorValue,
         position: tab.position,
+        pageId: tab.page_id,
       }));
       
       setTabs(loadedTabs);
-      if (loadedTabs.length > 0 && !activeTab) {
-        setActiveTab(loadedTabs[0].id);
+      // Set active tab to first tab of active page
+      const activePageTabs = loadedTabs.filter(t => t.pageId === currentPageId);
+      if (activePageTabs.length > 0 && !activeTab) {
+        setActiveTab(activePageTabs[0].id);
       }
       
       // Fetch categories
@@ -1021,12 +1096,77 @@ const Index = () => {
     }
   };
 
+  const currentPageTabs = tabs.filter(t => t.pageId === activePage);
+
   const getCategoriesByColumn = (columnIndex: number, tabId: string) => {
     return categories.filter(cat => cat.columnIndex === columnIndex && cat.tabId === tabId);
   };
 
   const getCategoriesCountForTab = (tabId: string) => {
     return categories.filter(cat => cat.tabId === tabId).length;
+  };
+
+  const handleAddPage = async () => {
+    if (!user) return;
+    const pageNumber = pages.length + 1;
+    const { data, error } = await supabase
+      .from("pages")
+      .insert({
+        user_id: user.id,
+        name: `New page ${pageNumber}`,
+        position: pages.length,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({ title: "Error creating page", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    const newPage: PageData = { id: data.id, name: data.name, position: data.position };
+    setPages([...pages, newPage]);
+    setActivePage(newPage.id);
+    setActiveTab("");
+    toast({ title: "Page created", description: `"${newPage.name}" was created.` });
+  };
+
+  const handleDeletePage = async () => {
+    if (!activePage || pages.length <= 1) {
+      toast({ title: "Cannot delete page", description: "You must have at least one page.", variant: "destructive" });
+      return;
+    }
+
+    const currentPage = pages.find(p => p.id === activePage);
+    const pageTabs = tabs.filter(t => t.pageId === activePage);
+    
+    if (pageTabs.length > 0) {
+      toast({ 
+        title: "Cannot delete page", 
+        description: `Page "${currentPage?.name}" contains ${pageTabs.length} tab(s). Delete them first.`, 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    const { error } = await supabase.from("pages").delete().eq("id", activePage);
+    if (error) {
+      toast({ title: "Error deleting page", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    const remaining = pages.filter(p => p.id !== activePage);
+    setPages(remaining);
+    setActivePage(remaining[0]?.id || "");
+    const newPageTabs = tabs.filter(t => t.pageId === remaining[0]?.id);
+    setActiveTab(newPageTabs[0]?.id || "");
+    toast({ title: "Page deleted", description: `"${currentPage?.name}" was deleted.` });
+  };
+
+  const handlePageChange = (pageId: string) => {
+    setActivePage(pageId);
+    const pageTabs = tabs.filter(t => t.pageId === pageId);
+    setActiveTab(pageTabs[0]?.id || "");
   };
 
   const getGridCols = () => {
@@ -1121,14 +1261,72 @@ const Index = () => {
                   Edit mode
                 </Label>
               </div>
-              
+
+              {/* Page selector dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    {pages.find(p => p.id === activePage)?.name || "Select page"}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card z-50">
+                  <DropdownMenuLabel>Pages</DropdownMenuLabel>
+                  {pages.map(page => (
+                    <DropdownMenuItem 
+                      key={page.id} 
+                      onClick={() => handlePageChange(page.id)}
+                      className={`cursor-pointer ${page.id === activePage ? 'bg-accent' : ''}`}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      {page.name}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleAddPage} className="cursor-pointer">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add new page
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Page actions menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-10 w-10">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card z-50">
+                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)} className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share page
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleDeletePage} 
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                    disabled={pages.length <= 1}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete page
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Main menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card">
+                <DropdownMenuContent align="end" className="w-56 bg-card z-50">
                   <DropdownMenuLabel>Theme</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => setTheme("light")}>
                     <Sun className="mr-2 h-4 w-4" />
@@ -1154,17 +1352,7 @@ const Index = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleColumnsChange(5)}>
                     <Grid3x3 className="mr-2 h-4 w-4" />
-                  5 columns
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share page
+                    5 columns
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
@@ -1203,10 +1391,10 @@ const Index = () => {
             >
               <TabsList className="justify-start gap-1">
                 <SortableContext
-                  items={tabs.map((tab) => tab.id)}
+                  items={currentPageTabs.map((tab) => tab.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {tabs.map((tab) => {
+                  {currentPageTabs.map((tab) => {
                     const colorClasses: Record<ColorValue, string> = {
                       blue: "bg-category-blue/70 text-category-blue-foreground data-[state=active]:bg-category-blue data-[state=active]:text-category-blue-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-blue/40 data-[state=active]:shadow-xl",
                       green: "bg-category-green/70 text-category-green-foreground data-[state=active]:bg-category-green data-[state=active]:text-category-green-foreground data-[state=active]:ring-4 data-[state=active]:ring-category-green/40 data-[state=active]:shadow-xl",
@@ -1240,7 +1428,7 @@ const Index = () => {
                           setEditTabDialogOpen(true);
                         }}
                         onDelete={() => handleDeleteTab(tab.id, tab.name)}
-                        canDelete={tabs.length > 1 && getCategoriesCountForTab(tab.id) === 0}
+                        canDelete={currentPageTabs.length > 1 && getCategoriesCountForTab(tab.id) === 0}
                       />
                     );
                   })}
@@ -1269,7 +1457,8 @@ const Index = () => {
                             user_id: user.id,
                             name: newTabName.trim(),
                             color: randomColor,
-                            position: tabs.length,
+                            position: currentPageTabs.length,
+                            page_id: activePage,
                           })
                           .select()
                           .single();
@@ -1288,6 +1477,7 @@ const Index = () => {
                           name: newTabData.name,
                           color: newTabData.color as ColorValue,
                           position: newTabData.position,
+                          pageId: newTabData.page_id,
                         };
                         setTabs([...tabs, newTab]);
                         setNewTabName("");
@@ -1329,7 +1519,7 @@ const Index = () => {
           </div>
 
           {/* Tab Content - Categories Grid */}
-          {tabs.map((tab) => (
+          {currentPageTabs.map((tab) => (
             <TabsContent key={tab.id} value={tab.id} className="mt-0">
               <DndContext
                 sensors={sensors}
