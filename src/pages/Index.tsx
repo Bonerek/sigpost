@@ -1261,29 +1261,7 @@ const Index = () => {
 
 
 
-              {/* Page actions menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-10 w-10">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card z-50">
-                  <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share page
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleDeletePage} 
-                    className="cursor-pointer text-destructive focus:text-destructive"
-                    disabled={pages.length <= 1}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete page
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
 
               {/* Main menu */}
               <DropdownMenu>
@@ -1325,9 +1303,22 @@ const Index = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShareDialogOpen(true)} className="cursor-pointer">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share page
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setInfoDialogOpen(true)}>
                     <Info className="mr-2 h-4 w-4" />
                     Info
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleDeletePage} 
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                    disabled={pages.length <= 1}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete page
                   </DropdownMenuItem>
                   {isAdmin && (
                     <>
