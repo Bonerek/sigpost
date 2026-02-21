@@ -15,7 +15,7 @@ import { InfoDialog } from "@/components/InfoDialog";
 
 import { EditTabDialog } from "@/components/EditTabDialog";
 import { DeletePageDialog } from "@/components/DeletePageDialog";
-import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, X, MoreVertical, Pencil, Trash2, ChevronDown, FileText } from "lucide-react";
+import { GripVertical, Menu, Sun, Moon, Laptop, Grid3x3, Type, Plus, Info, LogOut, Shield, X, MoreVertical, Pencil, Trash2, ChevronDown, FileText, Settings } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -1222,7 +1222,7 @@ const Index = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Menu className="h-5 w-5" />
+                      <Settings className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-56 bg-card z-50">
