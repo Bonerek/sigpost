@@ -84,12 +84,23 @@ Deno.serve(async (req) => {
     // Fetch tabs for this user
     const { data: tabs, error: tabsError } = await supabase
       .from("tabs")
-      .select("id, name, color, position")
+      .select("id, name, color, position, page_id")
       .eq("user_id", userId)
       .order("position");
 
     if (tabsError) {
       throw tabsError;
+    }
+
+    // Fetch pages for this user
+    const { data: pages, error: pagesError } = await supabase
+      .from("pages")
+      .select("id, name, position")
+      .eq("user_id", userId)
+      .order("position");
+
+    if (pagesError) {
+      throw pagesError;
     }
 
     return new Response(
@@ -102,6 +113,7 @@ Deno.serve(async (req) => {
         categories: categories || [],
         links: links,
         tabs: tabs || [],
+        pages: pages || [],
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -14,7 +14,7 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { LinkCategory } from "@/components/LinkCategory";
 import { IframeCategory } from "@/components/IframeCategory";
 import { InfoDialog } from "@/components/InfoDialog";
-import { Info, Moon, Sun, Laptop, Menu } from "lucide-react";
+import { Info, Moon, Sun, Laptop, Menu, ChevronDown, FileText } from "lucide-react";
 import headerIcon from "@/assets/header-icon.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,11 +30,18 @@ import { useTheme } from "next-themes";
 import type { IconType } from "@/components/AddLinkDialog";
 import type { ColorValue } from "@/components/ColorPickerDialog";
 
+interface PageData {
+  id: string;
+  name: string;
+  position: number;
+}
+
 interface TabData {
   id: string;
   name: string;
   color: ColorValue;
   position: number;
+  pageId: string | null;
 }
 
 interface CategoryData {
@@ -83,6 +90,8 @@ export default function Share() {
   const { theme, setTheme } = useTheme();
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [tabs, setTabs] = useState<TabData[]>([]);
+  const [pages, setPages] = useState<PageData[]>([]);
+  const [activePage, setActivePage] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [columnCount, setColumnCount] = useState(3);
@@ -133,19 +142,35 @@ export default function Share() {
         setCustomText(text);
         document.title = text;
 
+        // Load pages
+        const loadedPages: PageData[] = (data.pages || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          position: p.position,
+        }));
+        setPages(loadedPages);
+        const firstPageId = loadedPages.length > 0 ? loadedPages[0].id : "";
+        setActivePage(firstPageId);
+
         // Load tabs
         const loadedTabs: TabData[] = (data.tabs || []).map((tab: any) => ({
           id: tab.id,
           name: tab.name,
           color: tab.color as ColorValue,
           position: tab.position,
+          pageId: tab.page_id || null,
         }));
         setTabs(loadedTabs);
         
-        // Set initial active tab
-        if (loadedTabs.length > 0) {
-          setActiveTab(loadedTabs[0].id);
+        // Set initial active tab to first tab of first page
+        const firstPageTabs = loadedTabs.filter(t => t.pageId === firstPageId);
+        if (firstPageTabs.length > 0) {
+          setActiveTab(firstPageTabs[0].id);
         }
+
+        // Set document title to first page name
+        const pageTitle = loadedPages.length > 0 ? loadedPages[0].name : (text || "Shared Page");
+        document.title = pageTitle;
 
         // Organize data from edge function response
         const organizedCategories: CategoryData[] = (data.categories || []).map((cat: any) => ({
@@ -197,8 +222,15 @@ export default function Share() {
     return "grid-cols-1 md:grid-cols-5";
   };
 
-  // Filter categories by active tab
+  // Filter tabs and categories by active page
+  const currentPageTabs = tabs.filter(t => t.pageId === activePage);
   const filteredCategories = categories.filter((cat) => cat.tabId === activeTab);
+
+  const handlePageChange = (pageId: string) => {
+    setActivePage(pageId);
+    const pageTabs = tabs.filter(t => t.pageId === pageId);
+    setActiveTab(pageTabs[0]?.id || "");
+  };
 
   // Organize categories into columns
   const columnCategories = Array.from({ length: columnCount }, (_, i) =>
@@ -223,8 +255,32 @@ export default function Share() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <img src={headerIcon} alt="Signpost" className="w-8 h-8" />
-              {customText && (
-                <h1 className="text-3xl font-bold text-foreground">{customText}</h1>
+              {pages.length > 1 ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="gap-2 text-3xl font-bold text-foreground hover:bg-transparent hover:text-primary p-0 h-auto">
+                      {pages.find(p => p.id === activePage)?.name || "Shared Page"}
+                      <ChevronDown className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 bg-card z-50">
+                    <DropdownMenuLabel>Pages</DropdownMenuLabel>
+                    {pages.map(page => (
+                      <DropdownMenuItem 
+                        key={page.id} 
+                        onClick={() => handlePageChange(page.id)}
+                        className={`cursor-pointer ${page.id === activePage ? 'bg-accent' : ''}`}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        {page.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <h1 className="text-3xl font-bold text-foreground">
+                  {pages[0]?.name || customText}
+                </h1>
               )}
             </div>
 
@@ -262,11 +318,11 @@ export default function Share() {
       </header>
 
       <main className="flex-1 px-4 py-4">
-        {tabs.length > 0 ? (
+        {currentPageTabs.length > 0 ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="mb-6">
               <TabsList className="h-auto flex-wrap gap-2 bg-transparent p-0">
-                {tabs.map((tab) => (
+                {currentPageTabs.map((tab) => (
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
@@ -278,7 +334,7 @@ export default function Share() {
               </TabsList>
             </div>
 
-            {tabs.map((tab) => (
+            {currentPageTabs.map((tab) => (
               <TabsContent key={tab.id} value={tab.id} className="mt-0">
                 <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                   <div className={`grid ${getGridCols()} gap-6`}>
