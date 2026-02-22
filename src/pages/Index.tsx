@@ -363,17 +363,20 @@ const Index = () => {
 
     const redirectToDefaultOrAuth = async () => {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
-          { headers: { 'Content-Type': 'application/json' } }
+          { headers: { 'Content-Type': 'application/json' }, signal: controller.signal }
         );
+        clearTimeout(timeoutId);
         const data = await response.json();
         if (data.default_redirect_token) {
           navigate(`/share/${data.default_redirect_token}`);
           return;
         }
       } catch (e) {
-        // ignore, fall through to auth
+        // ignore, fall through to auth (timeout, network error, etc.)
       }
       navigate("/auth");
     };
