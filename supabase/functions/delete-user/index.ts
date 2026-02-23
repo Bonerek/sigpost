@@ -62,16 +62,7 @@ serve(async (req) => {
       throw new Error('Cannot delete your own account');
     }
 
-    // Check if trying to delete admin@admin.local
-    const { data: profileData } = await supabaseAdmin
-      .from('profiles')
-      .select('email')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileData?.email === 'admin@admin.local') {
-      throw new Error('Cannot delete main admin account');
-    }
+    // No longer protecting admin@admin.local from deletion
 
     // Delete user - this will trigger cascade delete of profile and all related data
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
