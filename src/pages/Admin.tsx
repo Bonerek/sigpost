@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, UserPlus, ArrowLeft, Edit, Key } from "lucide-react";
 
 interface UserWithRole {
@@ -402,6 +403,35 @@ export default function Admin() {
     setNewPassword("");
   };
 
+  const handleChangeRole = async (user: UserWithRole, newRole: string) => {
+    if (user.user_id === currentUser?.id) {
+      toast({
+        title: "Error",
+        description: "You cannot change your own role",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({ title: "Error", description: "You are not logged in", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase.functions.invoke('change-user-role', {
+      body: { userId: user.user_id, newRole },
+    });
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to change role: " + error.message, variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "Success", description: `Role changed to ${newRole}` });
+    loadData();
+  };
+
   const handleToggleUserAccess = async (user: UserWithRole) => {
     if (user.email === 'admin@admin.local' && user.is_active) {
       toast({
@@ -414,35 +444,20 @@ export default function Admin() {
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast({
-        title: "Error",
-        description: "You are not logged in",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "You are not logged in", variant: "destructive" });
       return;
     }
 
     const { error } = await supabase.functions.invoke('toggle-user-access', {
-      body: {
-        userId: user.user_id,
-        isActive: !user.is_active,
-      },
+      body: { userId: user.user_id, isActive: !user.is_active },
     });
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to change access: " + error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to change access: " + error.message, variant: "destructive" });
       return;
     }
 
-    toast({
-      title: "Success",
-      description: user.is_active ? "Access was disabled" : "Access was enabled",
-    });
-
+    toast({ title: "Success", description: user.is_active ? "Access was disabled" : "Access was enabled" });
     loadData();
   };
 
@@ -603,14 +618,23 @@ export default function Admin() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {user.is_admin ? (
+                    {user.user_id === currentUser?.id ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                         Admin
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                        User
-                      </span>
+                      <Select
+                        value={user.is_admin ? "admin" : "user"}
+                        onValueChange={(value) => handleChangeRole(user, value)}
+                      >
+                        <SelectTrigger className="w-[100px] h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="user">User</SelectItem>
+                        </SelectContent>
+                      </Select>
                     )}
                   </TableCell>
                   <TableCell>

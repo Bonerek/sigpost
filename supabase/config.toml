@@ -15,5 +15,8 @@ verify_jwt = false
 [functions.toggle-user-access]
 verify_jwt = false
 
+[functions.change-user-role]
+verify_jwt = false
+
 [functions.validate-share-token]
 verify_jwt = false
