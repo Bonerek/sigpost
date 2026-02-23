@@ -38,6 +38,7 @@ export default function Admin() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
   const [editDescription, setEditDescription] = useState("");
+  const [editRole, setEditRole] = useState<string>("user");
   const [changingPasswordUser, setChangingPasswordUser] = useState<UserWithRole | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [deletingUser, setDeletingUser] = useState<UserWithRole | null>(null);
@@ -315,6 +316,7 @@ export default function Admin() {
   const handleEditDescription = (user: UserWithRole) => {
     setEditingUser(user);
     setEditDescription(user.description || "");
+    setEditRole(user.is_admin ? "admin" : "user");
   };
 
   const handleSaveDescription = async () => {
@@ -334,9 +336,21 @@ export default function Admin() {
       return;
     }
 
+    // Check if role changed
+    const currentRole = editingUser.is_admin ? "admin" : "user";
+    if (editRole !== currentRole && editingUser.user_id !== currentUser?.id) {
+      const { error: roleError } = await supabase.functions.invoke('change-user-role', {
+        body: { userId: editingUser.user_id, newRole: editRole },
+      });
+      if (roleError) {
+        toast({ title: "Error", description: "Failed to change role: " + roleError.message, variant: "destructive" });
+        return;
+      }
+    }
+
     toast({
       title: "Saved",
-      description: "Account description was updated",
+      description: "Account was updated",
     });
 
     setEditingUser(null);
@@ -618,24 +632,9 @@ export default function Admin() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {user.user_id === currentUser?.id ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                        Admin
-                      </span>
-                    ) : (
-                      <Select
-                        value={user.is_admin ? "admin" : "user"}
-                        onValueChange={(value) => handleChangeRole(user, value)}
-                      >
-                        <SelectTrigger className="w-[100px] h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="user">User</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                      {user.is_admin ? "Admin" : "User"}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -708,6 +707,25 @@ export default function Admin() {
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="Enter account description..."
                 />
+              </div>
+              <div>
+                <Label htmlFor="edit-role">Role</Label>
+                <Select
+                  value={editRole}
+                  onValueChange={setEditRole}
+                  disabled={editingUser?.user_id === currentUser?.id}
+                >
+                  <SelectTrigger id="edit-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                  </SelectContent>
+                </Select>
+                {editingUser?.user_id === currentUser?.id && (
+                  <p className="text-xs text-muted-foreground mt-1">You cannot change your own role</p>
+                )}
               </div>
             </div>
             <DialogFooter>
