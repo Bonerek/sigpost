@@ -304,6 +304,13 @@ export type Database = {
       }
     }
     Views: {
+      system_settings_public: {
+        Row: {
+          default_redirect_token: string | null
+          registration_enabled: boolean | null
+        }
+        Relationships: []
+      }
       user_settings_public: {
         Row: {
           column_count: number | null
