@@ -19,19 +19,17 @@ const Auth = () => {
 
   const checkRegistrationStatus = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const data = await response.json();
-      setRegistrationEnabled(data.registration_enabled);
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('registration_enabled')
+        .limit(1)
+        .single();
+      if (!error && data) {
+        setRegistrationEnabled(data.registration_enabled);
+      }
     } catch (error) {
       console.error('Error checking registration status:', error);
-      setRegistrationEnabled(true); // Default to enabled on error
+      setRegistrationEnabled(true);
     }
   };
 

@@ -363,20 +363,17 @@ const Index = () => {
 
     const redirectToDefaultOrAuth = async () => {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-registration`,
-          { headers: { 'Content-Type': 'application/json' }, signal: controller.signal }
-        );
-        clearTimeout(timeoutId);
-        const data = await response.json();
-        if (data.default_redirect_token) {
+        const { data, error } = await supabase
+          .from('system_settings')
+          .select('default_redirect_token')
+          .limit(1)
+          .single();
+        if (!error && data?.default_redirect_token) {
           navigate(`/share/${data.default_redirect_token}`);
           return;
         }
       } catch (e) {
-        // ignore, fall through to auth (timeout, network error, etc.)
+        // ignore, fall through to auth
       }
       navigate("/auth");
     };
