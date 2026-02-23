@@ -134,17 +134,18 @@ export default function Admin() {
   };
 
   const handleToggleRegistration = async (enabled: boolean) => {
+    const { data: settings } = await supabase.from("system_settings").select("id").limit(1).single();
+    if (!settings) {
+      toast({ title: "Error", description: "Settings not found", variant: "destructive" });
+      return;
+    }
     const { error } = await supabase
       .from("system_settings")
       .update({ registration_enabled: enabled })
-      .eq("id", (await supabase.from("system_settings").select("id").single()).data?.id);
+      .eq("id", settings.id);
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update settings",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update settings", variant: "destructive" });
       return;
     }
 
@@ -157,17 +158,18 @@ export default function Admin() {
 
   const handleSaveRedirectToken = async (tokenOverride?: string) => {
     const token = tokenOverride !== undefined ? tokenOverride : defaultRedirectToken;
+    const { data: settings } = await supabase.from("system_settings").select("id").limit(1).single();
+    if (!settings) {
+      toast({ title: "Error", description: "Settings not found", variant: "destructive" });
+      return;
+    }
     const { error } = await supabase
       .from("system_settings")
       .update({ default_redirect_token: token || null })
-      .eq("id", (await supabase.from("system_settings").select("id").single()).data?.id);
+      .eq("id", settings.id);
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save redirect token",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to save redirect token", variant: "destructive" });
       return;
     }
 
