@@ -4,6 +4,9 @@
 -- ============================================
 -- 1. Create admin user in auth.users
 -- ============================================
+-- Disable trigger to prevent duplicate profile creation during seeding
+ALTER TABLE auth.users DISABLE TRIGGER ALL;
+
 INSERT INTO auth.users (
   id,
   instance_id,
@@ -57,7 +60,18 @@ INSERT INTO auth.identities (
   now()
 );
 
+-- Re-enable triggers
+ALTER TABLE auth.users ENABLE TRIGGER ALL;
+
 -- Note: Profile and admin role are created automatically via database trigger (handle_new_user_role)
+-- But since we disabled triggers above, we need to create them manually
+INSERT INTO public.profiles (user_id, email)
+VALUES ('00000000-0000-0000-0000-000000000001', 'admin@admin.local')
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO public.user_roles (user_id, role)
+VALUES ('00000000-0000-0000-0000-000000000001', 'admin')
+ON CONFLICT (user_id, role) DO NOTHING;
 
 -- ============================================
 -- 2. System settings
