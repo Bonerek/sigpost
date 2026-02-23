@@ -359,6 +359,7 @@ const Index = () => {
 
   // Auth check and session management
   useEffect(() => {
+    document.title = "Signpost";
     let initialCheckDone = false;
 
     const redirectToDefaultOrAuth = async () => {
