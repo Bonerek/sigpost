@@ -1186,7 +1186,7 @@ const Index = () => {
   // Update document title when customText changes
   useEffect(() => {
     const currentPageName = pages.find(p => p.id === activePage)?.name;
-    document.title = currentPageName || "Signpost";
+    document.title = currentPageName ? `Signpost | ${currentPageName}` : "Signpost";
   }, [activePage, pages]);
 
   if (loading) {

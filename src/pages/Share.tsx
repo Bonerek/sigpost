@@ -131,7 +131,7 @@ export default function Share() {
         
         const name = data.page?.name || "Shared Page";
         setPageName(name);
-        document.title = name;
+        document.title = `Signpost | ${name}`;
 
         // Load tabs
         const loadedTabs: TabData[] = (data.tabs || []).map((tab: any) => ({
