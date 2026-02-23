@@ -4,8 +4,9 @@
 -- ============================================
 -- 1. Create admin user in auth.users
 -- ============================================
--- Disable trigger to prevent duplicate profile creation during seeding
-ALTER TABLE auth.users DISABLE TRIGGER ALL;
+-- Note: The trigger on auth.users will fire and try to create profile/role.
+-- Our handle_new_user_role function is idempotent (ON CONFLICT DO NOTHING),
+-- so the manual inserts below will safely handle any duplicates.
 
 INSERT INTO auth.users (
   id,
@@ -60,8 +61,7 @@ INSERT INTO auth.identities (
   now()
 );
 
--- Re-enable triggers
-ALTER TABLE auth.users ENABLE TRIGGER ALL;
+-- Manually ensure profile and admin role exist (idempotent)
 
 -- Note: Profile and admin role are created automatically via database trigger (handle_new_user_role)
 -- But since we disabled triggers above, we need to create them manually
