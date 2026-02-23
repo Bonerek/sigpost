@@ -17,7 +17,8 @@ INSERT INTO auth.users (
   is_super_admin,
   role,
   aud,
-  confirmation_token
+  confirmation_token,
+  is_sso_user
 ) VALUES (
   '00000000-0000-0000-0000-000000000001',
   '00000000-0000-0000-0000-000000000000',
@@ -27,11 +28,12 @@ INSERT INTO auth.users (
   now(),
   now(),
   '{"provider": "email", "providers": ["email"]}',
-  '{}',
+  '{"email": "admin@admin.local", "email_verified": true, "sub": "00000000-0000-0000-0000-000000000001"}',
   false,
   'authenticated',
   'authenticated',
-  ''
+  '',
+  false
 );
 
 -- Create identity record (required by GoTrue for admin operations like password change)
