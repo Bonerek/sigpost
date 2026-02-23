@@ -34,6 +34,27 @@ INSERT INTO auth.users (
   ''
 );
 
+-- Create identity record (required by GoTrue for admin operations like password change)
+INSERT INTO auth.identities (
+  id,
+  user_id,
+  identity_data,
+  provider,
+  provider_id,
+  last_sign_in_at,
+  created_at,
+  updated_at
+) VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000001',
+  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'admin@admin.local', 'email_verified', true),
+  'email',
+  '00000000-0000-0000-0000-000000000001',
+  now(),
+  now(),
+  now()
+);
+
 -- Note: Profile and admin role are created automatically via database trigger (handle_new_user_role)
 
 -- ============================================
