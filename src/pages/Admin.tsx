@@ -159,7 +159,7 @@ export default function Admin() {
     const token = tokenOverride !== undefined ? tokenOverride : defaultRedirectToken;
     const { error } = await supabase
       .from("system_settings")
-      .update({ default_redirect_token: token || null } as any)
+      .update({ default_redirect_token: token || null })
       .eq("id", (await supabase.from("system_settings").select("id").single()).data?.id);
 
     if (error) {
