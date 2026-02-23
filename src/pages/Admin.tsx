@@ -43,6 +43,7 @@ export default function Admin() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    document.title = "Signpost | Administration";
     const checkAdmin = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
